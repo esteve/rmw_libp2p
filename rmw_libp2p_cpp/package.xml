@@ -10,6 +10,11 @@
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
+  <build_depend>libjsonrpccpp-tools</build_depend>
+  <build_depend>libjsonrpccpp-dev</build_depend>
+  <build_export_depend>libjsonrpccpp-dev</build_export_depend>
+
+  <depend>libjsonrpccpp-client0</depend>
   <depend>rcpputils</depend>
   <depend>rcutils</depend>
   <depend>rmw</depend>

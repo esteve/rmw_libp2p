@@ -14,6 +14,16 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
 endif()
 
+include(FetchContent)
+
+FetchContent_Declare(
+    Corrosion
+    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+    GIT_TAG v0.2.1
+)
+
+FetchContent_MakeAvailable(Corrosion)
+
 find_package(ament_cmake_ros REQUIRED)
 
 find_package(rcpputils REQUIRED)
@@ -32,6 +42,7 @@ add_library(rmw_libp2p_cpp
 target_include_directories(rmw_libp2p_cpp
   PUBLIC include
 )
+corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
 
 ament_target_dependencies(rmw_libp2p_cpp
   rcpputils
@@ -42,6 +53,8 @@ ament_target_dependencies(rmw_libp2p_cpp
   rosidl_typesupport_introspection_c
   rosidl_typesupport_introspection_cpp
 )
+
+target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs)
 
 register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_introspection_c"

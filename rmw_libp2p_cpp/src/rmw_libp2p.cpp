@@ -29,6 +29,8 @@
 
 #include "rmw_libp2p_cpp/identifier.hpp"
 
+#include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
+
 const char *
 rmw_get_implementation_identifier()
 {
@@ -54,6 +56,8 @@ rmw_init(
   RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "rmw_init");
   (void)options;
   (void)context;
+
+  rs_rmw_init();
 
   return RMW_RET_ERROR;
 }
@@ -106,7 +110,7 @@ rmw_init_options_init(
   (void)init_options;
   (void)allocator;
 
-  return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 // Finalize a context. (Cleanup and deallocation.)
@@ -141,7 +145,7 @@ rmw_init_options_copy(
   (void)src;
   (void)dst;
 
-  return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 // Finalize the given init_options. (Cleanup and deallocation.)

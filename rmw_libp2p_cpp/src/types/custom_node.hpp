@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_libp2p_cpp/identifier.hpp"
+#ifndef RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_
+#define RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+class CustomNode
+{
+    void *peer_id_;
+
+public:
+    CustomNode();
+    ~CustomNode();
+    void display();
+};
+
+#endif  // RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_

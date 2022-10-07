@@ -1,5 +1,6 @@
 use async_std::task;
 use std::os::raw::c_void;
+use std::os::raw::c_char;
 use uuid::Uuid;
 // use env_logger::{Builder, Env};
 use futures::channel::oneshot;
@@ -15,6 +16,9 @@ use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
 use std::hash::{Hash, Hasher};
 use std::time::Duration;
+use std::sync::Arc;
+use std::ffi::CStr;
+use deadqueue;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -50,10 +54,13 @@ impl From<GossipsubEvent> for OutEvent {
 pub struct Libp2pCustomNode {
     thread_handle: task::JoinHandle<()>,
     stop_sender: oneshot::Sender<bool>,
+    outgoing_queue: Arc<deadqueue::unlimited::Queue<(String, Vec<u8>)>>,
 }
 
 pub struct Libp2pCustomPublisher {
     gid: Uuid,
+    node: Arc<Libp2pCustomNode>, // We need to store the Node here to have access to the outgoing queue
+    topic: Topic,
 }
 
 impl Libp2pCustomNode {
@@ -95,6 +102,10 @@ impl Libp2pCustomNode {
 
         let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
 
+        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(String, Vec<u8>)>::new());
+
+        let outgoing_queue_clone = Arc::clone(&outgoing_queue);
+
         let thread_handle = task::spawn(async move {
 
         loop {
@@ -103,6 +114,10 @@ impl Libp2pCustomNode {
                 // select! will wait on any future
                 _ = stop_receiver => {
                     println!("Exit loop");
+                },
+                // pop messages from the queue and publish them to the network
+                (topic_str, buffer) = outgoing_queue_clone.pop().fuse() => {
+                    swarm.behaviour_mut().gossipsub.publish(Topic::new(topic_str), buffer);
                 },
                 event = swarm.select_next_some() => match event {
                     SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
@@ -150,20 +165,37 @@ impl Libp2pCustomNode {
         Self {
             thread_handle: thread_handle,
             stop_sender: stop_sender,
+            outgoing_queue: outgoing_queue,
         }
     }
 }
 
 impl Libp2pCustomPublisher {
-    fn new() -> Self {
+    fn new(libp2p2_custom_node: Arc<Libp2pCustomNode>, topic_str: &str) -> Self {
         Self {
             gid: Uuid::new_v4(),
+            node: libp2p2_custom_node,
+            topic: Topic::new(topic_str),
         }
     }
 }
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_new() -> *mut Libp2pCustomPublisher {
-    Box::into_raw(Box::new(Libp2pCustomPublisher::new()))
+pub extern "C" fn rs_libp2p_custom_publisher_new(ptr_node: *mut Libp2pCustomNode,
+    topic_str_ptr: *const c_char) -> *mut Libp2pCustomPublisher {
+    let libp2p2_custom_node = Arc::from(unsafe {
+        assert!(!ptr_node.is_null());
+        Box::from_raw(ptr_node)
+    });
+    let topic_str = unsafe {
+        assert!(!topic_str_ptr.is_null());
+        CStr::from_ptr(topic_str_ptr)
+    };
+
+    let libp2p2_custom_publisher = Libp2pCustomPublisher::new(
+        libp2p2_custom_node,
+        topic_str.to_str().unwrap()
+    );
+    Box::into_raw(Box::new(libp2p2_custom_publisher))
 }
 
 #[no_mangle]
@@ -193,6 +225,24 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
         );
     }
     count
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_custom_publisher_publish(
+    ptr_publisher: *mut Libp2pCustomPublisher,
+    ptr_buffer: *mut Vec<u8>,
+) -> usize {
+    let libp2p2_custom_publisher = unsafe {
+        assert!(!ptr_publisher.is_null());
+        &mut *ptr_publisher
+    };
+    let buffer = unsafe {
+        assert!(!ptr_buffer.is_null());
+        &*ptr_buffer
+    };
+    libp2p2_custom_publisher.node.outgoing_queue.push((String::from("foo"), vec![1, 2, 3]));
+    // libp2p2_custom_publisher.node_ptr.swarm.behaviour_mut().gossipsub.publish(libp2p2_custom_publisher.topic.clone(), *buffer);
+    0
 }
 
 #[no_mangle]

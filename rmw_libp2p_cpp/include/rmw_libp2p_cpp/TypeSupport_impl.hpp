@@ -102,6 +102,31 @@ TypeSupport<MembersType>::TypeSupport(const MembersType * members)
   this->members_ = members;
 }
 
+template<typename MembersType>
+bool TypeSupport<MembersType>::serializeROSmessage(
+  const void * ros_message, rs_libp2p_cdr_buffer * ser)
+{
+  assert(ros_message);
+
+  if (members_->member_count_ != 0) {
+    TypeSupport::serializeROSmessage(ser, members_, ros_message);
+  }
+  return true;
+}
+
+template<typename MembersType>
+bool TypeSupport<MembersType>::deserializeROSmessage(
+  rs_libp2p_cdr_buffer * deser, void * ros_message)
+{
+  assert(ros_message);
+
+  if (members_->member_count_ != 0) {
+    TypeSupport::deserializeROSmessage(deser, members_, ros_message, false);
+  }
+
+  return true;
+}
+
 }  // namespace rmw_libp2p_cpp
 
 #endif  // RMW_LIBP2P_CPP__TYPESUPPORT_IMPL_HPP_

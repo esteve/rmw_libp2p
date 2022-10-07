@@ -25,7 +25,7 @@
 #include "rmw_libp2p_cpp/custom_publisher_info.hpp"
 #include "rmw_libp2p_cpp/identifier.hpp"
 // #include "publish_common.hpp"
-// #include "ros_message_serialization.hpp"
+#include "ros_message_serialization.hpp"
 
 extern "C"
 {
@@ -54,7 +54,24 @@ rmw_publish(
   auto info = static_cast<CustomPublisherInfo *>(publisher->data);
   assert(info);
 
-  return RMW_RET_OK;
+  rs_libp2p_cdr_buffer_t * ser = rs_libp2p_cdr_buffer_new();
+
+  if (_serialize_ros_message(ros_message, ser, info->type_support_,
+    info->typesupport_identifier_))
+  {
+    uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser);
+    if (status == 0) { // TODO(esteve): replace with proper error codes
+      returnedValue = RMW_RET_OK;
+    } else {
+      RMW_SET_ERROR_MSG("cannot publish data");
+    }
+  } else {
+    RMW_SET_ERROR_MSG("cannot serialize data");
+  }
+
+  rs_libp2p_cdr_buffer_free(ser);
+
+  return returnedValue;
 }
 
 rmw_ret_t

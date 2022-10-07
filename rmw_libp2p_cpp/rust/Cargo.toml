@@ -23,5 +23,10 @@ features = [
     "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
 ]
 
+[dependencies.deadqueue]
+version = "0.2.3"
+default-features = false
+features = ["unlimited"]
+
 [lib]
 crate-type=["staticlib"]

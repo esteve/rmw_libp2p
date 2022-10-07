@@ -16,39 +16,50 @@
 #define RMW_LIBP2P_CPP__RMW_LIBP2P_RS_HPP_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
+  typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
-typedef struct rs_libp2p_custom_publisher rs_libp2p_custom_publisher_t;
+  typedef struct rs_libp2p_custom_publisher rs_libp2p_custom_publisher_t;
 
-extern rs_libp2p_custom_node_t *
-rs_libp2p_custom_node_new(void);
+  typedef struct rs_libp2p_cdr_buffer rs_libp2p_cdr_buffer_t;
 
-extern void
-rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
+  extern rs_libp2p_custom_node_t *
+  rs_libp2p_custom_node_new(void);
 
-extern rs_libp2p_custom_publisher_t *
-rs_libp2p_custom_publisher_new(void);
+  extern void
+  rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
 
-extern void
-rs_libp2p_custom_publisher_free(rs_libp2p_custom_publisher_t *);
+  extern rs_libp2p_custom_publisher_t *
+  rs_libp2p_custom_publisher_new(rs_libp2p_custom_node_t *, const char *);
 
-extern size_t
-rs_libp2p_custom_publisher_get_gid(rs_libp2p_custom_publisher_t *, uint8_t *);
+  extern void
+  rs_libp2p_custom_publisher_free(rs_libp2p_custom_publisher_t *);
 
-struct rmw_context_impl_s
-{
-  void * rs_event_loop_thread;
-  bool is_shutdown;
-  void * rs_local_key;
-};
+  extern size_t
+  rs_libp2p_custom_publisher_get_gid(rs_libp2p_custom_publisher_t *, uint8_t *);
 
-void * rs_rmw_init();
+  extern rs_libp2p_cdr_buffer_t *
+  rs_libp2p_cdr_buffer_new(void);
+
+  extern void
+  rs_libp2p_cdr_buffer_free(rs_libp2p_cdr_buffer_t *);
+
+  extern uint32_t rs_libp2p_custom_publisher_publish(rs_libp2p_custom_publisher_t *, rs_libp2p_cdr_buffer *);
+
+  struct rmw_context_impl_s
+  {
+    void *rs_event_loop_thread;
+    bool is_shutdown;
+    void *rs_local_key;
+  };
+
+  void *rs_rmw_init();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // RMW_LIBP2P_CPP__RMW_LIBP2P_RS_HPP_
+#endif // RMW_LIBP2P_CPP__RMW_LIBP2P_RS_HPP_

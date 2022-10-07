@@ -172,9 +172,9 @@ template<typename MembersType>
 class TypeSupport
 {
 public:
-  // bool serializeROSmessage(const void * ros_message, cbor::TxStream & ser);
+  bool serializeROSmessage(const void * ros_message, rs_libp2p_cdr_buffer * ser);
 
-  // bool deserializeROSmessage(cbor::RxStream & data, void * ros_message);
+  bool deserializeROSmessage(rs_libp2p_cdr_buffer * deser, void * ros_message);
 
 protected:
   explicit TypeSupport(const MembersType * members);
@@ -182,12 +182,12 @@ protected:
   const MembersType * members_;
 
 private:
-  // bool serializeROSmessage(
-  //   cbor::TxStream & ser, const MembersType * members, const void * ros_message);
+  bool serializeROSmessage(
+    rs_libp2p_cdr_buffer * ser, const MembersType * members, const void * ros_message);
 
-  // bool deserializeROSmessage(
-  //   cbor::RxStream & deser, const MembersType * members, void * ros_message,
-  //   bool call_new);
+  bool deserializeROSmessage(
+    rs_libp2p_cdr_buffer * deser, const MembersType * members, void * ros_message,
+    bool call_new);
 };
 
 }  // namespace rmw_libp2p_cpp

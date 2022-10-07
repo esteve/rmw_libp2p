@@ -54,7 +54,7 @@ impl From<GossipsubEvent> for OutEvent {
 pub struct Libp2pCustomNode {
     thread_handle: task::JoinHandle<()>,
     stop_sender: oneshot::Sender<bool>,
-    outgoing_queue: Arc<deadqueue::unlimited::Queue<(String, Vec<u8>)>>,
+    outgoing_queue: Arc<deadqueue::unlimited::Queue<(Topic, Vec<u8>)>>,
 }
 
 pub struct Libp2pCustomPublisher {
@@ -102,7 +102,7 @@ impl Libp2pCustomNode {
 
         let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
 
-        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(String, Vec<u8>)>::new());
+        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new());
 
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
 
@@ -115,8 +115,8 @@ impl Libp2pCustomNode {
                         println!("Exit loop");
                     },
                     // pop messages from the queue and publish them to the network
-                    (topic_str, buffer) = outgoing_queue_clone.pop().fuse() => {
-                        swarm.behaviour_mut().gossipsub.publish(Topic::new(topic_str), buffer);
+                    (topic, buffer) = outgoing_queue_clone.pop().fuse() => {
+                        swarm.behaviour_mut().gossipsub.publish(topic, buffer);
                     },
                     event = swarm.select_next_some() => match event {
                         SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
@@ -168,6 +168,10 @@ impl Libp2pCustomNode {
             outgoing_queue: outgoing_queue,
         }
     }
+
+    fn publish_message(&self, topic: Topic, buffer: Vec<u8>) -> () {
+        self.outgoing_queue.push((topic, buffer));
+    }
 }
 
 impl Libp2pCustomPublisher {
@@ -177,6 +181,10 @@ impl Libp2pCustomPublisher {
             node: libp2p2_custom_node,
             topic: Topic::new(topic_str),
         }
+    }
+
+    fn publish(&self, buffer: Vec<u8>) -> () {
+        self.node.publish_message(self.topic.clone(), buffer);
     }
 }
 #[no_mangle]
@@ -236,10 +244,8 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
-    libp2p2_custom_publisher
-        .node
-        .outgoing_queue
-        .push((String::from("foo"), vec![1, 2, 3]));
+    let buffer = vec![1, 2, 3];
+    libp2p2_custom_publisher.publish(buffer);
     // libp2p2_custom_publisher.node_ptr.swarm.behaviour_mut().gossipsub.publish(libp2p2_custom_publisher.topic.clone(), *buffer);
     0
 }

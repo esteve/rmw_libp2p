@@ -103,6 +103,92 @@ TypeSupport<MembersType>::TypeSupport(const MembersType * members)
 }
 
 template<typename MembersType>
+bool TypeSupport<MembersType>::deserializeROSmessage(
+  rs_libp2p_cdr_buffer * deser, const MembersType * members, void * ros_message, bool call_new)
+{
+  assert(members);
+  assert(ros_message);
+
+  size_t member_count = 0;
+  rs_deser.deserializeSequence(&member_count);
+  if (member_count != members->member_count_) {
+    throw std::runtime_error("failed to deserialize value");
+  }
+
+  for (uint32_t i = 0; i < members->member_count_; ++i) {
+    const auto * member = members->members_ + i;
+    void * field = static_cast<char *>(ros_message) + member->offset_;
+    switch (member->type_id_) {
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN:
+        deserialize_field<bool>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_OCTET:
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT8:
+        deserialize_field<uint8_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_CHAR:
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT8:
+        deserialize_field<char>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_FLOAT:
+        deserialize_field<float>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_DOUBLE:
+        deserialize_field<double>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT16:
+        deserialize_field<int16_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT16:
+        deserialize_field<uint16_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32:
+        deserialize_field<int32_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT32:
+        deserialize_field<uint32_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT64:
+        deserialize_field<int64_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT64:
+        deserialize_field<uint64_t>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
+        deserialize_field<std::string>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
+        deserialize_field<std::u16string>(member, field, deser, call_new);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
+        {
+          auto sub_members = (const MembersType *)member->members_->data;
+          if (!member->is_array_) {
+            deserializeROSmessage(deser, sub_members, field, call_new);
+          } else {
+            void * subros_message = nullptr;
+            size_t array_size = 0;
+            bool recall_new = call_new;
+
+            array_size = get_submessage_sequence_deserialize(
+              member, deser, field, subros_message, recall_new);
+
+            for (size_t index = 0; index < array_size; ++index) {
+              deserializeROSmessage(
+                deser, sub_members, member->get_function(subros_message, index), recall_new);
+            }
+          }
+        }
+        break;
+      default:
+        throw std::runtime_error("unknown type");
+    }
+  }
+
+  return true;
+}
+
+template<typename MembersType>
 bool TypeSupport<MembersType>::serializeROSmessage(
   const void * ros_message, rs_libp2p_cdr_buffer * ser)
 {

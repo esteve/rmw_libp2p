@@ -24,13 +24,13 @@ _serialize_ros_message(
   void * untyped_typesupport,
   const char * typesupport_identifier)
 {
-  if (using_introspection_c_typesupport(typesupport_identifier)) {
-    auto typed_typesupport = static_cast<MessageTypeSupport_c *>(untyped_typesupport);
-    return typed_typesupport->serializeROSmessage(ros_message, ser);
-  } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
-    auto typed_typesupport = static_cast<MessageTypeSupport_cpp *>(untyped_typesupport);
-    return typed_typesupport->serializeROSmessage(ros_message, ser);
-  }
+  // if (using_introspection_c_typesupport(typesupport_identifier)) {
+  //   auto typed_typesupport = static_cast<MessageTypeSupport_c *>(untyped_typesupport);
+  //   return typed_typesupport->serializeROSmessage(ros_message, ser);
+  // } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
+  //   auto typed_typesupport = static_cast<MessageTypeSupport_cpp *>(untyped_typesupport);
+  //   return typed_typesupport->serializeROSmessage(ros_message, ser);
+  // }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return false;
 }
@@ -42,13 +42,13 @@ _deserialize_ros_message(
   void * untyped_typesupport,
   const char * typesupport_identifier)
 {
-  if (using_introspection_c_typesupport(typesupport_identifier)) {
-    auto typed_typesupport = static_cast<TypeSupport_c *>(untyped_typesupport);
-    return typed_typesupport->deserializeROSmessage(buffer, ros_message);
-  } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
-    auto typed_typesupport = static_cast<TypeSupport_cpp *>(untyped_typesupport);
-    return typed_typesupport->deserializeROSmessage(buffer, ros_message);
-  }
+  // if (using_introspection_c_typesupport(typesupport_identifier)) {
+  //   auto typed_typesupport = static_cast<TypeSupport_c *>(untyped_typesupport);
+  //   return typed_typesupport->deserializeROSmessage(buffer, ros_message);
+  // } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
+  //   auto typed_typesupport = static_cast<TypeSupport_cpp *>(untyped_typesupport);
+  //   return typed_typesupport->deserializeROSmessage(buffer, ros_message);
+  // }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return false;
 }

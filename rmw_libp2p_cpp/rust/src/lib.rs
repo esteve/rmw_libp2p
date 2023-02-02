@@ -1,4 +1,5 @@
 use async_std::task;
+use core::ffi::c_size_t;
 use std::os::raw::c_char;
 use std::os::raw::c_void;
 use uuid::Uuid;
@@ -266,4 +267,12 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
 
         node.thread_handle.await
     });
+}
+
+#[no_mangle]
+pub extern "C" fn rs_deserialize_sequence(ptr: *mut Libp2pCDRBuffer, member_count: *mut c_size_t) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
 }

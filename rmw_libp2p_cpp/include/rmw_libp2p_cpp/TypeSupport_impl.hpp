@@ -110,7 +110,7 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
   assert(ros_message);
 
   size_t member_count = 0;
-  rs_deser.deserializeSequence(&member_count);
+  rs_deserialize_sequence(deser, &member_count);
   if (member_count != members->member_count_) {
     throw std::runtime_error("failed to deserialize value");
   }

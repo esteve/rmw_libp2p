@@ -58,6 +58,9 @@ extern "C"
 
   void *rs_rmw_init();
 
+  extern void
+  rs_deserialize_sequence(rs_libp2p_cdr_buffer_t *, size_t);
+
 #ifdef __cplusplus
 }
 #endif

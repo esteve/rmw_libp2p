@@ -128,11 +128,11 @@ rmw_create_publisher(
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
-  // info->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_, topic_name);
-  // if (!info->publisher_handle_) {
-  //   RMW_SET_ERROR_MSG("failed to create libp2p publisher");
-  //   goto fail;
-  // }
+  info->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_, topic_name);
+  if (!info->publisher_handle_) {
+    RMW_SET_ERROR_MSG("failed to create libp2p publisher");
+    goto fail;
+  }
 
   // info->publication_ = DPS_CreatePublication(node_data->impl);
   // if (!info->publication_) {
@@ -176,9 +176,9 @@ rmw_create_publisher(
 
 fail:
   _delete_typesupport(info->type_support_, info->typesupport_identifier_);
-  // if (info->publisher_handle_) {
-  //   rs_libp2p_custom_publisher_free(info->publisher_handle_);
-  // }
+  if (info->publisher_handle_) {
+    rs_libp2p_custom_publisher_free(info->publisher_handle_);
+  }
   delete info;
 
   if (rmw_publisher) {

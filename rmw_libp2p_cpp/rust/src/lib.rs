@@ -187,7 +187,6 @@ impl Libp2pCustomPublisher {
         self.node.publish_message(self.topic.clone(), buffer);
     }
 }
-
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
@@ -267,29 +266,4 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
 
         node.thread_handle.await
     });
-}
-
-pub struct Libp2pROS2Bridge {
-    gid: Uuid,
-}
-
-#[no_mangle]
-pub extern "C" fn rs_libp2p_bridge_new() -> *mut Libp2pROS2Bridge {
-    Box::into_raw(Box::new(Libp2pROS2Bridge::new()))
-}
-
-#[no_mangle]
-pub extern "C" fn rs_libp2p_bridge_free(ptr: *mut Libp2pROS2Bridge) {
-    if ptr.is_null() {
-        return;
-    }
-    let bridge = unsafe { Box::from_raw(ptr) };
-}
-
-impl Libp2pROS2Bridge {
-    fn new() -> Self {
-        Self {
-            gid: Uuid::new_v4(),
-        }
-    }
 }

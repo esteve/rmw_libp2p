@@ -1,5 +1,4 @@
 use async_std::task;
-use core::ffi::c_size_t;
 use std::os::raw::c_char;
 use std::os::raw::c_void;
 use uuid::Uuid;
@@ -62,6 +61,11 @@ pub struct Libp2pCustomPublisher {
     gid: Uuid,
     node: Arc<Libp2pCustomNode>, // We need to store the Node here to have access to the outgoing queue
     topic: Topic,
+}
+
+pub struct Libp2pCDRBuffer<'a> {
+    write_buffer: Vec<u8>,
+    read_buffer: &'a [u8],
 }
 
 impl Libp2pCustomNode {
@@ -188,6 +192,16 @@ impl Libp2pCustomPublisher {
         self.node.publish_message(self.topic.clone(), buffer);
     }
 }
+
+impl Libp2pCDRBuffer {
+    fn new() -> Self {
+        let write_buffer = Vec::new();
+        Self {
+            write_buffer: write_buffer,
+            read_buffer: write_buffer.as_slice(),
+        }
+    }
+}
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
@@ -270,7 +284,21 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
 }
 
 #[no_mangle]
-pub extern "C" fn rs_deserialize_sequence(ptr: *mut Libp2pCDRBuffer, member_count: *mut c_size_t) {
+pub extern "C" fn rs_libp2p_cdr_buffer_new() -> *mut Libp2pCDRBuffer {
+    let libp2p2_cdr_buffer = Libp2pCDRBuffer::new();
+    Box::into_raw(Box::new(libp2p2_cdr_buffer))
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Libp2pCDRBuffer) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe { Box::from_raw(ptr) };
+}
+
+#[no_mangle]
+pub extern "C" fn rs_deserialize_sequence(ptr: *mut Libp2pCDRBuffer, member_count: *mut usize) {
     let libp2p2_cdr_buffer = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr

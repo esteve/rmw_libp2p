@@ -19,6 +19,7 @@ use std::ffi::CStr;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::Duration;
+use std::io::Cursor;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -61,11 +62,6 @@ pub struct Libp2pCustomPublisher {
     gid: Uuid,
     node: Arc<Libp2pCustomNode>, // We need to store the Node here to have access to the outgoing queue
     topic: Topic,
-}
-
-pub struct Libp2pCDRBuffer<'a> {
-    write_buffer: Vec<u8>,
-    read_buffer: &'a [u8],
 }
 
 impl Libp2pCustomNode {
@@ -193,15 +189,6 @@ impl Libp2pCustomPublisher {
     }
 }
 
-impl Libp2pCDRBuffer {
-    fn new() -> Self {
-        let write_buffer = Vec::new();
-        Self {
-            write_buffer: write_buffer,
-            read_buffer: write_buffer.as_slice(),
-        }
-    }
-}
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
@@ -284,13 +271,13 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_cdr_buffer_new() -> *mut Libp2pCDRBuffer {
-    let libp2p2_cdr_buffer = Libp2pCDRBuffer::new();
+pub extern "C" fn rs_libp2p_cdr_buffer_new() -> *mut Cursor<Vec<u8>> {
+    let libp2p2_cdr_buffer = Cursor::new(Vec::new());
     Box::into_raw(Box::new(libp2p2_cdr_buffer))
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Libp2pCDRBuffer) {
+pub extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Cursor<Vec<u8>>) {
     if ptr.is_null() {
         return;
     }
@@ -298,9 +285,12 @@ pub extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Libp2pCDRBuffer) {
 }
 
 #[no_mangle]
-pub extern "C" fn rs_deserialize_sequence(ptr: *mut Libp2pCDRBuffer, member_count: *mut usize) {
+pub extern "C" fn rs_deserialize_sequence(ptr: *mut Cursor<Vec<u8>>, member_count: *mut usize) {
     let libp2p2_cdr_buffer = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
+    unsafe {
+        *member_count = cdr::deserialize_from::<_, usize, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
 }

@@ -237,7 +237,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
-    ptr_buffer: *const Vec<u8>,
+    ptr_buffer: *const Cursor<Vec<u8>>,
 ) -> usize {
     let libp2p2_custom_publisher = unsafe {
         assert!(!ptr_publisher.is_null());
@@ -247,8 +247,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
-    let buffer = vec![1, 2, 3];
-    libp2p2_custom_publisher.publish(buffer);
+    libp2p2_custom_publisher.publish(buffer.get_ref().to_vec());
     // libp2p2_custom_publisher.node_ptr.swarm.behaviour_mut().gossipsub.publish(libp2p2_custom_publisher.topic.clone(), *buffer);
     0
 }

@@ -15,18 +15,19 @@
 #ifndef ROS_MESSAGE_SERIALIZATION_HPP_
 #define ROS_MESSAGE_SERIALIZATION_HPP_
 
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
 #include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
 
 bool
 _serialize_ros_message(
   const void * ros_message,
-  rs_libp2p_cdr_buffer * ser,
+  rmw_libp2p_cpp::cdr::WriteCDRBuffer & ser,
   void * untyped_members,
   const char * typesupport_identifier);
 
 bool
 _deserialize_ros_message(
-  rs_libp2p_cdr_buffer * buffer,
+  rmw_libp2p_cpp::cdr::ReadCDRBuffer & deser,
   void * ros_message,
   void * untyped_members,
   const char * typesupport_identifier);

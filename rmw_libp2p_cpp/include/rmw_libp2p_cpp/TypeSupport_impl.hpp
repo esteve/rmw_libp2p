@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
 #include "rmw_libp2p_cpp/macros.hpp"
 
 #include "rosidl_runtime_c/primitives_sequence_functions.h"
@@ -106,7 +107,7 @@ template<typename T>
 void deserialize_field(
   const rosidl_typesupport_introspection_cpp::MessageMember * member,
   void * field,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   bool)
 {
   if (!member->is_array_) {
@@ -124,7 +125,7 @@ template<typename T>
 void deserialize_field(
   const rosidl_typesupport_introspection_c__MessageMember * member,
   void * field,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   bool)
 {
   if (!member->is_array_) {
@@ -147,7 +148,7 @@ inline
 void deserialize_field<std::string>(
   const rosidl_typesupport_introspection_c__MessageMember * member,
   void * field,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   bool call_new)
 {
   using CStringHelper = StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
@@ -190,7 +191,7 @@ inline
 void deserialize_field<std::u16string>(
   const rosidl_typesupport_introspection_c__MessageMember * member,
   void * field,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   bool call_new)
 {
   using CU16StringHelper = U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
@@ -231,7 +232,7 @@ void deserialize_field<std::u16string>(
 inline
 size_t get_submessage_sequence_deserialize(
   const rosidl_typesupport_introspection_cpp::MessageMember * member,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   void * & field,
   void * & subros_message,
   bool & call_new)
@@ -255,7 +256,7 @@ size_t get_submessage_sequence_deserialize(
 inline
 size_t get_submessage_sequence_deserialize(
   const rosidl_typesupport_introspection_c__MessageMember * member,
-  rs_libp2p_cdr_buffer * deser,
+  cdr::ReadCDRBuffer & deser,
   void * & field,
   void * & subros_message,
   bool & call_new)
@@ -276,13 +277,13 @@ size_t get_submessage_sequence_deserialize(
 
 template<typename MembersType>
 bool TypeSupport<MembersType>::deserializeROSmessage(
-  rs_libp2p_cdr_buffer * deser, const MembersType * members, void * ros_message, bool call_new)
+  cdr::ReadCDRBuffer & deser, const MembersType * members, void * ros_message, bool call_new)
 {
   assert(members);
   assert(ros_message);
 
   size_t member_count = 0;
-  rs_deserialize_sequence(deser, &member_count);
+  // deser.deserializeSequence(&member_count);
   if (member_count != members->member_count_) {
     throw std::runtime_error("failed to deserialize value");
   }
@@ -362,7 +363,7 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
 
 template<typename MembersType>
 bool TypeSupport<MembersType>::serializeROSmessage(
-  const void * ros_message, rs_libp2p_cdr_buffer * ser)
+  const void * ros_message, cdr::WriteCDRBuffer & ser)
 {
   assert(ros_message);
 
@@ -374,7 +375,7 @@ bool TypeSupport<MembersType>::serializeROSmessage(
 
 template<typename MembersType>
 bool TypeSupport<MembersType>::deserializeROSmessage(
-  rs_libp2p_cdr_buffer * deser, void * ros_message)
+  cdr::ReadCDRBuffer & deser, void * ros_message)
 {
   assert(ros_message);
 

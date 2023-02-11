@@ -236,7 +236,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
-    ptr_buffer: *mut Vec<u8>,
+    ptr_buffer: *const Vec<u8>,
 ) -> usize {
     let libp2p2_custom_publisher = unsafe {
         assert!(!ptr_publisher.is_null());

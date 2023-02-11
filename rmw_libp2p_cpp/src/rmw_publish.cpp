@@ -21,7 +21,7 @@
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
-// #include "rmw_libp2p_cpp/CborStream.hpp"
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
 #include "rmw_libp2p_cpp/custom_publisher_info.hpp"
 #include "rmw_libp2p_cpp/identifier.hpp"
 // #include "publish_common.hpp"
@@ -54,12 +54,12 @@ rmw_publish(
   auto info = static_cast<CustomPublisherInfo *>(publisher->data);
   assert(info);
 
-  rs_libp2p_cdr_buffer_t * ser = rs_libp2p_cdr_buffer_new();
+  rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
   if (_serialize_ros_message(ros_message, ser, info->type_support_,
     info->typesupport_identifier_))
   {
-    uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser);
+    uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
     if (status == 0) { // TODO(esteve): replace with proper error codes
       returnedValue = RMW_RET_OK;
     } else {
@@ -68,8 +68,6 @@ rmw_publish(
   } else {
     RMW_SET_ERROR_MSG("cannot serialize data");
   }
-
-  rs_libp2p_cdr_buffer_free(ser);
 
   return returnedValue;
 }

@@ -17,10 +17,12 @@
 #include "ros_message_serialization.hpp"
 #include "type_support_common.hpp"
 
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
+
 bool
 _serialize_ros_message(
   const void * ros_message,
-  rs_libp2p_cdr_buffer * ser,
+  rmw_libp2p_cpp::cdr::WriteCDRBuffer & ser,
   void * untyped_typesupport,
   const char * typesupport_identifier)
 {
@@ -37,17 +39,17 @@ _serialize_ros_message(
 
 bool
 _deserialize_ros_message(
-  rs_libp2p_cdr_buffer * buffer,
+  rmw_libp2p_cpp::cdr::ReadCDRBuffer & deser,
   void * ros_message,
   void * untyped_typesupport,
   const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
     auto typed_typesupport = static_cast<TypeSupport_c *>(untyped_typesupport);
-    return typed_typesupport->deserializeROSmessage(buffer, ros_message);
+    return typed_typesupport->deserializeROSmessage(deser, ros_message);
   } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
     auto typed_typesupport = static_cast<TypeSupport_cpp *>(untyped_typesupport);
-    return typed_typesupport->deserializeROSmessage(buffer, ros_message);
+    return typed_typesupport->deserializeROSmessage(deser, ros_message);
   }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return false;

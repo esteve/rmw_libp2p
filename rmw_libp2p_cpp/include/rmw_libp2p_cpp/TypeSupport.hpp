@@ -37,7 +37,8 @@
 #include "rosidl_typesupport_introspection_c/service_introspection.h"
 #include "rosidl_typesupport_introspection_c/visibility_control.h"
 
-// #include "CborStream.hpp"
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
+#include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
 
 namespace rmw_libp2p_cpp
 {
@@ -75,7 +76,7 @@ struct StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
     return std::string(data.data);
   }
 
-  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool)
+  static void assign(cdr::ReadCDRBuffer & deser, void * field, bool)
   {
     std::string str;
     // deser >> str;
@@ -95,7 +96,7 @@ struct StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     return *(static_cast<std::string *>(data));
   }
 
-  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool call_new)
+  static void assign(cdr::ReadCDRBuffer & deser, void * field, bool call_new)
   {
     std::string & str = *(std::string *)field;
     if (call_new) {
@@ -138,7 +139,7 @@ struct U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
     return std::u16string(reinterpret_cast<char16_t *>(data.data));
   }
 
-  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool)
+  static void assign(cdr::ReadCDRBuffer & deser, void * field, bool)
   {
     std::u16string str;
     // deser >> str;
@@ -158,7 +159,7 @@ struct U16StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     return *(static_cast<std::u16string *>(data));
   }
 
-  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool call_new)
+  static void assign(cdr::ReadCDRBuffer & deser, void * field, bool call_new)
   {
     std::u16string & str = *(std::u16string *)field;
     if (call_new) {
@@ -172,9 +173,9 @@ template<typename MembersType>
 class TypeSupport
 {
 public:
-  bool serializeROSmessage(const void * ros_message, rs_libp2p_cdr_buffer * ser);
+  bool serializeROSmessage(const void * ros_message, cdr::WriteCDRBuffer & ser);
 
-  bool deserializeROSmessage(rs_libp2p_cdr_buffer * deser, void * ros_message);
+  bool deserializeROSmessage(cdr::ReadCDRBuffer & deser, void * ros_message);
 
 protected:
   explicit TypeSupport(const MembersType * members);
@@ -183,10 +184,10 @@ protected:
 
 private:
   bool serializeROSmessage(
-    rs_libp2p_cdr_buffer * ser, const MembersType * members, const void * ros_message);
+    cdr::WriteCDRBuffer & ser, const MembersType * members, const void * ros_message);
 
   bool deserializeROSmessage(
-    rs_libp2p_cdr_buffer * deser, const MembersType * members, void * ros_message,
+    cdr::ReadCDRBuffer & deser, const MembersType * members, void * ros_message,
     bool call_new);
 };
 

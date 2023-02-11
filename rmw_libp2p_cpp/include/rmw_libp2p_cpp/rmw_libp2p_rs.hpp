@@ -47,7 +47,7 @@ extern "C"
   extern void
   rs_libp2p_cdr_buffer_free(rs_libp2p_cdr_buffer_t *);
 
-  extern uint32_t rs_libp2p_custom_publisher_publish(rs_libp2p_custom_publisher_t *, rs_libp2p_cdr_buffer *);
+  extern uint32_t rs_libp2p_custom_publisher_publish(rs_libp2p_custom_publisher_t *, const rs_libp2p_cdr_buffer *);
 
   struct rmw_context_impl_s
   {

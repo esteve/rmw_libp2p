@@ -79,7 +79,7 @@ struct StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
   static void assign(cdr::ReadCDRBuffer & deser, void * field, bool)
   {
     std::string str;
-    // deser >> str;
+    deser >> str;
     rosidl_runtime_c__String * c_str = static_cast<rosidl_runtime_c__String *>(field);
     rosidl_runtime_c__String__assign(c_str, str.c_str());
   }
@@ -102,7 +102,7 @@ struct StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     if (call_new) {
       new(&str) std::string;
     }
-    // deser >> str;
+    deser >> str;
   }
 };
 

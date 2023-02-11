@@ -116,6 +116,23 @@ namespace rmw_libp2p_cpp
                 rs_libp2p_cdr_buffer_read_bool(buffer_, &n);
                 return *this;
             }
+            inline ReadCDRBuffer &operator>>(std::string &s)
+            {
+                char *data;
+                size_t size;
+                rs_libp2p_cdr_buffer_read_string(buffer_, &data, &size);
+                if (!size)
+                {
+                    s = std::string();
+                }
+                else
+                {
+                    s = std::string(data, size);
+                    rs_libp2p_cdr_buffer_free_string(data);
+                }
+                return *this;
+            }
+
         private:
             rs_libp2p_cdr_buffer *buffer_;
         };

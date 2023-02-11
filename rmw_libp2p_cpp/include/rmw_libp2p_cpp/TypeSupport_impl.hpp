@@ -328,7 +328,7 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
         deserialize_field<uint64_t>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
-        // deserialize_field<std::string>(member, field, deser, call_new);
+        deserialize_field<std::string>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
         // deserialize_field<std::u16string>(member, field, deser, call_new);

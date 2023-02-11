@@ -16,6 +16,7 @@ use std::boxed::Box;
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
 use std::ffi::CStr;
+use std::ffi::CString;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::Duration;
@@ -425,4 +426,30 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>>, n: *
     unsafe {
         *n = cdr::deserialize_from::<_, bool, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
     }
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_string(ptr: *mut Cursor<Vec<u8>>, s: *mut *const c_char, size: *mut usize) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    let cs = cdr::deserialize_from::<_, CString, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    unsafe {
+        *size = cs.as_bytes().len();
+
+        if *size != 0 {
+            *s = cs.into_raw();
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_free_string(s: *mut c_char) {
+    unsafe {
+        if s.is_null() {
+            return;
+        }
+        CString::from_raw(s)
+    };
 }

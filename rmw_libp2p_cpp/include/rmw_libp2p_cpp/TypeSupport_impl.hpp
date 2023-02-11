@@ -111,7 +111,7 @@ void deserialize_field(
   bool)
 {
   if (!member->is_array_) {
-    // deser >> *static_cast<T *>(field);
+    deser >> *static_cast<T *>(field);
   } else if (member->array_size_ && !member->is_upper_bound_) {
     // deser.deserializeSequence(static_cast<T *>(field), member->array_size_);
   } else {
@@ -328,10 +328,10 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
         deserialize_field<uint64_t>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
-        deserialize_field<std::string>(member, field, deser, call_new);
+        // deserialize_field<std::string>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
-        deserialize_field<std::u16string>(member, field, deser, call_new);
+        // deserialize_field<std::u16string>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
         {

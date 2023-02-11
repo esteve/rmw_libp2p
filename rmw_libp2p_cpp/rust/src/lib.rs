@@ -382,3 +382,47 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_int8(ptr: *mut Cursor<Vec<u8>>, n: *
         *n = cdr::deserialize_from::<_, i8, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
     }
 }
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_char(ptr: *mut Cursor<Vec<u8>>, n: *mut c_char) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    unsafe {
+        *n = cdr::deserialize_from::<_, c_char, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_float(ptr: *mut Cursor<Vec<u8>>, n: *mut f32) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    unsafe {
+        *n = cdr::deserialize_from::<_, f32, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_double(ptr: *mut Cursor<Vec<u8>>, n: *mut f64) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    unsafe {
+        *n = cdr::deserialize_from::<_, f64, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>>, n: *mut bool) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    unsafe {
+        *n = cdr::deserialize_from::<_, bool, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
+}

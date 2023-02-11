@@ -85,6 +85,18 @@ extern "C"
   extern void
   rs_libp2p_cdr_buffer_read_int64(rs_libp2p_cdr_buffer_t *, int64_t *);
 
+  extern void
+  rs_libp2p_cdr_buffer_read_char(rs_libp2p_cdr_buffer_t *, char *);
+
+  extern void
+  rs_libp2p_cdr_buffer_read_float(rs_libp2p_cdr_buffer_t *, float *);
+
+  extern void
+  rs_libp2p_cdr_buffer_read_double(rs_libp2p_cdr_buffer_t *, double *);
+
+  extern void
+  rs_libp2p_cdr_buffer_read_bool(rs_libp2p_cdr_buffer_t *, bool *);
+
 #ifdef __cplusplus
 }
 #endif

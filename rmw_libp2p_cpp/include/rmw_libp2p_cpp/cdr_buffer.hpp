@@ -96,6 +96,26 @@ namespace rmw_libp2p_cpp
                 rs_libp2p_cdr_buffer_read_int8(buffer_, &n);
                 return *this;
             }
+            inline ReadCDRBuffer &operator>>(char &n)
+            {
+                rs_libp2p_cdr_buffer_read_char(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(float &n)
+            {
+                rs_libp2p_cdr_buffer_read_float(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(double &n)
+            {
+                rs_libp2p_cdr_buffer_read_double(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(bool &n)
+            {
+                rs_libp2p_cdr_buffer_read_bool(buffer_, &n);
+                return *this;
+            }
         private:
             rs_libp2p_cdr_buffer *buffer_;
         };

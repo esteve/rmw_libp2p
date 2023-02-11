@@ -243,7 +243,7 @@ size_t get_submessage_sequence_deserialize(
   } else {
     // Deserialize length
     uint32_t array_size = 0;
-    // deser >> array_size;
+    deser >> array_size;
     auto vector = reinterpret_cast<std::vector<unsigned char> *>(field);
     new(vector) std::vector<unsigned char>;
     member->resize_function(field, array_size);
@@ -267,7 +267,7 @@ size_t get_submessage_sequence_deserialize(
   } else {
     // Deserialize length
     uint32_t array_size = 0;
-    // deser >> array_size;
+    deser >> array_size;
     member->resize_function(field, array_size);
     subros_message = field;
     call_new = true;

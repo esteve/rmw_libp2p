@@ -56,7 +56,46 @@ namespace rmw_libp2p_cpp
             {
                 rs_libp2p_cdr_buffer_free(buffer_);
             }
-
+            inline ReadCDRBuffer &operator>>(uint64_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_uint64(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(uint32_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_uint32(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(uint16_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_uint16(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(uint8_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_uint8(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(int64_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_int64(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(int32_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_int32(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(int16_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_int16(buffer_, &n);
+                return *this;
+            }
+            inline ReadCDRBuffer &operator>>(int8_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_int8(buffer_, &n);
+                return *this;
+            }
         private:
             rs_libp2p_cdr_buffer *buffer_;
         };

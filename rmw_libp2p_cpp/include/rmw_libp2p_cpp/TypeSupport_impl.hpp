@@ -102,6 +102,178 @@ TypeSupport<MembersType>::TypeSupport(const MembersType * members)
   this->members_ = members;
 }
 
+template<typename T>
+void deserialize_field(
+  const rosidl_typesupport_introspection_cpp::MessageMember * member,
+  void * field,
+  rs_libp2p_cdr_buffer * deser,
+  bool)
+{
+  if (!member->is_array_) {
+    // deser >> *static_cast<T *>(field);
+  } else if (member->array_size_ && !member->is_upper_bound_) {
+    // deser.deserializeSequence(static_cast<T *>(field), member->array_size_);
+  } else {
+    auto & vector = *reinterpret_cast<std::vector<T> *>(field);
+    new(&vector) std::vector<T>;
+    // deser >> vector;
+  }
+}
+
+template<typename T>
+void deserialize_field(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  rs_libp2p_cdr_buffer * deser,
+  bool)
+{
+  if (!member->is_array_) {
+    // deser >> *static_cast<T *>(field);
+  } else if (member->array_size_ && !member->is_upper_bound_) {
+    // deser.deserializeSequence(static_cast<T *>(field), member->array_size_);
+  } else {
+    auto & data = *reinterpret_cast<typename GenericCSequence<T>::type *>(field);
+    size_t dsize = 0;
+    // deser.deserializeSequenceSize(&dsize);
+    if (!GenericCSequence<T>::init(&data, dsize)) {
+      throw std::runtime_error("unable to initialize GenericCSequence");
+    }
+    // deser.deserializeSequence(reinterpret_cast<T *>(data.data), dsize);
+  }
+}
+
+template<>
+inline
+void deserialize_field<std::string>(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  rs_libp2p_cdr_buffer * deser,
+  bool call_new)
+{
+  using CStringHelper = StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
+  if (!member->is_array_) {
+    CStringHelper::assign(deser, field, call_new);
+  } else {
+    std::vector<std::string> cpp_string_vector;
+    // deser >> cpp_string_vector;
+
+    if (member->array_size_ && !member->is_upper_bound_) {
+      auto deser_field = static_cast<rosidl_runtime_c__String *>(field);
+      for (size_t i = 0; i < member->array_size_; ++i) {
+        if (!rosidl_runtime_c__String__assign(&deser_field[i],
+          cpp_string_vector[i].c_str()))
+        {
+          throw std::runtime_error("unable to assign rosidl_runtime_c__String");
+        }
+      }
+    } else {
+      auto & string_sequence_field =
+        *reinterpret_cast<rosidl_runtime_c__String__Sequence *>(field);
+      if (!rosidl_runtime_c__String__Sequence__init(&string_sequence_field,
+        cpp_string_vector.size()))
+      {
+        throw std::runtime_error("unable to initialize rosidl_runtime_c__String sequence");
+      }
+      for (size_t i = 0; i < cpp_string_vector.size(); ++i) {
+        if (!rosidl_runtime_c__String__assign(&string_sequence_field.data[i],
+          cpp_string_vector[i].c_str()))
+        {
+          throw std::runtime_error("unable to assign rosidl_runtime_c__String");
+        }
+      }
+    }
+  }
+}
+
+template<>
+inline
+void deserialize_field<std::u16string>(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  rs_libp2p_cdr_buffer * deser,
+  bool call_new)
+{
+  using CU16StringHelper = U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
+  if (!member->is_array_) {
+    CU16StringHelper::assign(deser, field, call_new);
+  } else {
+    std::vector<std::u16string> cpp_u16string_vector;
+    // deser >> cpp_u16string_vector;
+
+    if (member->array_size_ && !member->is_upper_bound_) {
+      auto deser_field = static_cast<rosidl_runtime_c__U16String *>(field);
+      for (size_t i = 0; i < member->array_size_; ++i) {
+        if (!rosidl_runtime_c__U16String__assign(&deser_field[i],
+          reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
+        {
+          throw std::runtime_error("unable to assign rosidl_runtime_c__U16String");
+        }
+      }
+    } else {
+      auto & u16string_sequence_field =
+        *reinterpret_cast<rosidl_runtime_c__U16String__Sequence *>(field);
+      if (!rosidl_runtime_c__U16String__Sequence__init(&u16string_sequence_field,
+        cpp_u16string_vector.size()))
+      {
+        throw std::runtime_error("unable to initialize rosidl_runtime_c__U16String sequence");
+      }
+      for (size_t i = 0; i < cpp_u16string_vector.size(); ++i) {
+        if (!rosidl_runtime_c__U16String__assign(&u16string_sequence_field.data[i],
+          reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
+        {
+          throw std::runtime_error("unable to assign rosidl_runtime_c__U16String");
+        }
+      }
+    }
+  }
+}
+
+inline
+size_t get_submessage_sequence_deserialize(
+  const rosidl_typesupport_introspection_cpp::MessageMember * member,
+  rs_libp2p_cdr_buffer * deser,
+  void * & field,
+  void * & subros_message,
+  bool & call_new)
+{
+  if (member->array_size_ && !member->is_upper_bound_) {
+    subros_message = field;
+    return member->array_size_;
+  } else {
+    // Deserialize length
+    uint32_t array_size = 0;
+    // deser >> array_size;
+    auto vector = reinterpret_cast<std::vector<unsigned char> *>(field);
+    new(vector) std::vector<unsigned char>;
+    member->resize_function(field, array_size);
+    subros_message = field;
+    call_new = true;
+    return array_size;
+  }
+}
+
+inline
+size_t get_submessage_sequence_deserialize(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  rs_libp2p_cdr_buffer * deser,
+  void * & field,
+  void * & subros_message,
+  bool & call_new)
+{
+  if (member->array_size_ && !member->is_upper_bound_) {
+    subros_message = &field;
+    return member->array_size_;
+  } else {
+    // Deserialize length
+    uint32_t array_size = 0;
+    // deser >> array_size;
+    member->resize_function(field, array_size);
+    subros_message = field;
+    call_new = true;
+    return array_size;
+  }
+}
+
 template<typename MembersType>
 bool TypeSupport<MembersType>::deserializeROSmessage(
   rs_libp2p_cdr_buffer * deser, const MembersType * members, void * ros_message, bool call_new)

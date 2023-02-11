@@ -75,13 +75,13 @@ struct StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
     return std::string(data.data);
   }
 
-  // static void assign(cbor::RxStream & deser, void * field, bool)
-  // {
-  //   std::string str;
-  //   deser >> str;
-  //   rosidl_runtime_c__String * c_str = static_cast<rosidl_runtime_c__String *>(field);
-  //   rosidl_runtime_c__String__assign(c_str, str.c_str());
-  // }
+  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool)
+  {
+    std::string str;
+    // deser >> str;
+    rosidl_runtime_c__String * c_str = static_cast<rosidl_runtime_c__String *>(field);
+    rosidl_runtime_c__String__assign(c_str, str.c_str());
+  }
 };
 
 // For C++ introspection typesupport we just reuse the same std::string transparently.
@@ -95,14 +95,14 @@ struct StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     return *(static_cast<std::string *>(data));
   }
 
-  // static void assign(cbor::RxStream & deser, void * field, bool call_new)
-  // {
-  //   std::string & str = *(std::string *)field;
-  //   if (call_new) {
-  //     new(&str) std::string;
-  //   }
-  //   deser >> str;
-  // }
+  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool call_new)
+  {
+    std::string & str = *(std::string *)field;
+    if (call_new) {
+      new(&str) std::string;
+    }
+    // deser >> str;
+  }
 };
 
 // Helper class that uses template specialization to read/write u16string types
@@ -138,13 +138,13 @@ struct U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
     return std::u16string(reinterpret_cast<char16_t *>(data.data));
   }
 
-  // static void assign(cbor::RxStream & deser, void * field, bool)
-  // {
-  //   std::u16string str;
-  //   deser >> str;
-  //   rosidl_runtime_c__U16String * c_str = static_cast<rosidl_runtime_c__U16String *>(field);
-  //   rosidl_runtime_c__U16String__assign(c_str, reinterpret_cast<const uint16_t *>(str.c_str()));
-  // }
+  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool)
+  {
+    std::u16string str;
+    // deser >> str;
+    rosidl_runtime_c__U16String * c_str = static_cast<rosidl_runtime_c__U16String *>(field);
+    rosidl_runtime_c__U16String__assign(c_str, reinterpret_cast<const uint16_t *>(str.c_str()));
+  }
 };
 
 // For C++ introspection typesupport we just reuse the same std::u16string transparently.
@@ -158,14 +158,14 @@ struct U16StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     return *(static_cast<std::u16string *>(data));
   }
 
-  // static void assign(cbor::RxStream & deser, void * field, bool call_new)
-  // {
-  //   std::u16string & str = *(std::u16string *)field;
-  //   if (call_new) {
-  //     new(&str) std::u16string;
-  //   }
-  //   deser >> str;
-  // }
+  static void assign(rs_libp2p_cdr_buffer * deser, void * field, bool call_new)
+  {
+    std::u16string & str = *(std::u16string *)field;
+    if (call_new) {
+      new(&str) std::u16string;
+    }
+    // deser >> str;
+  }
 };
 
 template<typename MembersType>

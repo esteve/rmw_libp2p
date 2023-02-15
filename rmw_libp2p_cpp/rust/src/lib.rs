@@ -396,6 +396,17 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_char(ptr: *mut Cursor<Vec<u8>>, n: *
 }
 
 #[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_char16(ptr: *mut Cursor<Vec<u8>>, n: *mut u16) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    unsafe {
+        *n = cdr::deserialize_from::<_, u16, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn rs_libp2p_cdr_buffer_read_float(ptr: *mut Cursor<Vec<u8>>, n: *mut f32) {
     let libp2p2_cdr_buffer = unsafe {
         assert!(!ptr.is_null());

@@ -101,6 +101,11 @@ namespace rmw_libp2p_cpp
                 rs_libp2p_cdr_buffer_read_char(buffer_, &n);
                 return *this;
             }
+            inline ReadCDRBuffer &operator>>(char16_t &n)
+            {
+                rs_libp2p_cdr_buffer_read_char16(buffer_, &n);
+                return *this;
+            }
             inline ReadCDRBuffer &operator>>(float &n)
             {
                 rs_libp2p_cdr_buffer_read_float(buffer_, &n);
@@ -135,7 +140,7 @@ namespace rmw_libp2p_cpp
 
             inline ReadCDRBuffer &operator>>(std::u16string &s)
             {
-                wchar_t *data;
+                char16_t *data;
                 size_t size;
                 rs_libp2p_cdr_buffer_read_u16string(buffer_, &data, &size);
                 s.resize(size);

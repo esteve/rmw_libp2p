@@ -165,7 +165,7 @@ struct U16StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
     if (call_new) {
       new(&str) std::u16string;
     }
-    // deser >> str;
+    deser >> str;
   }
 };
 

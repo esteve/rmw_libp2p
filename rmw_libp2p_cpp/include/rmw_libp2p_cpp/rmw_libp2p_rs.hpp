@@ -103,6 +103,9 @@ extern "C"
   extern void
   rs_libp2p_cdr_buffer_free_string(char *);
 
+  extern void
+  rs_libp2p_cdr_buffer_read_u16string(rs_libp2p_cdr_buffer_t *, char16_t **, size_t *);
+
 #ifdef __cplusplus
 }
 #endif

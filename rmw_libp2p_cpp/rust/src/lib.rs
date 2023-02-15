@@ -18,9 +18,9 @@ use std::error::Error;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::hash::{Hash, Hasher};
+use std::io::Cursor;
 use std::sync::Arc;
 use std::time::Duration;
-use std::io::Cursor;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -291,7 +291,8 @@ pub extern "C" fn rs_deserialize_sequence(ptr: *mut Cursor<Vec<u8>>, member_coun
         &mut *ptr
     };
     unsafe {
-        *member_count = cdr::deserialize_from::<_, usize, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+        *member_count =
+            cdr::deserialize_from::<_, usize, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
     }
 }
 
@@ -428,7 +429,11 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>>, n: *
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_cdr_buffer_read_string(ptr: *mut Cursor<Vec<u8>>, s: *mut *const c_char, size: *mut usize) {
+pub extern "C" fn rs_libp2p_cdr_buffer_read_string(
+    ptr: *mut Cursor<Vec<u8>>,
+    s: *mut *const c_char,
+    size: *mut usize,
+) {
     let libp2p2_cdr_buffer = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -451,4 +456,24 @@ pub extern "C" fn rs_libp2p_cdr_buffer_free_string(s: *mut c_char) {
         }
         CString::from_raw(s)
     };
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_u16string(
+    ptr: *mut Cursor<Vec<u8>>,
+    s: *mut *const u16,
+    size: *mut usize,
+) {
+    let libp2p2_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    let cs = cdr::deserialize_from::<_, Vec<u16>, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+    unsafe {
+        *size = cs.len();
+
+        if *size != 0 {
+            *s = cs.as_ptr();
+        }
+    }
 }

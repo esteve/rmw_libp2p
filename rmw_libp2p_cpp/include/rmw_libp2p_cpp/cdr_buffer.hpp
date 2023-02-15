@@ -133,6 +133,19 @@ namespace rmw_libp2p_cpp
                 return *this;
             }
 
+            inline ReadCDRBuffer &operator>>(std::u16string &s)
+            {
+                wchar_t *data;
+                size_t size;
+                rs_libp2p_cdr_buffer_read_u16string(buffer_, &data, &size);
+                s.resize(size);
+                for (size_t i = 0; i < size; ++i)
+                {
+                    *this >> s[i];
+                }
+                return *this;
+            }
+
         private:
             rs_libp2p_cdr_buffer *buffer_;
         };

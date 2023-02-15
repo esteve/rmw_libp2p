@@ -142,7 +142,7 @@ struct U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
   static void assign(cdr::ReadCDRBuffer & deser, void * field, bool)
   {
     std::u16string str;
-    // deser >> str;
+    deser >> str;
     rosidl_runtime_c__U16String * c_str = static_cast<rosidl_runtime_c__U16String *>(field);
     rosidl_runtime_c__U16String__assign(c_str, reinterpret_cast<const uint16_t *>(str.c_str()));
   }

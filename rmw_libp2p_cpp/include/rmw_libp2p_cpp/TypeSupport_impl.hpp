@@ -104,6 +104,243 @@ TypeSupport<MembersType>::TypeSupport(const MembersType * members)
 }
 
 template<typename T>
+void serialize_field(
+  const rosidl_typesupport_introspection_cpp::MessageMember * member,
+  void * field,
+  cdr::WriteCDRBuffer & ser)
+{
+  if (!member->is_array_) {
+    // ser << *static_cast<T *>(field);
+  } else if (member->array_size_ && !member->is_upper_bound_) {
+    // ser.serializeSequence(static_cast<T *>(field), member->array_size_);
+  } else {
+    std::vector<T> & data = *reinterpret_cast<std::vector<T> *>(field);
+    // ser << data;
+  }
+}
+
+// C specialization
+template<typename T>
+void serialize_field(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  cdr::WriteCDRBuffer & ser)
+{
+  if (!member->is_array_) {
+    // ser << *static_cast<T *>(field);
+  } else if (member->array_size_ && !member->is_upper_bound_) {
+    // ser.serializeSequence(static_cast<T *>(field), member->array_size_);
+  } else {
+    auto & data = *reinterpret_cast<typename GenericCSequence<T>::type *>(field);
+    // ser.serializeSequence(reinterpret_cast<T *>(data.data), data.size);
+  }
+}
+
+template<>
+inline
+void serialize_field<std::string>(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  cdr::WriteCDRBuffer & ser)
+{
+  using CStringHelper = StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
+  if (!member->is_array_) {
+    auto && str = CStringHelper::convert_to_std_string(field);
+    // Control maximum length.
+    if (member->string_upper_bound_ && str.length() > member->string_upper_bound_ + 1) {
+      throw std::runtime_error("string overcomes the maximum length");
+    }
+    // ser << str;
+  } else {
+    // First, cast field to rosidl_runtime_c
+    // Then convert to a std::string using StringHelper and serialize the std::string
+    std::vector<std::string> cpp_string_vector;
+    if (member->array_size_ && !member->is_upper_bound_) {
+      auto string_field = static_cast<rosidl_runtime_c__String *>(field);
+      for (size_t i = 0; i < member->array_size_; ++i) {
+        cpp_string_vector.push_back(
+          CStringHelper::convert_to_std_string(string_field[i]));
+      }
+    } else {
+      auto & string_sequence_field =
+        *reinterpret_cast<rosidl_runtime_c__String__Sequence *>(field);
+      for (size_t i = 0; i < string_sequence_field.size; ++i) {
+        cpp_string_vector.push_back(
+          CStringHelper::convert_to_std_string(string_sequence_field.data[i]));
+      }
+    }
+    // ser << cpp_string_vector;
+  }
+}
+
+template<>
+inline
+void serialize_field<std::u16string>(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  void * field,
+  cdr::WriteCDRBuffer & ser)
+{
+  using CU16StringHelper = U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>;
+  if (!member->is_array_) {
+    auto && str = CU16StringHelper::convert_to_std_u16string(field);
+    // Control maximum length.
+    if (member->string_upper_bound_ && str.length() > member->string_upper_bound_ + 1) {
+      throw std::runtime_error("string overcomes the maximum length");
+    }
+    // ser << str;
+  } else {
+    // First, cast field to rosidl_runtime_c
+    // Then convert to a std::u16string using U16StringHelper and serialize the std::u16string
+    std::vector<std::u16string> cpp_u16string_vector;
+    if (member->array_size_ && !member->is_upper_bound_) {
+      auto u16string_field = static_cast<rosidl_runtime_c__U16String *>(field);
+      for (size_t i = 0; i < member->array_size_; ++i) {
+        cpp_u16string_vector.push_back(
+          CU16StringHelper::convert_to_std_u16string(u16string_field[i]));
+      }
+    } else {
+      auto & u16string_sequence_field =
+        *reinterpret_cast<rosidl_runtime_c__U16String__Sequence *>(field);
+      for (size_t i = 0; i < u16string_sequence_field.size; ++i) {
+        cpp_u16string_vector.push_back(
+          CU16StringHelper::convert_to_std_u16string(u16string_sequence_field.data[i]));
+      }
+    }
+    // ser << cpp_u16string_vector;
+  }
+}
+
+inline
+size_t get_submessage_sequence_serialize(
+  const rosidl_typesupport_introspection_cpp::MessageMember * member,
+  cdr::WriteCDRBuffer & ser,
+  void * & field,
+  void * & subros_message)
+{
+  if (member->array_size_ && !member->is_upper_bound_) {
+    subros_message = field;
+    return member->array_size_;
+  } else {
+    subros_message = field;
+    size_t array_size = member->size_function(field);
+    if (member->is_upper_bound_ && array_size > member->array_size_) {
+      throw std::runtime_error("sequence overcomes the maximum length");
+    }
+    // Serialize length
+    // ser << (uint32_t)array_size;
+    return array_size;
+  }
+}
+
+inline
+size_t get_submessage_sequence_serialize(
+  const rosidl_typesupport_introspection_c__MessageMember * member,
+  cdr::WriteCDRBuffer & ser,
+  void * & field,
+  void * & subros_message)
+{
+  if (member->array_size_ && !member->is_upper_bound_) {
+    subros_message = &field;
+    return member->array_size_;
+  } else {
+    subros_message = field;
+    size_t array_size = member->size_function(field);
+    if (member->is_upper_bound_ && array_size > member->array_size_) {
+      throw std::runtime_error("sequence overcomes the maximum length");
+    }
+    // Serialize length
+    // ser << (uint32_t)array_size;
+    return array_size;
+  }
+}
+
+template<typename MembersType>
+bool TypeSupport<MembersType>::serializeROSmessage(
+  cdr::WriteCDRBuffer & ser, const MembersType * members, const void * ros_message)
+{
+  assert(ros_message);
+  assert(members);
+
+  // ser.serializeSequence(members->member_count_);
+
+  for (uint32_t i = 0; i < members->member_count_; ++i) {
+    const auto member = members->members_ + i;
+    void * field = const_cast<char *>(static_cast<const char *>(ros_message)) + member->offset_;
+    switch (member->type_id_) {
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN:
+        if (!member->is_array_) {
+          // don't cast to bool here because if the bool is
+          // uninitialized the random value can't be deserialized
+          // ser << (*static_cast<uint8_t *>(field) ? true : false);
+        } else {
+          serialize_field<bool>(member, field, ser);
+        }
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_OCTET:
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT8:
+        serialize_field<uint8_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_CHAR:
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT8:
+        serialize_field<char>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_FLOAT:
+        serialize_field<float>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_DOUBLE:
+        serialize_field<double>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT16:
+        serialize_field<int16_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT16:
+        serialize_field<uint16_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32:
+        serialize_field<int32_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT32:
+        serialize_field<uint32_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT64:
+        serialize_field<int64_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT64:
+        serialize_field<uint64_t>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
+        serialize_field<std::string>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
+        serialize_field<std::u16string>(member, field, ser);
+        break;
+      case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
+        {
+          auto sub_members = static_cast<const MembersType *>(member->members_->data);
+          if (!member->is_array_) {
+            serializeROSmessage(ser, sub_members, field);
+          } else {
+            void * subros_message = nullptr;
+            size_t array_size = 0;
+
+            array_size = get_submessage_sequence_serialize(
+              member, ser, field, subros_message);
+
+            for (size_t index = 0; index < array_size; ++index) {
+              serializeROSmessage(ser, sub_members, member->get_function(subros_message, index));
+            }
+          }
+        }
+        break;
+      default:
+        throw std::runtime_error("unknown type");
+    }
+  }
+
+  return true;
+}
+
+template<typename T>
 void deserialize_field(
   const rosidl_typesupport_introspection_cpp::MessageMember * member,
   void * field,

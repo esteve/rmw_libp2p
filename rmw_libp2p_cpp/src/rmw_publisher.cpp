@@ -107,7 +107,7 @@ rmw_create_publisher(
 //   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
 //   const char * topic = dps_topic.c_str();
   rmw_publisher_t * rmw_publisher = nullptr;
-//   rmw_libp2p_cpp::cbor::TxStream ser;
+//   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 //   DPS_Status ret;
 
   info = new CustomPublisherInfo();

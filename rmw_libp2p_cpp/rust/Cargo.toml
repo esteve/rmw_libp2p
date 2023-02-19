@@ -24,9 +24,9 @@ features = [
 ]
 
 [dependencies.deadqueue]
-version = "0.2.3"
+version = "0.2.4"
 default-features = false
-features = ["unlimited"]
+features = ["unlimited", "limited"]
 
 [lib]
 crate-type=["staticlib"]

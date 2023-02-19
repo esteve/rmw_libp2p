@@ -261,7 +261,7 @@ bool TypeSupport<MembersType>::serializeROSmessage(
   assert(ros_message);
   assert(members);
 
-  // ser.serializeSequence(members->member_count_);
+  ser << members->member_count_;
 
   for (uint32_t i = 0; i < members->member_count_; ++i) {
     const auto member = members->members_ + i;
@@ -520,7 +520,7 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
   assert(ros_message);
 
   size_t member_count = 0;
-  // deser.deserializeSequence(&member_count);
+  deser >> member_count;
   if (member_count != members->member_count_) {
     throw std::runtime_error("failed to deserialize value");
   }

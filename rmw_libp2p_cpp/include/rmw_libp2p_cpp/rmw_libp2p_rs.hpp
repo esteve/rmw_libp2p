@@ -59,9 +59,6 @@ extern "C"
   void *rs_rmw_init();
 
   extern void
-  rs_deserialize_sequence(rs_libp2p_cdr_buffer_t *, size_t *);
-
-  extern void
   rs_libp2p_cdr_buffer_read_uint8(rs_libp2p_cdr_buffer_t *, uint8_t *);
 
   extern void

@@ -41,6 +41,69 @@ namespace rmw_libp2p_cpp
 
             const rs_libp2p_cdr_buffer *data() const noexcept { return buffer_; }
 
+            inline WriteCDRBuffer &operator<<(const uint64_t n)
+            {
+                rs_libp2p_cdr_buffer_write_uint64(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const uint32_t n)
+            {
+                rs_libp2p_cdr_buffer_write_uint32(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const uint16_t n)
+            {
+                rs_libp2p_cdr_buffer_write_uint16(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const uint8_t n)
+            {
+                rs_libp2p_cdr_buffer_write_uint8(buffer_, n);
+                return *this;
+            }
+
+            inline WriteCDRBuffer &operator<<(const int64_t n)
+            {
+                rs_libp2p_cdr_buffer_write_int64(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const int32_t n)
+            {
+                rs_libp2p_cdr_buffer_write_int32(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const int16_t n)
+            {
+                rs_libp2p_cdr_buffer_write_int16(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const int8_t n)
+            {
+                rs_libp2p_cdr_buffer_write_int8(buffer_, n);
+                return *this;
+            }
+
+            inline WriteCDRBuffer &operator<<(const char n)
+            {
+                rs_libp2p_cdr_buffer_write_char(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator>>(char16_t n)
+            {
+                rs_libp2p_cdr_buffer_write_char16(buffer_, n);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const float f)
+            {
+                rs_libp2p_cdr_buffer_write_float(buffer_, f);
+                return *this;
+            }
+            inline WriteCDRBuffer &operator<<(const double d)
+            {
+                rs_libp2p_cdr_buffer_write_double(buffer_, d);
+                return *this;
+            }
+
         private:
             rs_libp2p_cdr_buffer *buffer_;
         };

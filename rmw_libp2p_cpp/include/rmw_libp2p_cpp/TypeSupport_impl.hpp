@@ -110,7 +110,7 @@ void serialize_field(
   cdr::WriteCDRBuffer & ser)
 {
   if (!member->is_array_) {
-    // ser << *static_cast<T *>(field);
+    ser << *static_cast<T *>(field);
   } else if (member->array_size_ && !member->is_upper_bound_) {
     // ser.serializeSequence(static_cast<T *>(field), member->array_size_);
   } else {
@@ -127,7 +127,7 @@ void serialize_field(
   cdr::WriteCDRBuffer & ser)
 {
   if (!member->is_array_) {
-    // ser << *static_cast<T *>(field);
+    ser << *static_cast<T *>(field);
   } else if (member->array_size_ && !member->is_upper_bound_) {
     // ser.serializeSequence(static_cast<T *>(field), member->array_size_);
   } else {
@@ -227,7 +227,7 @@ size_t get_submessage_sequence_serialize(
       throw std::runtime_error("sequence overcomes the maximum length");
     }
     // Serialize length
-    // ser << (uint32_t)array_size;
+    ser << (uint32_t)array_size;
     return array_size;
   }
 }
@@ -249,7 +249,7 @@ size_t get_submessage_sequence_serialize(
       throw std::runtime_error("sequence overcomes the maximum length");
     }
     // Serialize length
-    // ser << (uint32_t)array_size;
+    ser << (uint32_t)array_size;
     return array_size;
   }
 }
@@ -271,7 +271,7 @@ bool TypeSupport<MembersType>::serializeROSmessage(
         if (!member->is_array_) {
           // don't cast to bool here because if the bool is
           // uninitialized the random value can't be deserialized
-          // ser << (*static_cast<uint8_t *>(field) ? true : false);
+          ser << (*static_cast<uint8_t *>(field) ? true : false);
         } else {
           serialize_field<bool>(member, field, ser);
         }
@@ -309,10 +309,10 @@ bool TypeSupport<MembersType>::serializeROSmessage(
         serialize_field<uint64_t>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
-        serialize_field<std::string>(member, field, ser);
+        // serialize_field<std::string>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
-        serialize_field<std::u16string>(member, field, ser);
+        // serialize_field<std::u16string>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
         {

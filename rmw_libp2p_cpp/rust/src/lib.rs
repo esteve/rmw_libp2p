@@ -1,11 +1,15 @@
-use async_std::task;
+// use async_std::task;use
 use std::os::raw::c_char;
 use std::os::raw::c_void;
+use tokio::runtime::Handle;
+use tokio::runtime::Runtime;
+use tokio::task;
 use uuid::Uuid;
 // use env_logger::{Builder, Env};
 use deadqueue;
 use futures::channel::oneshot;
 use futures::{future, prelude::*, select};
+// use futures::executor;
 use libp2p::gossipsub::MessageId;
 use libp2p::gossipsub::{
     GossipsubEvent, GossipsubMessage, IdentTopic as Topic, MessageAuthenticity, ValidationMode,
@@ -58,24 +62,41 @@ pub struct Libp2pCustomNode {
     stop_sender: oneshot::Sender<bool>,
     // outgoing_queue: Arc<Mutex<std::collections::VecDeque<u32>>>,
     // outgoing_queue: Arc<deadqueue::limited::Queue<(Topic, Vec<u8>)>>,
-    outgoing_queue: Arc<deadqueue::limited::Queue<u32>>,
+    outgoing_queue: deadqueue::unlimited::Queue<u32>,
     // outgoing_queue: Arc<Mutex<deadqueue::unlimited::Queue<(Topic, Vec<u8>)>>>,
+    value: Mutex<u32>,
+    reactor: Runtime,
 }
 
 pub struct Libp2pCustomPublisher {
     gid: Uuid,
-    node: Arc<Libp2pCustomNode>, // We need to store the Node here to have access to the outgoing queue
+    node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
     topic: Topic,
 }
 
 impl Libp2pCustomNode {
     fn new() -> Self {
+        let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
+        let outgoing_queue = deadqueue::unlimited::Queue::<u32>::new();
+
+        Self {
+            // thread_handle: thread_handle,
+            stop_sender: stop_sender,
+            outgoing_queue: outgoing_queue,
+            value: Mutex::new(1),
+            reactor: Runtime::new().unwrap(),
+        }
+    }
+
+    fn XXX_new() -> Self {
         println!("1 111 INIT NODE RUST=====");
         let keypair = identity::Keypair::generate_ed25519();
 
         let peer_id = PeerId::from(keypair.public());
 
-        let transport = task::block_on(libp2p::development_transport(keypair.clone())).unwrap();
+        let transport = Handle::current()
+            .block_on(libp2p::development_transport(keypair.clone()))
+            .unwrap();
 
         println!("BEFOR SWARM");
 
@@ -98,7 +119,9 @@ impl Libp2pCustomNode {
                 gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
                     .expect("Correct configuration");
 
-            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+            let mdns = Handle::current()
+                .block_on(Mdns::new(MdnsConfig::default()))
+                .unwrap();
 
             let behaviour = RosNetworkBehaviour {
                 gossipsub: gossipsub,
@@ -112,12 +135,12 @@ impl Libp2pCustomNode {
 
         let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
         // let outgoing_queue = Arc::new(deadqueue::limited::Queue::<(Topic, Vec<u8>)>::new(10000));
-        let outgoing_queue = Arc::new(deadqueue::limited::Queue::<u32>::new(10000));
+        let outgoing_queue = deadqueue::unlimited::Queue::<u32>::new();
         // let outgoing_queue = Arc::new(Mutex::new(
         //     deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new(),
         // ));
         // let outgoing_queue = Arc::new(Mutex::new(std::collections::VecDeque::<u32>::new()));
-        let outgoing_queue_clone = Arc::clone(&outgoing_queue);
+        let outgoing_queue_clone = Arc::new(&outgoing_queue);
 
         println!("BEFORE THREAD");
         // let thread_handle = task::spawn(async move {
@@ -185,21 +208,19 @@ impl Libp2pCustomNode {
             // thread_handle: thread_handle,
             stop_sender: stop_sender,
             outgoing_queue: outgoing_queue,
+            value: Mutex::new(1),
+            reactor: Runtime::new().unwrap(),
         }
-    }
-
-    fn hello(&self) {
-        println!("JELLO WORLD");
     }
 
     fn publish_message(&self, topic: Topic, buffer: Vec<u8>) -> () {
         println!("PUTING SOMETHING IN THE QUEUE112211!!!");
-        task::block_on(async {
+        self.reactor.handle().block_on(async {
             println!("PUSH 1");
-            self.outgoing_queue.push(1).await;
-            println!("PUSH 2");
-            self.outgoing_queue.push(2).await;
-            println!("PUSH 3");
+            // self.outgoing_queue.push(1).await;
+            // println!("PUSH 2");
+            // self.outgoing_queue.push(2).await;
+            // println!("PUSH 3");
             // self.outgoing_queue
             //     .push((topic.clone(), buffer.clone()))
             //     .await;
@@ -235,15 +256,13 @@ impl Libp2pCustomNode {
         // self.outgoing_queue.push(1);
         // self.outgoing_queue.lock().unwrap().push_back(1);
         // self.outgoing_queue.pop();
-        let val = task::block_on(async { self.outgoing_queue.pop().await });
+        let val = self.reactor.handle().block_on(async { self.outgoing_queue.pop().await });
         println!("AFTER POP");
     }
 }
 
 impl Libp2pCustomPublisher {
-    fn new(libp2p2_custom_node: Arc<Libp2pCustomNode>, topic_str: &str) -> Self {
-        libp2p2_custom_node.hello();
-
+    fn new(libp2p2_custom_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
         Self {
             gid: Uuid::new_v4(),
             node: libp2p2_custom_node,
@@ -252,10 +271,23 @@ impl Libp2pCustomPublisher {
     }
 
     fn publish(&self, buffer: Vec<u8>) -> () {
+        let libp2p2_custom_node = unsafe {
+            assert!(!self.node.is_null());
+            &mut *self.node
+        };
+    
         println!("PUBLISHING!!!!!!!");
-        task::block_on(async {
-            self.node.outgoing_queue.push(1234).await;
-        });
+        // let myq = deadqueue::unlimited::Queue::<u32>::new();
+        println!("CRE PUBLISHING!!!!!!!");
+        // myq.push(1234);
+        println!("CRE PUASD!!!!!!!");
+        // self.node.print_value();
+        // self.node.increase_value();
+        // self.node.print_value();
+        // task::block_on(async {
+        //     self.node.outgoing_queue.push(1234).await;
+        // });
+        println!("PUBLISHING 2!!!!!!!");
         // self.node.publish_message(self.topic.clone(), buffer);
     }
 }
@@ -265,19 +297,15 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
 ) -> *mut Libp2pCustomPublisher {
-    let libp2p2_custom_node = unsafe {
-        assert!(!ptr_node.is_null());
-        Box::from_raw(ptr_node)
-    };
     let topic_str = unsafe {
         assert!(!topic_str_ptr.is_null());
         CStr::from_ptr(topic_str_ptr)
     };
 
-    libp2p2_custom_node.hello();
+    // let node = Arc::from(libp2p2_custom_node);
 
     let libp2p2_custom_publisher =
-        Libp2pCustomPublisher::new(Arc::from(libp2p2_custom_node), topic_str.to_str().unwrap());
+        Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
     Box::into_raw(Box::new(libp2p2_custom_publisher))
 }
 
@@ -326,7 +354,9 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
 
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
-    Box::into_raw(Box::new(Libp2pCustomNode::new()))
+    let ptr_node = Box::into_raw(Box::new(Libp2pCustomNode::new()));
+    println!("CREAT NODE PTR: {:p}", ptr_node);
+    ptr_node
 }
 
 #[no_mangle]
@@ -335,11 +365,11 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
         return;
     }
     let node = unsafe { Box::from_raw(ptr) };
-    task::block_on(async {
-        node.stop_sender.send(true).unwrap();
+    // node.reactor.handle().block_on(async {
+    //     node.stop_sender.send(true).unwrap();
 
-        // node.thread_handle.await
-    });
+    //     // node.thread_handle.await
+    // });
 }
 
 #[no_mangle]

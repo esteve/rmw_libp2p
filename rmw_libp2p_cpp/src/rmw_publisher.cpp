@@ -87,7 +87,7 @@ rmw_create_publisher(
     return nullptr;
   }
 
-  if (!node_data->node_) {
+  if (!node_data->node_handle_) {
     RMW_SET_ERROR_MSG("node handle is null");
     return nullptr;
   }
@@ -116,10 +116,10 @@ rmw_create_publisher(
 
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
-  if (!_get_registered_type(node_data->node_, type_name, &info->type_support_)) {
+  if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
     info->type_support_ = _create_message_type_support(type_support->data,
         info->typesupport_identifier_);
-    _register_type(node_data->node_, info->type_support_, info->typesupport_identifier_);
+    _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
 
   info->qos_ = *qos_policies;
@@ -128,7 +128,7 @@ rmw_create_publisher(
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
-  info->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_, topic_name);
+  info->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name);
   if (!info->publisher_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p publisher");
     goto fail;

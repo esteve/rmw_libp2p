@@ -24,7 +24,7 @@
 
 typedef struct CustomNodeInfo
 {
-  rs_libp2p_custom_node_t * node_;
+  rs_libp2p_custom_node_t * node_handle_;
   rmw_guard_condition_t * graph_guard_condition_;
   std::mutex publishers_mutex_;
   std::map<std::string, std::set<CustomPublisherInfo *>> publishers_;

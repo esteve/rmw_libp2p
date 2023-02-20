@@ -104,8 +104,8 @@ rmw_create_node(
     goto fail;
   }
 
-  node_impl->node_ = rs_libp2p_custom_node_new(); 
-  if (!node_impl->node_) {
+  node_impl->node_handle_ = rs_libp2p_custom_node_new(); 
+  if (!node_impl->node_handle_) {
     RMW_SET_ERROR_MSG("failed to allocate libp2p node");
     goto fail;
   }
@@ -146,8 +146,8 @@ rmw_destroy_node(
 
   auto impl = static_cast<CustomNodeInfo *>(node->data);
   if (impl) {
-    if (impl->node_) {
-      rs_libp2p_custom_node_free(impl->node_);
+    if (impl->node_handle_) {
+      rs_libp2p_custom_node_free(impl->node_handle_);
     }
     if (impl->graph_guard_condition_) {
       rmw_ret_t ret = rmw_destroy_guard_condition(impl->graph_guard_condition_);

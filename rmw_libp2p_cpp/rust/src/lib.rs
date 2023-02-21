@@ -116,9 +116,8 @@ impl Libp2pCustomNode {
                     },
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop().fuse() => {
-                        println!("POPPING FROM QUEUE: {} = {:?}", topic, buffer);
+                        println!("Publishing message on topic {} : {:?}", topic, buffer);
                         swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone());
-                        println!("AFTER PUBLISH FROM QUEUE: {} = {:?}", topic, buffer);
                     },
 
                     event = swarm.select_next_some() => match event {
@@ -174,131 +173,6 @@ impl Libp2pCustomNode {
         }
     }
 
-    // fn XXX_new() -> Self {
-    //     println!("1 111 INIT NODE RUST=====");
-    //     let keypair = identity::Keypair::generate_ed25519();
-
-    //     let peer_id = PeerId::from(keypair.public());
-
-    //     let transport = Handle::current()
-    //         .block_on(libp2p::development_transport(keypair.clone()))
-    //         .unwrap();
-
-    //     println!("BEFOR SWARM");
-
-    //     let mut swarm = {
-    //         let message_id_fn = |message: &GossipsubMessage| {
-    //             let mut s = DefaultHasher::new();
-    //             message.data.hash(&mut s);
-    //             MessageId::from(s.finish().to_string())
-    //         };
-
-    //         let gossipsub_config = gossipsub::GossipsubConfigBuilder::default()
-    //             .heartbeat_interval(Duration::from_secs(10))
-    //             .validation_mode(ValidationMode::Strict)
-    //             .message_id_fn(message_id_fn)
-    //             // same content will be propagated.
-    //             .build()
-    //             .expect("Valid config");
-
-    //         let gossipsub: gossipsub::Gossipsub =
-    //             gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
-    //                 .expect("Correct configuration");
-
-    //         let mdns = Handle::current()
-    //             .block_on(Mdns::new(MdnsConfig::default()))
-    //             .unwrap();
-
-    //         let behaviour = RosNetworkBehaviour {
-    //             gossipsub: gossipsub,
-    //             mdns: mdns,
-    //         };
-
-    //         libp2p::Swarm::new(transport, behaviour, peer_id)
-    //     };
-
-    //     println!("SWARM END");
-
-    //     let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
-    //     // let outgoing_queue = Arc::new(deadqueue::limited::Queue::<(Topic, Vec<u8>)>::new(10000));
-    //     let outgoing_queue = deadqueue::unlimited::Queue::<u32>::new();
-    //     // let outgoing_queue = Arc::new(Mutex::new(
-    //     //     deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new(),
-    //     // ));
-    //     // let outgoing_queue = Arc::new(Mutex::new(std::collections::VecDeque::<u32>::new()));
-    //     let outgoing_queue_clone = Arc::new(&outgoing_queue);
-
-    //     println!("BEFORE THREAD");
-    //     // let thread_handle = task::spawn(async move {
-    //     //     loop {
-    //     //         println!("1213 LOOOP===");
-    //     //         select! {
-    //     //             // use a oneshot future that will be triggered to stop the swarm
-    //     //             // select! will wait on any future
-    //     //             _ = stop_receiver => {
-    //     //                 println!("Exit loop");
-    //     //             },
-    //     //             // pop messages from the queue and publish them to the network
-    //     //             // (topic, buffer) = outgoing_queue_clone.pop().fuse() => {
-    //     //             val = outgoing_queue_clone.pop().fuse() => {
-    //     //                     // swarm.behaviour_mut().gossipsub.publish(topic, buffer);
-    //     //                 println!("POPPING FROM QUEUE====1223");
-    //     //             },
-    //     //             event = swarm.select_next_some() => match event {
-    //     //                 SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
-    //     //                     propagation_source: peer_id,
-    //     //                     message_id: id,
-    //     //                     message,
-    //     //                 })) => {
-    //     //                     println!(
-    //     //                         "Got message: {} with id: {} from peer: {:?}",
-    //     //                         String::from_utf8_lossy(&message.data),
-    //     //                         id,
-    //     //                         peer_id
-    //     //                     );
-    //     //                 }
-    //     //                 SwarmEvent::NewListenAddr { address, .. } => {
-    //     //                     println!("Listening on {:?}", address);
-    //     //                 }
-    //     //                 SwarmEvent::Behaviour(OutEvent::Mdns(
-    //     //                     MdnsEvent::Discovered(list)
-    //     //                 )) => {
-    //     //                     for (peer, _) in list {
-    //     //                         swarm
-    //     //                             .behaviour_mut()
-    //     //                             .gossipsub
-    //     //                             .add_explicit_peer(&peer);
-    //     //                     }
-    //     //                 }
-    //     //                 SwarmEvent::Behaviour(OutEvent::Mdns(MdnsEvent::Expired(
-    //     //                     list
-    //     //                 ))) => {
-    //     //                     for (peer, _) in list {
-    //     //                         if !swarm.behaviour_mut().mdns.has_node(&peer) {
-    //     //                             swarm
-    //     //                                 .behaviour_mut()
-    //     //                                 .gossipsub
-    //     //                                 .remove_explicit_peer(&peer);
-    //     //                         }
-    //     //                     }
-    //     //                 },
-    //     //                 _ => {
-    //     //                     println!("UNKNOWN EVENT");
-    //     //                 }
-    //     //             }
-    //     //         }
-    //     //     }
-    //     // });
-
-    //     Self {
-    //         // thread_handle: thread_handle,
-    //         stop_sender: stop_sender,
-    //         outgoing_queue: outgoing_queue,
-    //         value: Mutex::new(1),
-    //         reactor: Runtime::new().unwrap(),
-    //     }
-    // }
-
     fn publish_message(&self, topic: Topic, buffer: Vec<u8>) -> () {
         self.outgoing_queue.push((topic, buffer));
     }
@@ -332,8 +206,6 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
         assert!(!topic_str_ptr.is_null());
         CStr::from_ptr(topic_str_ptr)
     };
-
-    // let node = Arc::from(libp2p2_custom_node);
 
     let libp2p2_custom_publisher =
         Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());

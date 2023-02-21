@@ -15,8 +15,6 @@
 #ifndef RMW_LIBP2P_CPP__TYPESUPPORT_IMPL_HPP_
 #define RMW_LIBP2P_CPP__TYPESUPPORT_IMPL_HPP_
 
-#include <iostream>
-
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -263,14 +261,11 @@ bool TypeSupport<MembersType>::serializeROSmessage(
   assert(ros_message);
   assert(members);
 
-  std::cout << "SERIALIZING MEMBER COUNT: " << members->member_count_;
-
   ser << members->member_count_;
 
   for (uint32_t i = 0; i < members->member_count_; ++i) {
     const auto member = members->members_ + i;
     void * field = const_cast<char *>(static_cast<const char *>(ros_message)) + member->offset_;
-    std::cout << "SERIALIZING MEMBER NUMBER: " << i << " TYPE: " << static_cast<uint32_t>(member->type_id_) << std::endl;
     switch (member->type_id_) {
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN:
         if (!member->is_array_) {
@@ -302,7 +297,6 @@ bool TypeSupport<MembersType>::serializeROSmessage(
         serialize_field<uint16_t>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32:
-        std::cout << "SERIALIZING INT32: " << *static_cast<int32_t *>(field) << std::endl;
         serialize_field<int32_t>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_UINT32:

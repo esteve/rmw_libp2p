@@ -54,8 +54,6 @@ rmw_publish(
   auto info = static_cast<CustomPublisherInfo *>(publisher->data);
   assert(info);
 
-  std::cout << "====== PUBLISHER" << std::endl;
-
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
   if (_serialize_ros_message(ros_message, ser, info->type_support_,

@@ -20,8 +20,6 @@ extern "C"
 {
 #endif
 
-  typedef struct rs_libp2p_facade rs_libp2p_facade_t;
-
   typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
   typedef struct rs_libp2p_custom_publisher rs_libp2p_custom_publisher_t;
@@ -143,9 +141,6 @@ extern "C"
 
   extern void
   rs_libp2p_cdr_buffer_write_double(rs_libp2p_cdr_buffer_t *, double);
-
-  extern rs_libp2p_facade_t *
-  rs_libp2p_facade_new(void);
 
 #ifdef __cplusplus
 }

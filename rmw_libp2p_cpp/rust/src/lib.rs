@@ -14,12 +14,11 @@ use libp2p::mdns::{Mdns, MdnsConfig, MdnsEvent};
 use libp2p::{gossipsub, identity, swarm::SwarmEvent, Multiaddr, NetworkBehaviour, PeerId};
 use std::boxed::Box;
 use std::collections::hash_map::DefaultHasher;
-use std::error::Error;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::hash::{Hash, Hasher};
 use std::io::Cursor;
-use std::sync::{Arc, Mutex, Weak};
+use std::sync::Arc;
 use std::time::Duration;
 
 #[derive(NetworkBehaviour)]
@@ -54,8 +53,8 @@ impl From<GossipsubEvent> for OutEvent {
 // }
 
 pub struct Libp2pCustomNode {
-    thread_handle: task::JoinHandle<()>,
-    stop_sender: oneshot::Sender<bool>,
+    thread_handle: Option<task::JoinHandle<()>>,
+    stop_sender: Option<oneshot::Sender<bool>>,
     outgoing_queue: Arc<deadqueue::unlimited::Queue<(Topic, Vec<u8>)>>,
 }
 
@@ -66,44 +65,46 @@ pub struct Libp2pCustomPublisher {
 }
 
 impl Libp2pCustomNode {
-    fn new() -> Self {
-        let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
-        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new());
-
+    fn create_swarm() -> libp2p::Swarm<RosNetworkBehaviour> {
         let keypair = identity::Keypair::generate_ed25519();
 
         let peer_id = PeerId::from(keypair.public());
 
         let transport = task::block_on(libp2p::development_transport(keypair.clone())).unwrap();
 
-        let mut swarm = {
-            let message_id_fn = |message: &GossipsubMessage| {
-                let mut s = DefaultHasher::new();
-                message.data.hash(&mut s);
-                MessageId::from(s.finish().to_string())
-            };
-
-            let gossipsub_config = gossipsub::GossipsubConfigBuilder::default()
-                .heartbeat_interval(Duration::from_secs(10))
-                .validation_mode(ValidationMode::Strict)
-                .message_id_fn(message_id_fn)
-                // same content will be propagated.
-                .build()
-                .expect("Valid config");
-
-            let gossipsub: gossipsub::Gossipsub =
-                gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
-                    .expect("Correct configuration");
-
-            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
-
-            let behaviour = RosNetworkBehaviour {
-                gossipsub: gossipsub,
-                mdns: mdns,
-            };
-
-            libp2p::Swarm::new(transport, behaviour, peer_id)
+        let message_id_fn = |message: &GossipsubMessage| {
+            let mut s = DefaultHasher::new();
+            message.data.hash(&mut s);
+            MessageId::from(s.finish().to_string())
         };
+
+        let gossipsub_config = gossipsub::GossipsubConfigBuilder::default()
+            .heartbeat_interval(Duration::from_secs(10))
+            .validation_mode(ValidationMode::Strict)
+            .message_id_fn(message_id_fn)
+            // same content will be propagated.
+            .build()
+            .expect("Valid config");
+
+        let gossipsub: gossipsub::Gossipsub =
+            gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
+                .expect("Correct configuration");
+
+        let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+
+        let behaviour = RosNetworkBehaviour {
+            gossipsub: gossipsub,
+            mdns: mdns,
+        };
+
+        libp2p::Swarm::new(transport, behaviour, peer_id)
+    }
+
+    fn new() -> Self {
+        let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
+        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new());
+
+        let mut swarm = Self::create_swarm();
 
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
         let thread_handle = task::spawn(async move {
@@ -113,11 +114,14 @@ impl Libp2pCustomNode {
                     // select! will wait on any future
                     _ = stop_receiver => {
                         println!("Exit loop");
+                        break;
                     },
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop().fuse() => {
                         println!("Publishing message on topic {} : {:?}", topic, buffer);
-                        swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone());
+                        if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
+                            println!("Publish error: {e:?}");
+                        }
                     },
 
                     event = swarm.select_next_some() => match event {
@@ -167,14 +171,27 @@ impl Libp2pCustomNode {
         });
 
         Self {
-            thread_handle: thread_handle,
-            stop_sender: stop_sender,
+            thread_handle: Some(thread_handle),
+            stop_sender: Some(stop_sender),
             outgoing_queue: outgoing_queue,
         }
     }
 
     fn publish_message(&self, topic: Topic, buffer: Vec<u8>) -> () {
         self.outgoing_queue.push((topic, buffer));
+    }
+}
+
+impl Drop for Libp2pCustomNode {
+    fn drop(&mut self) {
+        if let Some(stop_sender) = self.stop_sender.take() {
+            let _ = stop_sender.send(true);
+        }
+        task::block_on(async {
+            if let Some(thread_handle) = self.thread_handle.take() {
+                let _ = thread_handle.await;
+            }
+        });
     }
 }
 
@@ -217,7 +234,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublishe
     if ptr.is_null() {
         return;
     }
-    let publisher = unsafe { Box::from_raw(ptr) };
+    let _ = unsafe { Box::from_raw(ptr) };
 }
 
 #[no_mangle]
@@ -264,11 +281,7 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
     if ptr.is_null() {
         return;
     }
-    let node = unsafe { Box::from_raw(ptr) };
-    task::block_on(async {
-        node.stop_sender.send(true).unwrap();
-        node.thread_handle.await
-    });
+    let _ = unsafe { Box::from_raw(ptr) };
 }
 
 #[no_mangle]

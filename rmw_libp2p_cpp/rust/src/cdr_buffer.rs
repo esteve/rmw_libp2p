@@ -4,7 +4,7 @@ use std::os::raw::c_char;
 
 #[no_mangle]
 pub extern "C" fn rs_libp2p_cdr_buffer_new() -> *mut Cursor<Vec<u8>> {
-    let libp2p2_cdr_buffer = Cursor::new(Vec::new());
+    let libp2p2_cdr_buffer = Cursor::new(Vec::<u8>::new());
     Box::into_raw(Box::new(libp2p2_cdr_buffer))
 }
 

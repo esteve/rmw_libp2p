@@ -1,7 +1,8 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use std::io::Cursor;
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use libp2p::gossipsub::{
     GossipsubEvent, GossipsubMessage, IdentTopic, MessageAuthenticity, MessageId, ValidationMode,
@@ -167,7 +168,21 @@ impl Libp2pCustomNode {
     }
 
     pub(crate) fn publish_message(&self, topic: IdentTopic, buffer: Vec<u8>) -> () {
-        self.outgoing_queue.push((topic, buffer));
+        let mut out_buffer = Vec::<u8>::new();
+
+        let start = SystemTime::now();
+        let since_the_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards");
+
+        let secs = since_the_epoch.as_secs();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(&mut out_buffer, &secs, cdr::Infinite).unwrap();
+
+        let usecs = since_the_epoch.subsec_micros();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(&mut out_buffer, &usecs, cdr::Infinite).unwrap();
+
+        out_buffer.extend(buffer);
+        self.outgoing_queue.push((topic, out_buffer));
     }
 }
 

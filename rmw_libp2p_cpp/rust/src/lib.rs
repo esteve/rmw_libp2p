@@ -1,25 +1,30 @@
-use async_std::task;
+use std::boxed::Box;
+use std::collections::hash_map::DefaultHasher;
+use std::ffi::{CStr, CString};
+use std::hash::{Hash, Hasher};
+use std::io::Cursor;
 use std::os::raw::c_char;
 use std::os::raw::c_void;
+use std::sync::Arc;
+use std::time::Duration;
+
 use uuid::Uuid;
 // use env_logger::{Builder, Env};
+
 use deadqueue;
-use futures::channel::oneshot;
-use futures::{future, prelude::*, select};
-use libp2p::gossipsub::MessageId;
+
+use futures_util::{FutureExt, StreamExt};
+
 use libp2p::gossipsub::{
-    GossipsubEvent, GossipsubMessage, IdentTopic as Topic, MessageAuthenticity, ValidationMode,
+    GossipsubEvent, GossipsubMessage, IdentTopic as Topic, MessageAuthenticity, MessageId,
+    ValidationMode,
 };
 use libp2p::mdns::{Mdns, MdnsConfig, MdnsEvent};
 use libp2p::{gossipsub, identity, swarm::SwarmEvent, Multiaddr, NetworkBehaviour, PeerId};
-use std::boxed::Box;
-use std::collections::hash_map::DefaultHasher;
-use std::ffi::CStr;
-use std::ffi::CString;
-use std::hash::{Hash, Hasher};
-use std::io::Cursor;
-use std::sync::Arc;
-use std::time::Duration;
+
+use tokio::runtime::Runtime;
+use tokio::sync::oneshot;
+use tokio::{select, task};
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -56,6 +61,7 @@ pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_sender: Option<oneshot::Sender<bool>>,
     outgoing_queue: Arc<deadqueue::unlimited::Queue<(Topic, Vec<u8>)>>,
+    reactor: Arc<Runtime>,
 }
 
 pub struct Libp2pCustomPublisher {
@@ -65,12 +71,14 @@ pub struct Libp2pCustomPublisher {
 }
 
 impl Libp2pCustomNode {
-    fn create_swarm() -> libp2p::Swarm<RosNetworkBehaviour> {
+    fn create_swarm(reactor: &Runtime) -> libp2p::Swarm<RosNetworkBehaviour> {
         let keypair = identity::Keypair::generate_ed25519();
 
         let peer_id = PeerId::from(keypair.public());
 
-        let transport = task::block_on(libp2p::development_transport(keypair.clone())).unwrap();
+        let transport = reactor
+            .block_on(libp2p::development_transport(keypair.clone()))
+            .unwrap();
 
         let message_id_fn = |message: &GossipsubMessage| {
             let mut s = DefaultHasher::new();
@@ -90,7 +98,7 @@ impl Libp2pCustomNode {
             gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
                 .expect("Correct configuration");
 
-        let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+        let mdns = reactor.block_on(Mdns::new(MdnsConfig::default())).unwrap();
 
         let behaviour = RosNetworkBehaviour {
             gossipsub: gossipsub,
@@ -101,18 +109,21 @@ impl Libp2pCustomNode {
     }
 
     fn new() -> Self {
-        let (stop_sender, mut stop_receiver) = oneshot::channel::<bool>();
+        let reactor = Arc::new(Runtime::new().unwrap());
+
+        let (stop_sender, stop_receiver) = tokio::sync::oneshot::channel::<bool>();
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(Topic, Vec<u8>)>::new());
 
-        let mut swarm = Self::create_swarm();
+        let mut swarm = Self::create_swarm(&reactor);
 
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
-        let thread_handle = task::spawn(async move {
+        let mut stop_receiver = Some(stop_receiver);
+        let thread_handle = reactor.spawn(async move {
             loop {
                 select! {
                     // use a oneshot future that will be triggered to stop the swarm
                     // select! will wait on any future
-                    _ = stop_receiver => {
+                    _ = stop_receiver.as_mut().unwrap().fuse() => {
                         println!("Exit loop");
                         break;
                     },
@@ -174,6 +185,7 @@ impl Libp2pCustomNode {
             thread_handle: Some(thread_handle),
             stop_sender: Some(stop_sender),
             outgoing_queue: outgoing_queue,
+            reactor: reactor,
         }
     }
 
@@ -187,7 +199,7 @@ impl Drop for Libp2pCustomNode {
         if let Some(stop_sender) = self.stop_sender.take() {
             let _ = stop_sender.send(true);
         }
-        task::block_on(async {
+        self.reactor.block_on(async {
             if let Some(thread_handle) = self.thread_handle.take() {
                 let _ = thread_handle.await;
             }

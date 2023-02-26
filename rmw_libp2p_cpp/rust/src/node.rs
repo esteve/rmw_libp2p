@@ -1,6 +1,5 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::io::Cursor;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -45,7 +44,7 @@ pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_sender: Option<oneshot::Sender<bool>>,
     outgoing_queue: Arc<deadqueue::unlimited::Queue<(IdentTopic, Vec<u8>)>>,
-    reactor: Arc<Runtime>,
+    reactor: Runtime,
 }
 
 impl Libp2pCustomNode {
@@ -87,7 +86,7 @@ impl Libp2pCustomNode {
     }
 
     fn new() -> Self {
-        let reactor = Arc::new(Runtime::new().unwrap());
+        let reactor = Runtime::new().unwrap();
 
         let (stop_sender, stop_receiver) = tokio::sync::oneshot::channel::<bool>();
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(IdentTopic, Vec<u8>)>::new());

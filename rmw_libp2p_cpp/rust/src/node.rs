@@ -88,19 +88,19 @@ impl Libp2pCustomNode {
     fn new() -> Self {
         let reactor = Runtime::new().unwrap();
 
-        let (stop_sender, stop_receiver) = tokio::sync::oneshot::channel::<bool>();
+        let (stop_sender, mut stop_receiver) = tokio::sync::oneshot::channel::<bool>();
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(IdentTopic, Vec<u8>)>::new());
 
         let mut swarm = Self::create_swarm(&reactor);
 
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
-        let mut stop_receiver = Some(stop_receiver);
+
         let thread_handle = reactor.spawn(async move {
             loop {
                 select! {
                     // use a oneshot future that will be triggered to stop the swarm
                     // select! will wait on any future
-                    _ = stop_receiver.as_mut().unwrap().fuse() => {
+                    _ = &mut stop_receiver => {
                         println!("Exit loop");
                         break;
                     },

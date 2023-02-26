@@ -13,7 +13,7 @@ use tokio::runtime::Runtime;
 use tokio::sync::oneshot;
 use tokio::{select, task};
 
-use futures_util::{FutureExt, StreamExt};
+use futures_util::StreamExt;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -105,7 +105,7 @@ impl Libp2pCustomNode {
                         break;
                     },
                     // pop messages from the queue and publish them to the network
-                    (topic, buffer) = outgoing_queue_clone.pop().fuse() => {
+                    (topic, buffer) = outgoing_queue_clone.pop() => {
                         println!("Publishing message on topic {} : {:?}", topic, buffer);
                         if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
                             println!("Publish error: {e:?}");

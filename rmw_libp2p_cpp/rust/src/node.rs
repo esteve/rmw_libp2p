@@ -3,11 +3,7 @@ use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use libp2p::gossipsub::{
-    GossipsubEvent, GossipsubMessage, IdentTopic, MessageAuthenticity, MessageId, ValidationMode,
-};
-use libp2p::mdns::{Mdns, MdnsConfig, MdnsEvent};
-use libp2p::{gossipsub, identity, swarm::SwarmEvent, NetworkBehaviour, PeerId};
+use libp2p::{gossipsub, identity, mdns, swarm::NetworkBehaviour, swarm::SwarmEvent, PeerId};
 
 use tokio::runtime::Runtime;
 use tokio::sync::oneshot;
@@ -18,24 +14,24 @@ use futures_util::StreamExt;
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
 struct RosNetworkBehaviour {
-    gossipsub: gossipsub::Gossipsub,
-    mdns: Mdns,
+    gossipsub: gossipsub::Behaviour,
+    mdns: mdns::tokio::Behaviour,
 }
 
 #[derive(Debug)]
 enum OutEvent {
-    Gossipsub(GossipsubEvent),
-    Mdns(MdnsEvent),
+    Gossipsub(gossipsub::Event),
+    Mdns(mdns::Event),
 }
 
-impl From<MdnsEvent> for OutEvent {
-    fn from(v: MdnsEvent) -> Self {
+impl From<mdns::Event> for OutEvent {
+    fn from(v: mdns::Event) -> Self {
         Self::Mdns(v)
     }
 }
 
-impl From<GossipsubEvent> for OutEvent {
-    fn from(v: GossipsubEvent) -> Self {
+impl From<gossipsub::Event> for OutEvent {
+    fn from(v: gossipsub::Event) -> Self {
         Self::Gossipsub(v)
     }
 }
@@ -43,59 +39,63 @@ impl From<GossipsubEvent> for OutEvent {
 pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_sender: Option<oneshot::Sender<bool>>,
-    outgoing_queue: Arc<deadqueue::unlimited::Queue<(IdentTopic, Vec<u8>)>>,
+    outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
     reactor: Runtime,
 }
 
 impl Libp2pCustomNode {
-    fn create_swarm(reactor: &Runtime) -> libp2p::Swarm<RosNetworkBehaviour> {
+    fn create_swarm() -> libp2p::Swarm<RosNetworkBehaviour> {
         let keypair = identity::Keypair::generate_ed25519();
 
         let peer_id = PeerId::from(keypair.public());
 
-        let transport = reactor
-            .block_on(libp2p::development_transport(keypair.clone()))
-            .unwrap();
+        let transport = libp2p::tokio_development_transport(keypair.clone()).unwrap();
 
-        let message_id_fn = |message: &GossipsubMessage| {
+        let message_id_fn = |message: &gossipsub::Message| {
             let mut s = DefaultHasher::new();
             message.data.hash(&mut s);
-            MessageId::from(s.finish().to_string())
+            gossipsub::MessageId::from(s.finish().to_string())
         };
 
-        let gossipsub_config = gossipsub::GossipsubConfigBuilder::default()
+        let gossipsub_config = gossipsub::ConfigBuilder::default()
             .heartbeat_interval(Duration::from_secs(10))
-            .validation_mode(ValidationMode::Strict)
+            .validation_mode(gossipsub::ValidationMode::Strict)
             .message_id_fn(message_id_fn)
             // same content will be propagated.
             .build()
             .expect("Valid config");
 
-        let gossipsub: gossipsub::Gossipsub =
-            gossipsub::Gossipsub::new(MessageAuthenticity::Signed(keypair), gossipsub_config)
-                .expect("Correct configuration");
+        let gossipsub: gossipsub::Behaviour = gossipsub::Behaviour::new(
+            gossipsub::MessageAuthenticity::Signed(keypair),
+            gossipsub_config,
+        )
+        .expect("Correct configuration");
 
-        let mdns = reactor.block_on(Mdns::new(MdnsConfig::default())).unwrap();
+        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), peer_id).unwrap();
 
         let behaviour = RosNetworkBehaviour {
             gossipsub: gossipsub,
             mdns: mdns,
         };
 
-        libp2p::Swarm::new(transport, behaviour, peer_id)
+        libp2p::Swarm::with_tokio_executor(transport, behaviour, peer_id)
     }
 
     fn new() -> Self {
         let reactor = Runtime::new().unwrap();
+        let _guard = reactor.enter();
 
         let (stop_sender, mut stop_receiver) = tokio::sync::oneshot::channel::<bool>();
-        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(IdentTopic, Vec<u8>)>::new());
+        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(
+            gossipsub::IdentTopic,
+            Vec<u8>,
+        )>::new());
 
-        let mut swarm = Self::create_swarm(&reactor);
+        let mut swarm = Self::create_swarm();
 
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
 
-        let thread_handle = reactor.spawn(async move {
+        let thread_handle = tokio::spawn(async move {
             loop {
                 select! {
                     // use a oneshot future that will be triggered to stop the swarm
@@ -113,7 +113,7 @@ impl Libp2pCustomNode {
                     },
 
                     event = swarm.select_next_some() => match event {
-                        SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
+                        SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
                             propagation_source: peer_id,
                             message_id: id,
                             message,
@@ -129,7 +129,7 @@ impl Libp2pCustomNode {
                             println!("Listening on {:?}", address);
                         }
                         SwarmEvent::Behaviour(OutEvent::Mdns(
-                            MdnsEvent::Discovered(list)
+                            mdns::Event::Discovered(list)
                         )) => {
                             for (peer, _) in list {
                                 swarm
@@ -138,7 +138,7 @@ impl Libp2pCustomNode {
                                     .add_explicit_peer(&peer);
                             }
                         }
-                        SwarmEvent::Behaviour(OutEvent::Mdns(MdnsEvent::Expired(
+                        SwarmEvent::Behaviour(OutEvent::Mdns(mdns::Event::Expired(
                             list
                         ))) => {
                             for (peer, _) in list {
@@ -166,7 +166,7 @@ impl Libp2pCustomNode {
         }
     }
 
-    pub(crate) fn publish_message(&self, topic: IdentTopic, buffer: Vec<u8>) -> () {
+    pub(crate) fn publish_message(&self, topic: gossipsub::IdentTopic, buffer: Vec<u8>) -> () {
         let mut out_buffer = Vec::<u8>::new();
 
         let start = SystemTime::now();

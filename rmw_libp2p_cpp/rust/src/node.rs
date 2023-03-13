@@ -93,6 +93,8 @@ impl Libp2pCustomNode {
 
         let mut swarm = Self::create_swarm();
 
+        swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap()).unwrap();
+
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
 
         let thread_handle = tokio::spawn(async move {
@@ -104,6 +106,7 @@ impl Libp2pCustomNode {
                         println!("Exit loop");
                         break;
                     },
+
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
                         println!("Publishing message on topic {} : {:?}", topic, buffer);
@@ -153,7 +156,7 @@ impl Libp2pCustomNode {
                         _ => {
                             println!("UNKNOWN EVENT");
                         }
-                    }
+                    },
                 }
             }
         });

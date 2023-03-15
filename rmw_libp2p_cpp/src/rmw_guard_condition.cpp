@@ -20,7 +20,7 @@
 #include "rmw_libp2p_cpp/identifier.hpp"
 
 #include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
-#include "types/guard_condition.hpp"
+#include "rmw_libp2p_cpp/guard_condition.hpp"
 
 extern "C"
 {

@@ -3,13 +3,14 @@ use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use libp2p::{gossipsub, identity, mdns, swarm::NetworkBehaviour, swarm::SwarmEvent, PeerId};
+use libp2p::{
+    futures::StreamExt, gossipsub, identity, mdns, swarm::NetworkBehaviour, swarm::SwarmEvent,
+    PeerId,
+};
 
 use tokio::runtime::Runtime;
-use tokio::sync::oneshot;
+use tokio::sync::Notify;
 use tokio::{select, task};
-
-use futures_util::StreamExt;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
@@ -38,7 +39,7 @@ impl From<gossipsub::Event> for OutEvent {
 
 pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
-    stop_sender: Option<oneshot::Sender<bool>>,
+    stop_notify: Arc<Notify>,
     outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
     reactor: Runtime,
 }
@@ -85,7 +86,7 @@ impl Libp2pCustomNode {
         let reactor = Runtime::new().unwrap();
         let _guard = reactor.enter();
 
-        let (stop_sender, mut stop_receiver) = tokio::sync::oneshot::channel::<bool>();
+        let stop_notify = Arc::new(Notify::new());
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(
             gossipsub::IdentTopic,
             Vec<u8>,
@@ -93,8 +94,11 @@ impl Libp2pCustomNode {
 
         let mut swarm = Self::create_swarm();
 
-        swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap()).unwrap();
+        swarm
+            .listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap())
+            .unwrap();
 
+        let stop_notify_clone = Arc::clone(&stop_notify);
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
 
         let thread_handle = tokio::spawn(async move {
@@ -102,7 +106,7 @@ impl Libp2pCustomNode {
                 select! {
                     // use a oneshot future that will be triggered to stop the swarm
                     // select! will wait on any future
-                    _ = &mut stop_receiver => {
+                    _ = stop_notify_clone.notified() => {
                         println!("Exit loop");
                         break;
                     },
@@ -122,8 +126,8 @@ impl Libp2pCustomNode {
                             message,
                         })) => {
                             println!(
-                                "Got message: {} with id: {} from peer: {:?}",
-                                String::from_utf8_lossy(&message.data),
+                                "Got message: {:?} with id: {} from peer: {:?}",
+                                message.data,
                                 id,
                                 peer_id
                             );
@@ -163,7 +167,7 @@ impl Libp2pCustomNode {
 
         Self {
             thread_handle: Some(thread_handle),
-            stop_sender: Some(stop_sender),
+            stop_notify: stop_notify,
             outgoing_queue: outgoing_queue,
             reactor: reactor,
         }
@@ -190,9 +194,7 @@ impl Libp2pCustomNode {
 
 impl Drop for Libp2pCustomNode {
     fn drop(&mut self) {
-        if let Some(stop_sender) = self.stop_sender.take() {
-            let _ = stop_sender.send(true);
-        }
+        self.stop_notify.notify_waiters();
         self.reactor.block_on(async {
             if let Some(thread_handle) = self.thread_handle.take() {
                 let _ = thread_handle.await;

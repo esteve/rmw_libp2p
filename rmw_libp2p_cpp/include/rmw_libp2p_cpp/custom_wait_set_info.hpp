@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_
-#define RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_
+#ifndef TYPES__CUSTOM_WAIT_SET_INFO_HPP_
+#define TYPES__CUSTOM_WAIT_SET_INFO_HPP_
 
-class CustomNode
+#include <condition_variable>
+#include <mutex>
+
+typedef struct CustomWaitsetInfo
 {
-    void *peer_id_;
+  std::condition_variable condition;
+  std::mutex condition_mutex;
+} CustomWaitsetInfo;
 
-public:
-    CustomNode();
-    ~CustomNode();
-    void display();
-};
-
-#endif  // RMW_LIBP2P_CPP__TYPES__CUSTOM_NODE_HPP_
+#endif  // TYPES__CUSTOM_WAIT_SET_INFO_HPP_

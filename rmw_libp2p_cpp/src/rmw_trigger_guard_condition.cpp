@@ -18,7 +18,7 @@
 #include "rmw/rmw.h"
 
 #include "rmw_libp2p_cpp/identifier.hpp"
-#include "types/guard_condition.hpp"
+#include "rmw_libp2p_cpp/guard_condition.hpp"
 
 extern "C"
 {

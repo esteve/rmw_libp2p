@@ -10,7 +10,6 @@ cbindgen = "0.24.3"
 
 [dependencies]
 cdr = "0.2.4"
-futures-util = "0.3.26"
 
 [dependencies.uuid]
 version = "1.1.2"

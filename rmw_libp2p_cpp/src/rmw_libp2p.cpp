@@ -244,34 +244,6 @@ rmw_service_server_is_available(
 }
 
 rmw_ret_t
-rmw_destroy_wait_set(
-  rmw_wait_set_t * wait_set)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)wait_set;
-
-  return RMW_RET_ERROR;
-}
-
-rmw_wait_set_t *
-rmw_create_wait_set(
-  rmw_context_t * context,
-  size_t max_conditions)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)context;
-  (void)max_conditions;
-
-  return nullptr;
-}
-
-rmw_ret_t
 rmw_send_response(
   const rmw_service_t * service,
   rmw_request_id_t * request_header,

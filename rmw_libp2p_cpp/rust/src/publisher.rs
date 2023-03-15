@@ -6,12 +6,12 @@ use std::os::raw::c_char;
 
 use uuid::Uuid;
 
-use libp2p::gossipsub::IdentTopic;
+use libp2p::gossipsub;
 
 pub struct Libp2pCustomPublisher {
     gid: Uuid,
     node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
-    topic: IdentTopic,
+    topic: gossipsub::IdentTopic,
 }
 
 impl Libp2pCustomPublisher {
@@ -19,7 +19,7 @@ impl Libp2pCustomPublisher {
         Self {
             gid: Uuid::new_v4(),
             node: libp2p2_custom_node,
-            topic: IdentTopic::new(topic_str),
+            topic: gossipsub::IdentTopic::new(topic_str),
         }
     }
 

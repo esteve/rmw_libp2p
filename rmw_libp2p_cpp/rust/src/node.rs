@@ -104,7 +104,7 @@ impl Libp2pCustomNode {
         let thread_handle = tokio::spawn(async move {
             loop {
                 select! {
-                    // use a oneshot future that will be triggered to stop the swarm
+                    // use a Notify that will be triggered to stop the swarm
                     // select! will wait on any future
                     _ = stop_notify_clone.notified() => {
                         println!("Exit loop");

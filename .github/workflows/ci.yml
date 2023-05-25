@@ -31,7 +31,7 @@ jobs:
     container:
       image: ${{ matrix.docker_image }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Search packages in this repository
       id: list_packages
@@ -44,12 +44,12 @@ jobs:
         required-ros-distributions: ${{ matrix.ros_distro }}
 
     - name: Setup Rust
-      uses: dtolnay/rust-toolchain@1.63.0
+      uses: dtolnay/rust-toolchain@1.69.0
       with:
         components: clippy, rustfmt
 
     - name: build and test
-      uses: ros-tooling/action-ros-ci@v0.2
+      uses: ros-tooling/action-ros-ci@v0.3
       with:
         package-name: ${{ steps.list_packages.outputs.package_list }}
         target-ros2-distro: ${{ matrix.ros_distro }}

@@ -32,7 +32,7 @@ jobs:
     container:
       image: ${{ matrix.docker_image }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Search packages in this repository
       id: list_packages
@@ -40,12 +40,12 @@ jobs:
         echo ::set-output name=package_list::$(colcon list --names-only)
 
     - name: Setup ROS environment
-      uses: ros-tooling/setup-ros@v0.6
+      uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distro }}
 
     - name: Setup Rust
-      uses: dtolnay/rust-toolchain@1.69.0
+      uses: dtolnay/rust-toolchain@1.71.1
       with:
         components: clippy, rustfmt
 

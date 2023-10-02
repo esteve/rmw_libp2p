@@ -117,8 +117,9 @@ rmw_create_publisher(
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
-    info->type_support_ = _create_message_type_support(type_support->data,
-        info->typesupport_identifier_);
+    info->type_support_ = _create_message_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
 

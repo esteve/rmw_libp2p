@@ -104,7 +104,7 @@ rmw_create_node(
     goto fail;
   }
 
-  node_impl->node_handle_ = rs_libp2p_custom_node_new(); 
+  node_impl->node_handle_ = rs_libp2p_custom_node_new();
   if (!node_impl->node_handle_) {
     RMW_SET_ERROR_MSG("failed to allocate libp2p node");
     goto fail;

@@ -88,7 +88,8 @@ rmw_create_service(
     // TODO(esteve): replace with goto fail
     return nullptr;
   }
-  memcpy(const_cast<char *>(rmw_service->service_name), service_name,
+  memcpy(
+    const_cast<char *>(rmw_service->service_name), service_name,
     strlen(service_name) + 1);
 
   return rmw_service;

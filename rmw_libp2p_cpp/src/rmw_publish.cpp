@@ -56,8 +56,9 @@ rmw_publish(
 
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
-  if (_serialize_ros_message(ros_message, ser, info->type_support_,
-    info->typesupport_identifier_))
+  if (_serialize_ros_message(
+      ros_message, ser, info->type_support_,
+      info->typesupport_identifier_))
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
     if (status == 0) { // TODO(esteve): replace with proper error codes

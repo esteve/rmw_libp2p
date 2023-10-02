@@ -398,8 +398,9 @@ void deserialize_field<std::string>(
     if (member->array_size_ && !member->is_upper_bound_) {
       auto deser_field = static_cast<rosidl_runtime_c__String *>(field);
       for (size_t i = 0; i < member->array_size_; ++i) {
-        if (!rosidl_runtime_c__String__assign(&deser_field[i],
-          cpp_string_vector[i].c_str()))
+        if (!rosidl_runtime_c__String__assign(
+            &deser_field[i],
+            cpp_string_vector[i].c_str()))
         {
           throw std::runtime_error("unable to assign rosidl_runtime_c__String");
         }
@@ -407,14 +408,16 @@ void deserialize_field<std::string>(
     } else {
       auto & string_sequence_field =
         *reinterpret_cast<rosidl_runtime_c__String__Sequence *>(field);
-      if (!rosidl_runtime_c__String__Sequence__init(&string_sequence_field,
-        cpp_string_vector.size()))
+      if (!rosidl_runtime_c__String__Sequence__init(
+          &string_sequence_field,
+          cpp_string_vector.size()))
       {
         throw std::runtime_error("unable to initialize rosidl_runtime_c__String sequence");
       }
       for (size_t i = 0; i < cpp_string_vector.size(); ++i) {
-        if (!rosidl_runtime_c__String__assign(&string_sequence_field.data[i],
-          cpp_string_vector[i].c_str()))
+        if (!rosidl_runtime_c__String__assign(
+            &string_sequence_field.data[i],
+            cpp_string_vector[i].c_str()))
         {
           throw std::runtime_error("unable to assign rosidl_runtime_c__String");
         }
@@ -441,8 +444,9 @@ void deserialize_field<std::u16string>(
     if (member->array_size_ && !member->is_upper_bound_) {
       auto deser_field = static_cast<rosidl_runtime_c__U16String *>(field);
       for (size_t i = 0; i < member->array_size_; ++i) {
-        if (!rosidl_runtime_c__U16String__assign(&deser_field[i],
-          reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
+        if (!rosidl_runtime_c__U16String__assign(
+            &deser_field[i],
+            reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
         {
           throw std::runtime_error("unable to assign rosidl_runtime_c__U16String");
         }
@@ -450,14 +454,16 @@ void deserialize_field<std::u16string>(
     } else {
       auto & u16string_sequence_field =
         *reinterpret_cast<rosidl_runtime_c__U16String__Sequence *>(field);
-      if (!rosidl_runtime_c__U16String__Sequence__init(&u16string_sequence_field,
-        cpp_u16string_vector.size()))
+      if (!rosidl_runtime_c__U16String__Sequence__init(
+          &u16string_sequence_field,
+          cpp_u16string_vector.size()))
       {
         throw std::runtime_error("unable to initialize rosidl_runtime_c__U16String sequence");
       }
       for (size_t i = 0; i < cpp_u16string_vector.size(); ++i) {
-        if (!rosidl_runtime_c__U16String__assign(&u16string_sequence_field.data[i],
-          reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
+        if (!rosidl_runtime_c__U16String__assign(
+            &u16string_sequence_field.data[i],
+            reinterpret_cast<const uint16_t *>(cpp_u16string_vector[i].c_str())))
         {
           throw std::runtime_error("unable to assign rosidl_runtime_c__U16String");
         }

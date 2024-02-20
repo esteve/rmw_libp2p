@@ -36,7 +36,7 @@ rmw_publish(
   rmw_publisher_allocation_t * allocation)
 {
   (void)allocation;
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s(publisher=%p,ros_message=%p,allocation=%p)",
     __FUNCTION__, (void *)publisher, (void *)ros_message, (void *)allocation);

@@ -23,7 +23,7 @@ extern "C"
 const char *
 rmw_get_implementation_identifier()
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

@@ -39,7 +39,7 @@ rmw_init_options_init(
   rmw_init_options_t * init_options,
   rcutils_allocator_t allocator)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -66,7 +66,7 @@ rmw_init_options_copy(
   const rmw_init_options_t * src,
   rmw_init_options_t * dst)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -109,7 +109,7 @@ rmw_ret_t
 rmw_init_options_fini(
   rmw_init_options_t * init_options)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -132,7 +132,7 @@ rmw_init(
   const rmw_init_options_t * options,
   rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -196,7 +196,7 @@ rmw_ret_t
 rmw_shutdown(
   rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -220,7 +220,7 @@ rmw_ret_t
 rmw_context_fini(
   rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

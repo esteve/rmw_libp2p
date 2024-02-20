@@ -50,6 +50,7 @@ pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_notify: Arc<Notify>,
     outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
+    new_subscribers_queue: Arc<deadqueue::unlimited::Queue<gossipsub::IdentTopic>>,
     reactor: Runtime,
 }
 
@@ -117,7 +118,8 @@ impl Libp2pCustomNode {
             unsafe extern "C" fn(CustomNodeHandle, *mut u8, len: usize),
             Vec<u8>,
         )>::new();
-        let new_subscribers_queue = Queue::<String>::new();
+        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<gossipsub::IdentTopic>::new());
+        let new_subscribers_queue_clone = Arc::clone(&new_subscribers_queue);
 
         let thread_handle = tokio::spawn(async move {
             loop {
@@ -129,9 +131,8 @@ impl Libp2pCustomNode {
                         break;
                     },
 
-                    topic = new_subscribers_queue.pop() => {
+                    topic = new_subscribers_queue_clone.pop() => {
                         println!("Subscribing to topic: {}", topic);
-                        let topic = gossipsub::IdentTopic::new(&topic);
                         swarm.behaviour_mut().gossipsub.subscribe(&topic).unwrap();
                     },
 
@@ -215,6 +216,7 @@ impl Libp2pCustomNode {
             thread_handle: Some(thread_handle),
             stop_notify: stop_notify,
             outgoing_queue: outgoing_queue,
+            new_subscribers_queue: new_subscribers_queue,
             reactor: reactor,
         }
     }
@@ -235,6 +237,10 @@ impl Libp2pCustomNode {
 
         out_buffer.extend(buffer);
         self.outgoing_queue.push((topic, out_buffer));
+    }
+
+    pub(crate) fn notify_new_subscriber(&self, topic: gossipsub::IdentTopic) -> () {
+        self.new_subscribers_queue.push(topic);
     }
 }
 

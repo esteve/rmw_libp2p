@@ -36,7 +36,7 @@ rmw_create_service(
   const char * service_name,
   const rmw_qos_profile_t * qos_policies)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s(node=%p,type_supports=%p,service_name=%s,"
     "qos_policies={history=%d,depth=%zu,reliability=%d,durability=%d})",
@@ -100,7 +100,7 @@ rmw_service_response_publisher_get_actual_qos(
   const rmw_service_t * service,
   rmw_qos_profile_t * qos_policies)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -115,7 +115,7 @@ rmw_service_request_subscription_get_actual_qos(
   const rmw_service_t * service,
   rmw_qos_profile_t * qos_policies)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

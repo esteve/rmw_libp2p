@@ -17,13 +17,17 @@ pub struct Libp2pCustomSubscription {
 }
 
 impl Libp2pCustomSubscription {
-    fn new(
-        libp2p2_custom_node: *mut Libp2pCustomNode,
-        topic_str: &str,
-    ) -> Self {
+    fn new(ptr_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
+        let libp2p2_custom_node = unsafe {
+            assert!(!ptr_node.is_null());
+            &mut *ptr_node
+        };
+
+        libp2p2_custom_node.notify_new_subscriber(gossipsub::IdentTopic::new(topic_str));
+
         Self {
             gid: Uuid::new_v4(),
-            node: libp2p2_custom_node,
+            node: ptr_node,
             topic: gossipsub::IdentTopic::new(topic_str),
             incoming_queue: Arc::new(deadqueue::unlimited::Queue::new()),
         }
@@ -46,21 +50,23 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_free(ptr: *mut Libp2pCustomSubscription) {
-    if ptr.is_null() {
+pub extern "C" fn rs_libp2p_custom_subscription_free(
+    ptr_subscription: *mut Libp2pCustomSubscription,
+) {
+    if ptr_subscription.is_null() {
         return;
     }
-    let _ = unsafe { Box::from_raw(ptr) };
+    let _ = unsafe { Box::from_raw(ptr_subscription) };
 }
 
 #[no_mangle]
 pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
-    ptr: *mut Libp2pCustomSubscription,
+    ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
     let libp2p2_custom_subscription = unsafe {
-        assert!(!ptr.is_null());
-        &mut *ptr
+        assert!(!ptr_subscription.is_null());
+        &mut *ptr_subscription
     };
     let gid_bytes = libp2p2_custom_subscription.gid.as_bytes();
     let count = gid_bytes.len();

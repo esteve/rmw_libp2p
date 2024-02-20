@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+
 #include <mutex>
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
+#include "rmw/impl/cpp/macros.hpp"
 #include "rmw/types.h"
 #include "rmw/validate_full_topic_name.h"
 #include "rmw/rmw.h"
@@ -41,26 +44,20 @@ rmw_create_subscription(
   const rmw_qos_profile_t * qos_policies,
   const rmw_subscription_options_t * subscription_options)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
-  (void)node;
-  (void)type_supports;
-  (void)topic_name;
-  (void)qos_policies;
-  (void)subscription_options;
-
-//   RCUTILS_LOG_DEBUG_NAMED(
-//     "rmw_libp2p_cpp",
-//     "%s(node=%p,type_supports=%p,topic_name=%s,"
-//     "qos_policies={history=%s,depth=%zu,reliability=%s,durability=%s},publisher_options=%p)",
-//     __FUNCTION__, reinterpret_cast<const void *>(node),
-//     reinterpret_cast<const void *>(type_supports), topic_name,
-//     qos_history_string(qos_policies->history), qos_policies->depth,
-//     qos_reliability_string(qos_policies->reliability),
-//     qos_durability_string(qos_policies->durability),
-//     reinterpret_cast<const void *>(publisher_options));
+  //   RCUTILS_LOG_WARN_NAMED(
+  //     "rmw_libp2p_cpp",
+  //     "%s(node=%p,type_supports=%p,topic_name=%s,"
+  //     "qos_policies={history=%s,depth=%zu,reliability=%s,durability=%s},publisher_options=%p)",
+  //     __FUNCTION__, reinterpret_cast<const void *>(node),
+  //     reinterpret_cast<const void *>(type_supports), topic_name,
+  //     qos_history_string(qos_policies->history), qos_policies->depth,
+  //     qos_reliability_string(qos_policies->reliability),
+  //     qos_durability_string(qos_policies->durability),
+  //     reinterpret_cast<const void *>(publisher_options));
 
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -93,23 +90,30 @@ rmw_create_subscription(
     return nullptr;
   }
 
+  std::cout << "rmw_create_subscription: " << topic_name << std::endl;
+  std::cout << "SUB: TRY TYPESUPPORT 1" << std::endl;
   const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
     type_supports, rosidl_typesupport_introspection_c__identifier);
+  std::cout << "SUB: TRY TYPESUPPORT 2" << std::endl;
   if (!type_support) {
+    std::cout << "SUB: TRY TYPESUPPORT 2a" << std::endl;
     type_support = get_message_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
+      std::cout << "SUB: TRY TYPESUPPORT 2aa" << std::endl;
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
 
+  std::cout << "SUB: TRY TYPESUPPORT 3" << std::endl;
+
   CustomSubscriptionInfo * info = nullptr;
-//   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
-//   const char * topic = dps_topic.c_str();
+  //   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
+  //   const char * topic = dps_topic.c_str();
   rmw_subscription_t * rmw_subscription = nullptr;
-//   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
-//   DPS_Status ret;
+  //   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
+  //   DPS_Status ret;
 
   info = new CustomSubscriptionInfo();
   info->node_ = node;
@@ -118,10 +122,12 @@ rmw_create_subscription(
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
-    info->type_support_ = _create_message_type_support(type_support->data,
-        info->typesupport_identifier_);
+    info->type_support_ = _create_message_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
+  std::cout << "SUB: TRY TYPESUPPORT 4" << std::endl;
 
   info->qos_ = *qos_policies;
   /* Set to best-effort & volatile since QoS features are not supported by DPS at the moment. */
@@ -129,11 +135,13 @@ rmw_create_subscription(
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
-  info->subscription_handle_ = rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name);
+  info->subscription_handle_ =
+    rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name);
   if (!info->subscription_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p subscription");
     goto fail;
   }
+  std::cout << "SUB: TRY TYPESUPPORT 5" << std::endl;
 
   // info->publication_ = DPS_CreatePublication(node_data->impl);
   // if (!info->publication_) {
@@ -151,6 +159,7 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("failed to allocate subscription");
     goto fail;
   }
+  std::cout << "SUB: TRY TYPESUPPORT 6" << std::endl;
 
   rmw_subscription->implementation_identifier = libp2p_identifier;
   rmw_subscription->data = info;
@@ -172,6 +181,8 @@ rmw_create_subscription(
     std::lock_guard<std::mutex> lock(node_data->subscriptions_mutex_);
     node_data->subscriptions_[topic_name].insert(info);
   }
+
+  std::cout << "SUB: TRY TYPESUPPORT 9" << std::endl;
 
   return rmw_subscription;
 
@@ -198,7 +209,7 @@ rmw_destroy_subscription(
   rmw_node_t * node,
   rmw_subscription_t * subscription)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -206,4 +217,24 @@ rmw_destroy_subscription(
   (void)subscription;
 
   return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_subscription_get_actual_qos(
+  const rmw_subscription_t * subscription,
+  rmw_qos_profile_t * qos)
+{
+  RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  (void)subscription;
+  (void)qos;
+
+  RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<CustomSubscriptionInfo *>(subscription->data);
+  *qos = info->qos_;
+  return RMW_RET_OK;
 }

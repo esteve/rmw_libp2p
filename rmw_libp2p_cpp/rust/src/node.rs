@@ -1,38 +1,59 @@
 use std::collections::hash_map::DefaultHasher;
+use std::ffi::c_void;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use libp2p::{futures::StreamExt, mdns, swarm::NetworkBehaviour};
+
 use libp2p::{
-    futures::StreamExt, gossipsub, identity, mdns, swarm::NetworkBehaviour, swarm::SwarmEvent,
-    PeerId,
+    core::transport::ListenerId,
+    gossipsub,
+    gossipsub::{
+        Gossipsub, GossipsubConfigBuilder, GossipsubEvent, GossipsubMessage, MessageAuthenticity,
+        MessageId, Sha256Topic as Topic, TopicHash,
+    },
+    identity,
+    identity::Keypair,
+    mdns::{MdnsConfig, MdnsEvent, TokioMdns},
+    swarm::behaviour::toggle::Toggle,
+    swarm::{SwarmBuilder, SwarmEvent},
+    Multiaddr, NetworkBehaviour, PeerId, Swarm,
 };
 
 use tokio::runtime::Runtime;
 use tokio::sync::Notify;
 use tokio::{select, task};
 
+use deadqueue::unlimited::Queue;
+
+#[repr(C)]
+struct CustomNodeHandle(*mut c_void);
+
+unsafe impl Send for CustomNodeHandle {}
+unsafe impl Sync for CustomNodeHandle {}
+
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
 struct RosNetworkBehaviour {
-    gossipsub: gossipsub::Behaviour,
-    mdns: mdns::tokio::Behaviour,
+    pubsub: Gossipsub,
+    mdns: Toggle<TokioMdns>,
 }
 
 #[derive(Debug)]
 enum OutEvent {
-    Gossipsub(gossipsub::Event),
-    Mdns(mdns::Event),
+    Gossipsub(GossipsubEvent),
+    Mdns(MdnsEvent),
 }
 
-impl From<mdns::Event> for OutEvent {
-    fn from(v: mdns::Event) -> Self {
+impl From<MdnsEvent> for OutEvent {
+    fn from(v: MdnsEvent) -> Self {
         Self::Mdns(v)
     }
 }
 
-impl From<gossipsub::Event> for OutEvent {
-    fn from(v: gossipsub::Event) -> Self {
+impl From<GossipsubEvent> for OutEvent {
+    fn from(v: GossipsubEvent) -> Self {
         Self::Gossipsub(v)
     }
 }
@@ -52,13 +73,13 @@ impl Libp2pCustomNode {
 
         let transport = libp2p::tokio_development_transport(keypair.clone()).unwrap();
 
-        let message_id_fn = |message: &gossipsub::Message| {
+        let message_id_fn = |message: &GossipsubMessage| {
             let mut s = DefaultHasher::new();
             message.data.hash(&mut s);
             gossipsub::MessageId::from(s.finish().to_string())
         };
 
-        let gossipsub_config = gossipsub::ConfigBuilder::default()
+        let gossipsub_config = GossipsubConfigBuilder::default()
             .heartbeat_interval(Duration::from_secs(10))
             .validation_mode(gossipsub::ValidationMode::Strict)
             .message_id_fn(message_id_fn)
@@ -66,23 +87,32 @@ impl Libp2pCustomNode {
             .build()
             .expect("Valid config");
 
-        let gossipsub: gossipsub::Behaviour = gossipsub::Behaviour::new(
-            gossipsub::MessageAuthenticity::Signed(keypair),
+        let gossipsub: Gossipsub::new(
+            MessageAuthenticity::Signed(keypair),
             gossipsub_config,
-        )
-        .expect("Correct configuration");
+        );
+        // .expect("Correct configuration");
 
-        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), peer_id).unwrap();
+        // Build mDNS network behaviour
+        let mdns = if !disable_mdns {
+            let mdns = TokioMdns::new(MdnsConfig::default())?;
+            Toggle::from(Some(mdns))
+        } else {
+            Toggle::from(None)
+        };
 
         let behaviour = RosNetworkBehaviour {
-            gossipsub: gossipsub,
+            pubsub: gossipsub,
             mdns: mdns,
         };
 
         libp2p::Swarm::with_tokio_executor(transport, behaviour, peer_id)
     }
 
-    fn new() -> Self {
+    fn new(
+        obj: CustomNodeHandle,
+        callback: unsafe extern "C" fn(&CustomNodeHandle, *mut u8, usize),
+    ) -> Self {
         let reactor = Runtime::new().unwrap();
         let _guard = reactor.enter();
 
@@ -100,6 +130,12 @@ impl Libp2pCustomNode {
 
         let stop_notify_clone = Arc::clone(&stop_notify);
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
+        let incoming_queue = Queue::<(
+            String,
+            unsafe extern "C" fn(CustomNodeHandle, *mut u8, len: usize),
+            Vec<u8>,
+        )>::new();
+        let new_subscribers_queue = Queue::<String>::new();
 
         let thread_handle = tokio::spawn(async move {
             loop {
@@ -111,16 +147,34 @@ impl Libp2pCustomNode {
                         break;
                     },
 
+                    topic = new_subscribers_queue.pop() => {
+                        println!("Subscribing to topic: {}", topic);
+                        let topic = gossipsub::IdentTopic::new(&topic);
+                        swarm.behaviour_mut().pubsub.subscribe(&topic).unwrap();
+                    },
+
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
                         println!("Publishing message on topic {} : {:?}", topic, buffer);
-                        if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
+                        if let Err(e) = swarm.behaviour_mut().pubsub.publish(topic.clone(), buffer.clone()) {
                             println!("Publish error: {e:?}");
                         }
                     },
 
+                    // // // pop messages from the queue and trigger the callback
+                    // (topic, callback, buffer) = incoming_queue.pop() => {
+                    //     let mut vec = buffer;
+                    //     vec.shrink_to_fit();
+                    //     let ptr: *mut u8 = vec.as_mut_ptr();
+                    //     let len: usize = vec.len();
+                    //     std::mem::forget(vec);
+                    //     unsafe {
+                    //         callback(obj, ptr, len);
+                    //     }
+                    // },
+
                     event = swarm.select_next_some() => match event {
-                        SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
+                        SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
                             propagation_source: peer_id,
                             message_id: id,
                             message,
@@ -132,29 +186,40 @@ impl Libp2pCustomNode {
                                 peer_id,
                                 message.topic.as_str(),
                             );
+                            // incoming_queue.push((message.topic.into_string(), callback, message.data));
+                            let mut vec = message.data;
+                            vec.shrink_to_fit();
+                            let ptr: *mut u8 = vec.as_mut_ptr();
+                            let len: usize = vec.len();
+                            std::mem::forget(vec);
+                            unsafe {
+                                callback(&obj, ptr, len);
+                            }
                         }
                         SwarmEvent::NewListenAddr { address, .. } => {
                             println!("Listening on {:?}", address);
                         }
                         SwarmEvent::Behaviour(OutEvent::Mdns(
-                            mdns::Event::Discovered(list)
+                            MdnsEvent::Discovered(list)
                         )) => {
                             for (peer, _) in list {
                                 swarm
                                     .behaviour_mut()
-                                    .gossipsub
+                                    .pubsub
                                     .add_explicit_peer(&peer);
                             }
                         }
-                        SwarmEvent::Behaviour(OutEvent::Mdns(mdns::Event::Expired(
+                        SwarmEvent::Behaviour(OutEvent::Mdns(MdnsEvent::Expired(
                             list
                         ))) => {
                             for (peer, _) in list {
-                                if !swarm.behaviour_mut().mdns.has_node(&peer) {
-                                    swarm
-                                        .behaviour_mut()
-                                        .gossipsub
-                                        .remove_explicit_peer(&peer);
+                                if let Some(mdns) = swarm.behaviour_mut().mdns.as_mut() {
+                                    if !mdns.has_node(&peer) {
+                                        swarm
+                                            .behaviour_mut()
+                                            .pubsub
+                                            .remove_explicit_peer(&peer);
+                                    }
                                 }
                             }
                         },
@@ -205,8 +270,11 @@ impl Drop for Libp2pCustomNode {
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
-    Box::into_raw(Box::new(Libp2pCustomNode::new()))
+pub extern "C" fn rs_libp2p_custom_node_new(
+    obj: CustomNodeHandle,
+    callback: unsafe extern "C" fn(&CustomNodeHandle, *mut u8, len: usize),
+) -> *mut Libp2pCustomNode {
+    Box::into_raw(Box::new(Libp2pCustomNode::new(obj, callback)))
 }
 
 #[no_mangle]

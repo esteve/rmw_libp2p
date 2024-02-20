@@ -3,6 +3,7 @@ use crate::Libp2pCustomNode;
 use std::ffi::CStr;
 use std::io::Cursor;
 use std::os::raw::c_char;
+use std::sync::Arc;
 
 use uuid::Uuid;
 

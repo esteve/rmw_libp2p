@@ -660,7 +660,9 @@ rmw_wait(
   (void)wait_set;
   (void)wait_timeout;
 
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  // return RMW_RET_OK;
+  return RMW_RET_TIMEOUT;
 }
 
 rmw_ret_t

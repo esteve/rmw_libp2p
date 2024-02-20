@@ -20,6 +20,8 @@ extern "C"
 {
 #endif
 
+struct CustomNodeInfo;
+
 typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
 typedef struct rs_libp2p_custom_publisher rs_libp2p_custom_publisher_t;
@@ -29,7 +31,7 @@ typedef struct rs_libp2p_custom_subscription rs_libp2p_custom_subscription_t;
 typedef struct rs_libp2p_cdr_buffer rs_libp2p_cdr_buffer_t;
 
 extern rs_libp2p_custom_node_t *
-rs_libp2p_custom_node_new(void);
+rs_libp2p_custom_node_new(CustomNodeInfo *, void (*)(CustomNodeInfo *, uint8_t*, uintptr_t));
 
 extern void
 rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);

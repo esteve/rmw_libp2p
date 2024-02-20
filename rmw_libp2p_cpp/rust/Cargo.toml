@@ -29,13 +29,30 @@ features = [
     "rt-multi-thread",
 ]
 
+# [dependencies.libp2p]
+# version = "0.51"
+# features = [
+#     "dns",
+#     "gossipsub",
+#     "kad",
+#     "macros",
+#     "mdns",
+#     "mplex",
+#     "noise",
+#     "request-response",
+#     "rsa",
+#     "tcp",
+#     "tokio",
+#     "websocket",
+#     "yamux",
+# ]
+
 [dependencies.libp2p]
-version = "0.51"
+version = "0.49"
 features = [
     "dns",
     "gossipsub",
     "kad",
-    "macros",
     "mdns",
     "mplex",
     "noise",

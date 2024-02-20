@@ -4,21 +4,9 @@ use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use libp2p::{futures::StreamExt, mdns, swarm::NetworkBehaviour};
-
 use libp2p::{
-    core::transport::ListenerId,
-    gossipsub,
-    gossipsub::{
-        Gossipsub, GossipsubConfigBuilder, GossipsubEvent, GossipsubMessage, MessageAuthenticity,
-        MessageId, Sha256Topic as Topic, TopicHash,
-    },
-    identity,
-    identity::Keypair,
-    mdns::{MdnsConfig, MdnsEvent, TokioMdns},
-    swarm::behaviour::toggle::Toggle,
-    swarm::{SwarmBuilder, SwarmEvent},
-    Multiaddr, NetworkBehaviour, PeerId, Swarm,
+    futures::StreamExt, gossipsub, identity, mdns, swarm::NetworkBehaviour, swarm::SwarmEvent,
+    PeerId,
 };
 
 use tokio::runtime::Runtime;
@@ -36,24 +24,24 @@ unsafe impl Sync for CustomNodeHandle {}
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "OutEvent")]
 struct RosNetworkBehaviour {
-    pubsub: Gossipsub,
-    mdns: Toggle<TokioMdns>,
+    gossipsub: gossipsub::Behaviour,
+    mdns: mdns::tokio::Behaviour,
 }
 
 #[derive(Debug)]
 enum OutEvent {
-    Gossipsub(GossipsubEvent),
-    Mdns(MdnsEvent),
+    Gossipsub(gossipsub::Event),
+    Mdns(mdns::Event),
 }
 
-impl From<MdnsEvent> for OutEvent {
-    fn from(v: MdnsEvent) -> Self {
+impl From<mdns::Event> for OutEvent {
+    fn from(v: mdns::Event) -> Self {
         Self::Mdns(v)
     }
 }
 
-impl From<GossipsubEvent> for OutEvent {
-    fn from(v: GossipsubEvent) -> Self {
+impl From<gossipsub::Event> for OutEvent {
+    fn from(v: gossipsub::Event) -> Self {
         Self::Gossipsub(v)
     }
 }
@@ -73,13 +61,13 @@ impl Libp2pCustomNode {
 
         let transport = libp2p::tokio_development_transport(keypair.clone()).unwrap();
 
-        let message_id_fn = |message: &GossipsubMessage| {
+        let message_id_fn = |message: &gossipsub::Message| {
             let mut s = DefaultHasher::new();
             message.data.hash(&mut s);
             gossipsub::MessageId::from(s.finish().to_string())
         };
 
-        let gossipsub_config = GossipsubConfigBuilder::default()
+        let gossipsub_config = gossipsub::ConfigBuilder::default()
             .heartbeat_interval(Duration::from_secs(10))
             .validation_mode(gossipsub::ValidationMode::Strict)
             .message_id_fn(message_id_fn)
@@ -87,22 +75,16 @@ impl Libp2pCustomNode {
             .build()
             .expect("Valid config");
 
-        let gossipsub: Gossipsub::new(
-            MessageAuthenticity::Signed(keypair),
+        let gossipsub: gossipsub::Behaviour = gossipsub::Behaviour::new(
+            gossipsub::MessageAuthenticity::Signed(keypair),
             gossipsub_config,
-        );
-        // .expect("Correct configuration");
+        )
+        .expect("Correct configuration");
 
-        // Build mDNS network behaviour
-        let mdns = if !disable_mdns {
-            let mdns = TokioMdns::new(MdnsConfig::default())?;
-            Toggle::from(Some(mdns))
-        } else {
-            Toggle::from(None)
-        };
+        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), peer_id).unwrap();
 
         let behaviour = RosNetworkBehaviour {
-            pubsub: gossipsub,
+            gossipsub: gossipsub,
             mdns: mdns,
         };
 
@@ -150,13 +132,13 @@ impl Libp2pCustomNode {
                     topic = new_subscribers_queue.pop() => {
                         println!("Subscribing to topic: {}", topic);
                         let topic = gossipsub::IdentTopic::new(&topic);
-                        swarm.behaviour_mut().pubsub.subscribe(&topic).unwrap();
+                        swarm.behaviour_mut().gossipsub.subscribe(&topic).unwrap();
                     },
 
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
                         println!("Publishing message on topic {} : {:?}", topic, buffer);
-                        if let Err(e) = swarm.behaviour_mut().pubsub.publish(topic.clone(), buffer.clone()) {
+                        if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
                             println!("Publish error: {e:?}");
                         }
                     },
@@ -174,7 +156,7 @@ impl Libp2pCustomNode {
                     // },
 
                     event = swarm.select_next_some() => match event {
-                        SwarmEvent::Behaviour(OutEvent::Gossipsub(GossipsubEvent::Message {
+                        SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
                             propagation_source: peer_id,
                             message_id: id,
                             message,
@@ -200,26 +182,24 @@ impl Libp2pCustomNode {
                             println!("Listening on {:?}", address);
                         }
                         SwarmEvent::Behaviour(OutEvent::Mdns(
-                            MdnsEvent::Discovered(list)
+                            mdns::Event::Discovered(list)
                         )) => {
                             for (peer, _) in list {
                                 swarm
                                     .behaviour_mut()
-                                    .pubsub
+                                    .gossipsub
                                     .add_explicit_peer(&peer);
                             }
                         }
-                        SwarmEvent::Behaviour(OutEvent::Mdns(MdnsEvent::Expired(
+                        SwarmEvent::Behaviour(OutEvent::Mdns(mdns::Event::Expired(
                             list
                         ))) => {
                             for (peer, _) in list {
-                                if let Some(mdns) = swarm.behaviour_mut().mdns.as_mut() {
-                                    if !mdns.has_node(&peer) {
-                                        swarm
-                                            .behaviour_mut()
-                                            .pubsub
-                                            .remove_explicit_peer(&peer);
-                                    }
+                                if !swarm.behaviour_mut().mdns.has_node(&peer) {
+                                    swarm
+                                        .behaviour_mut()
+                                        .gossipsub
+                                        .remove_explicit_peer(&peer);
                                 }
                             }
                         },

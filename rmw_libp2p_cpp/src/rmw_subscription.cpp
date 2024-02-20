@@ -20,11 +20,7 @@
 #include "rmw/validate_full_topic_name.h"
 #include "rmw/rmw.h"
 
-#include "rmw/impl/cpp/macros.hpp"
-
-#include "rcutils/allocator.h"
 #include "rcutils/logging_macros.h"
-#include "rcutils/strdup.h"
 
 #include "rosidl_typesupport_introspection_cpp/identifier.hpp"
 
@@ -32,22 +28,28 @@
 
 #include "rmw_libp2p_cpp/identifier.hpp"
 #include "rmw_libp2p_cpp/custom_node_info.hpp"
-#include "rmw_libp2p_cpp/custom_publisher_info.hpp"
+#include "rmw_libp2p_cpp/custom_subscription_info.hpp"
 
 #include "type_support_common.hpp"
 
-// Create and return an rmw publisher.
-rmw_publisher_t *
-rmw_create_publisher(
+// Create and return an rmw subscriber
+rmw_subscription_t *
+rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
   const rmw_qos_profile_t * qos_policies,
-  const rmw_publisher_options_t * publisher_options)
+  const rmw_subscription_options_t * subscription_options)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
+
+  (void)node;
+  (void)type_supports;
+  (void)topic_name;
+  (void)qos_policies;
+  (void)subscription_options;
 
 //   RCUTILS_LOG_DEBUG_NAMED(
 //     "rmw_libp2p_cpp",
@@ -102,23 +104,22 @@ rmw_create_publisher(
     }
   }
 
-  CustomPublisherInfo * info = nullptr;
+  CustomSubscriptionInfo * info = nullptr;
 //   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
 //   const char * topic = dps_topic.c_str();
-  rmw_publisher_t * rmw_publisher = nullptr;
+  rmw_subscription_t * rmw_subscription = nullptr;
 //   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 //   DPS_Status ret;
 
-  info = new CustomPublisherInfo();
+  info = new CustomSubscriptionInfo();
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
 
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
-    info->type_support_ = _create_message_type_support(
-      type_support->data,
-      info->typesupport_identifier_);
+    info->type_support_ = _create_message_type_support(type_support->data,
+        info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
 
@@ -128,9 +129,9 @@ rmw_create_publisher(
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
-  info->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name);
-  if (!info->publisher_handle_) {
-    RMW_SET_ERROR_MSG("failed to create libp2p publisher");
+  info->subscription_handle_ = rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name);
+  if (!info->subscription_handle_) {
+    RMW_SET_ERROR_MSG("failed to create libp2p subscription");
     goto fail;
   }
 
@@ -145,81 +146,64 @@ rmw_create_publisher(
   //   goto fail;
   // }
 
-  rmw_publisher = rmw_publisher_allocate();
-  if (!rmw_publisher) {
-    RMW_SET_ERROR_MSG("failed to allocate publisher");
+  rmw_subscription = rmw_subscription_allocate();
+  if (!rmw_subscription) {
+    RMW_SET_ERROR_MSG("failed to allocate subscription");
     goto fail;
   }
 
-  rmw_publisher->implementation_identifier = libp2p_identifier;
-  rmw_publisher->data = info;
-  rmw_publisher->topic_name = reinterpret_cast<char *>(
+  rmw_subscription->implementation_identifier = libp2p_identifier;
+  rmw_subscription->data = info;
+  rmw_subscription->topic_name = reinterpret_cast<char *>(
     rmw_allocate(strlen(topic_name) + 1));
-  if (!rmw_publisher->topic_name) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for publisher topic name");
+  if (!rmw_subscription->topic_name) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for subscription topic name");
     goto fail;
   }
-  memcpy(const_cast<char *>(rmw_publisher->topic_name), topic_name, strlen(topic_name) + 1);
+  memcpy(const_cast<char *>(rmw_subscription->topic_name), topic_name, strlen(topic_name) + 1);
 
-  // info->discovery_name_ = dps_publisher_prefix + std::string(topic_name) +
+  // info->discovery_name_ = dps_subscription_prefix + std::string(topic_name) +
   //   "&types=" + type_name;
   // if (_add_discovery_topic(impl, info->discovery_name_) != RMW_RET_OK) {
   //   goto fail;
   // }
 
   {
-    std::lock_guard<std::mutex> lock(node_data->publishers_mutex_);
-    node_data->publishers_[topic_name].insert(info);
+    std::lock_guard<std::mutex> lock(node_data->subscriptions_mutex_);
+    node_data->subscriptions_[topic_name].insert(info);
   }
 
-  return rmw_publisher;
+  return rmw_subscription;
 
 fail:
   _delete_typesupport(info->type_support_, info->typesupport_identifier_);
-  if (info->publisher_handle_) {
-    rs_libp2p_custom_publisher_free(info->publisher_handle_);
+  if (info->subscription_handle_) {
+    rs_libp2p_custom_subscription_free(info->subscription_handle_);
   }
   delete info;
 
-  if (rmw_publisher) {
-    if (rmw_publisher->topic_name) {
-      rmw_free(const_cast<char *>(rmw_publisher->topic_name));
+  if (rmw_subscription) {
+    if (rmw_subscription->topic_name) {
+      rmw_free(const_cast<char *>(rmw_subscription->topic_name));
     }
-    rmw_publisher_free(rmw_publisher);
+    rmw_subscription_free(rmw_subscription);
   }
 
   return nullptr;
 }
 
-// Destroy and deallocate an rmw publisher.
+// Destroy and deallocate an RMW subscription
 rmw_ret_t
-rmw_destroy_publisher(
+rmw_destroy_subscription(
   rmw_node_t * node,
-  rmw_publisher_t * publisher)
+  rmw_subscription_t * subscription)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
   (void)node;
-  (void)publisher;
+  (void)subscription;
 
   return RMW_RET_ERROR;
-}
-
-rmw_ret_t
-rmw_publisher_get_actual_qos(
-  const rmw_publisher_t * publisher,
-  rmw_qos_profile_t * qos)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
-
-  auto info = static_cast<CustomPublisherInfo *>(publisher->data);
-  *qos = info->qos_;
-  return RMW_RET_OK;
 }

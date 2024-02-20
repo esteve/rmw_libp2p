@@ -44,44 +44,6 @@
 extern "C"
 {
 
-// Create and return an rmw subscriber
-rmw_subscription_t *
-rmw_create_subscription(
-  const rmw_node_t * node,
-  const rosidl_message_type_support_t * type_supports,
-  const char * topic_name,
-  const rmw_qos_profile_t * qos_policies,
-  const rmw_subscription_options_t * subscription_options)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)node;
-  (void)type_supports;
-  (void)topic_name;
-  (void)qos_policies;
-  (void)subscription_options;
-
-  return nullptr;
-}
-
-// Destroy and deallocate an RMW subscription
-rmw_ret_t
-rmw_destroy_subscription(
-  rmw_node_t * node,
-  rmw_subscription_t * subscription)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)node;
-  (void)subscription;
-
-  return RMW_RET_ERROR;
-}
-
 rmw_ret_t
 rmw_subscription_get_actual_qos(
   const rmw_subscription_t * subscription,

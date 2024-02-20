@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_LIBP2P_CPP__CUSTOM_NODE_INFO_HPP_
-#define RMW_LIBP2P_CPP__CUSTOM_NODE_INFO_HPP_
+#ifndef RMW_LIBP2P_CPP__CUSTOM_SUBSCRIPTION_INFO_HPP_
+#define RMW_LIBP2P_CPP__CUSTOM_SUBSCRIPTION_INFO_HPP_
 
-#include <map>
-#include <mutex>
+#include <atomic>
 #include <set>
+#include <string>
 
 #include "rmw/rmw.h"
-#include "rmw_libp2p_cpp/custom_publisher_info.hpp"
-#include "rmw_libp2p_cpp/custom_subscription_info.hpp"
+
 #include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
 
-typedef struct CustomNodeInfo
+typedef struct CustomSubscriptionInfo
 {
-  rs_libp2p_custom_node_t * node_handle_;
-  rmw_guard_condition_t * graph_guard_condition_;
-  std::mutex publishers_mutex_;
-  std::map<std::string, std::set<CustomPublisherInfo *>> publishers_;
-  std::mutex subscriptions_mutex_;
-  std::map<std::string, std::set<CustomSubscriptionInfo *>> subscriptions_;
-} CustomNodeInfo;
+  const rmw_node_t * node_;
+  void * type_support_;
+  const char * typesupport_identifier_;
+  rmw_qos_profile_t qos_;
+  // std::string discovery_name_;
+  // std::set<std::string> subscriptions_;
+  // std::atomic_size_t subscriptions_matched_count_;
+  rs_libp2p_custom_subscription_t * subscription_handle_;
+  std::queue<uint8_t *> message_queue_;
+} CustomSubscriptionInfo;
 
-#endif  // RMW_LIBP2P_CPP__CUSTOM_NODE_INFO_HPP_
+#endif  // RMW_LIBP2P_CPP__CUSTOM_SUBSCRIPTION_INFO_HPP_

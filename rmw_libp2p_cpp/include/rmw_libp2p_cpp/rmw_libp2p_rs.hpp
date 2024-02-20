@@ -24,6 +24,8 @@ typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
 typedef struct rs_libp2p_custom_publisher rs_libp2p_custom_publisher_t;
 
+typedef struct rs_libp2p_custom_subscription rs_libp2p_custom_subscription_t;
+
 typedef struct rs_libp2p_cdr_buffer rs_libp2p_cdr_buffer_t;
 
 extern rs_libp2p_custom_node_t *
@@ -40,6 +42,15 @@ rs_libp2p_custom_publisher_free(rs_libp2p_custom_publisher_t *);
 
 extern size_t
 rs_libp2p_custom_publisher_get_gid(rs_libp2p_custom_publisher_t *, uint8_t *);
+
+extern rs_libp2p_custom_subscription_t *
+rs_libp2p_custom_subscription_new(rs_libp2p_custom_node_t *, const char *);
+
+extern void
+rs_libp2p_custom_subscription_free(rs_libp2p_custom_subscription_t *);
+
+extern size_t
+rs_libp2p_custom_subscription_get_gid(rs_libp2p_custom_subscription_t *, uint8_t *);
 
 extern rs_libp2p_cdr_buffer_t *
 rs_libp2p_cdr_buffer_new(void);

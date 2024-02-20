@@ -126,10 +126,11 @@ impl Libp2pCustomNode {
                             message,
                         })) => {
                             println!(
-                                "Got message: {:?} with id: {} from peer: {:?}",
+                                "Got message: {:?} with id: {} from peer: {:?} topic: {}",
                                 message.data,
                                 id,
-                                peer_id
+                                peer_id,
+                                message.topic.as_str(),
                             );
                         }
                         SwarmEvent::NewListenAddr { address, .. } => {

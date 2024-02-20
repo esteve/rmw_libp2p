@@ -49,6 +49,7 @@ add_library(rmw_libp2p_cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
   src/rmw_service.cpp
+  src/rmw_subscription.cpp
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait_set.cpp
   src/ros_message_serialization.cpp

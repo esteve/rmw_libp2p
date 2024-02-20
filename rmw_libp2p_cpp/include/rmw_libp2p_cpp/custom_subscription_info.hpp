@@ -16,6 +16,7 @@
 #define RMW_LIBP2P_CPP__CUSTOM_SUBSCRIPTION_INFO_HPP_
 
 #include <atomic>
+#include <queue>
 #include <set>
 #include <string>
 

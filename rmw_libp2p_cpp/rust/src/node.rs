@@ -96,6 +96,8 @@ impl Libp2pCustomNode {
         obj: CustomNodeHandle,
         callback: unsafe extern "C" fn(&CustomNodeHandle, *mut u8, usize),
     ) -> Self {
+        println!("1 === Creating new Libp2pCustomNode {:p}", obj.0);
+
         let reactor = Runtime::new().unwrap();
         let _guard = reactor.enter();
 

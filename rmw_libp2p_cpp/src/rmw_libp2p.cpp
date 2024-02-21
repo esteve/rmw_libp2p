@@ -40,6 +40,7 @@
 #include "rmw_libp2p_cpp/identifier.hpp"
 
 #include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
+#include "rmw_libp2p_cpp/custom_subscription_info.hpp"
 
 extern "C"
 {
@@ -96,7 +97,7 @@ rmw_take(
   bool * taken,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
+  RCUTILS_LOG_WARN_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -104,7 +105,19 @@ rmw_take(
   (void)ros_message;
   (void)taken;
   (void)allocation;
-
+  CustomSubscriptionInfo * info = static_cast<CustomSubscriptionInfo *>(subscription->data);
+  if (info->message_queue_.empty()) {
+    RCUTILS_LOG_WARN_NAMED(
+      "rmw_libp2p_cpp",
+      "%s(info is empty)", __FUNCTION__);
+  } else {
+    RCUTILS_LOG_WARN_NAMED(
+      "rmw_libp2p_cpp",
+      "%s(info is not empty)", __FUNCTION__);
+    RCUTILS_LOG_WARN_NAMED(
+      "rmw_libp2p_cpp",
+      "%s(info size: %ld)", __FUNCTION__, info->message_queue_.size());
+  }
   // return RMW_RET_ERROR;
   return RMW_RET_OK;
 }
@@ -619,33 +632,6 @@ rmw_get_node_names_with_enclaves(
   (void)enclaves;
 
   return RMW_RET_ERROR;
-}
-
-rmw_ret_t
-rmw_wait(
-  rmw_subscriptions_t * subscriptions,
-  rmw_guard_conditions_t * guard_conditions,
-  rmw_services_t * services,
-  rmw_clients_t * clients,
-  rmw_events_t * events,
-  rmw_wait_set_t * wait_set,
-  const rmw_time_t * wait_timeout)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)subscriptions;
-  (void)guard_conditions;
-  (void)services;
-  (void)clients;
-  (void)events;
-  (void)wait_set;
-  (void)wait_timeout;
-
-  // return RMW_RET_ERROR;
-  // return RMW_RET_OK;
-  return RMW_RET_TIMEOUT;
 }
 
 rmw_ret_t

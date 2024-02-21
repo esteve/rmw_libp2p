@@ -35,17 +35,25 @@ extern "C"
 {
 
 void _add_message_to_queue_in_subscription(
-  CustomNodeInfo * node_impl, uint8_t * message,
+  void * node_ptr, uint8_t * message,
   uintptr_t length)
 {
   std::cout << "====== I WILL ADD A MESSAGE TO THE QUEUE IN SUBSCRIPTION\n";
-  // std::lock_guard<std::mutex> lock(node_impl->subscriptions_mutex_);
-  // for (auto it = node_impl->subscriptions_.begin(); it != node_impl->subscriptions_.end(); ++it) {
-  //   for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-  //     CustomSubscriptionInfo * info = *it2;
-  //     info->message_queue_.push(message);
-  //   }
-  // }
+  CustomNodeHandle *node_handle = static_cast<CustomNodeHandle *>(node_ptr);
+  CustomNodeInfo * node_impl = static_cast<CustomNodeInfo *>(node_handle->custom_node_info);
+
+  RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s(node_impl=%p)",
+    __FUNCTION__, (void *)node_impl);
+
+  std::lock_guard<std::mutex> lock(node_impl->subscriptions_mutex_);
+  for (auto it = node_impl->subscriptions_.begin(); it != node_impl->subscriptions_.end(); ++it) {
+    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+      CustomSubscriptionInfo * info = *it2;
+      info->message_queue_.push(message);
+    }
+  }
 }
 
 // Create a node and return a handle to that node.
@@ -117,6 +125,11 @@ rmw_create_node(
     // error already set
     goto fail;
   }
+
+  RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s(node_impl:rs_libp2p_custom_node_new=%p)",
+  __FUNCTION__, (void *)node_impl);
 
   node_impl->node_handle_ = rs_libp2p_custom_node_new(
     node_impl,

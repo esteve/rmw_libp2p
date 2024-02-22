@@ -106,18 +106,18 @@ rmw_take(
   (void)taken;
   (void)allocation;
   CustomSubscriptionInfo * info = static_cast<CustomSubscriptionInfo *>(subscription->data);
-  if (info->message_queue_.empty()) {
-    RCUTILS_LOG_WARN_NAMED(
-      "rmw_libp2p_cpp",
-      "%s(info is empty)", __FUNCTION__);
-  } else {
-    RCUTILS_LOG_WARN_NAMED(
-      "rmw_libp2p_cpp",
-      "%s(info is not empty)", __FUNCTION__);
-    RCUTILS_LOG_WARN_NAMED(
-      "rmw_libp2p_cpp",
-      "%s(info size: %ld)", __FUNCTION__, info->message_queue_.size());
-  }
+  // if (info->message_queue_.empty()) {
+  //   RCUTILS_LOG_WARN_NAMED(
+  //     "rmw_libp2p_cpp",
+  //     "%s(info is empty)", __FUNCTION__);
+  // } else {
+  //   RCUTILS_LOG_WARN_NAMED(
+  //     "rmw_libp2p_cpp",
+  //     "%s(info is not empty)", __FUNCTION__);
+  //   RCUTILS_LOG_WARN_NAMED(
+  //     "rmw_libp2p_cpp",
+  //     "%s(info size: %ld)", __FUNCTION__, info->message_queue_.size());
+  // }
   // return RMW_RET_ERROR;
   return RMW_RET_OK;
 }

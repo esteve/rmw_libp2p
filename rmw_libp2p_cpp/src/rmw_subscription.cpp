@@ -32,6 +32,7 @@
 #include "rmw_libp2p_cpp/identifier.hpp"
 #include "rmw_libp2p_cpp/custom_node_info.hpp"
 #include "rmw_libp2p_cpp/custom_subscription_info.hpp"
+#include "rmw_libp2p_cpp/Listener.hpp"
 
 #include "type_support_common.hpp"
 
@@ -136,7 +137,8 @@ rmw_create_subscription(
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
   info->subscription_handle_ =
-    rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name);
+    rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name,
+    info, Listener::on_publication);
   if (!info->subscription_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p subscription");
     goto fail;

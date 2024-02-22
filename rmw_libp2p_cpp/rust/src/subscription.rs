@@ -1,4 +1,5 @@
 use crate::Libp2pCustomNode;
+use crate::CustomSubscriptionHandle;
 
 use std::ffi::CStr;
 use std::io::Cursor;
@@ -17,13 +18,22 @@ pub struct Libp2pCustomSubscription {
 }
 
 impl Libp2pCustomSubscription {
-    fn new(ptr_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
+    fn new(ptr_node: *mut Libp2pCustomNode, topic_str: &str,
+        obj: CustomSubscriptionHandle,
+        callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
+    ) -> Self {
+        // println!("1 === Creating new Libp2pCustomSubscription {:p}", obj.0);
+
         let libp2p2_custom_node = unsafe {
             assert!(!ptr_node.is_null());
             &mut *ptr_node
         };
 
-        libp2p2_custom_node.notify_new_subscriber(gossipsub::IdentTopic::new(topic_str));
+        libp2p2_custom_node.notify_new_subscriber(
+            gossipsub::IdentTopic::new(topic_str),
+            obj,
+            callback,        
+        );
 
         Self {
             gid: Uuid::new_v4(),
@@ -38,6 +48,8 @@ impl Libp2pCustomSubscription {
 pub extern "C" fn rs_libp2p_custom_subscription_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
+    obj: CustomSubscriptionHandle,
+    callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
 ) -> *mut Libp2pCustomSubscription {
     let topic_str = unsafe {
         assert!(!topic_str_ptr.is_null());
@@ -45,7 +57,7 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
     };
 
     let libp2p2_custom_subscription =
-        Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap());
+        Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
     Box::into_raw(Box::new(libp2p2_custom_subscription))
 }
 

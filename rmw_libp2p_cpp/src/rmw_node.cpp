@@ -28,32 +28,10 @@
 
 #include "rmw_libp2p_cpp/identifier.hpp"
 #include "rmw_libp2p_cpp/custom_node_info.hpp"
-
 #include "rmw_libp2p_cpp/rmw_libp2p_rs.hpp"
 
 extern "C"
 {
-
-void _add_message_to_queue_in_subscription(
-  const CustomNodeHandle * node_handle, uint8_t * message,
-  uintptr_t length)
-{
-  std::cout << "====== I WILL ADD A MESSAGE TO THE QUEUE IN SUBSCRIPTION\n";
-  CustomNodeInfo * node_impl = static_cast<CustomNodeInfo *>(node_handle->custom_node_info);
-
-  RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(node_impl=%p)",
-    __FUNCTION__, (void *)node_impl);
-
-  std::lock_guard<std::mutex> lock(node_impl->subscriptions_mutex_);
-  for (auto it = node_impl->subscriptions_.begin(); it != node_impl->subscriptions_.end(); ++it) {
-    for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-      CustomSubscriptionInfo * info = *it2;
-      info->message_queue_.push(message);
-    }
-  }
-}
 
 // Create a node and return a handle to that node.
 //
@@ -130,9 +108,7 @@ rmw_create_node(
   "%s(node_impl:rs_libp2p_custom_node_new=%p)",
   __FUNCTION__, (void *)node_impl);
 
-  node_impl->node_handle_ = rs_libp2p_custom_node_new(
-    node_impl,
-    _add_message_to_queue_in_subscription);
+  node_impl->node_handle_ = rs_libp2p_custom_node_new();
   if (!node_impl->node_handle_) {
     RMW_SET_ERROR_MSG("failed to allocate libp2p node");
     goto fail;

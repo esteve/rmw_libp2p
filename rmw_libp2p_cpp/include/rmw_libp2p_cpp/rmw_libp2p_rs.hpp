@@ -22,9 +22,11 @@ extern "C"
 
 struct CustomNodeInfo;
 
-struct CustomNodeHandle {
-  CustomNodeInfo * custom_node_info;
-};
+struct CustomNodeHandle;
+
+struct CustomSubscriptionInfo;
+
+struct CustomSubscriptionHandle;
 
 typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
@@ -35,7 +37,7 @@ typedef struct rs_libp2p_custom_subscription rs_libp2p_custom_subscription_t;
 typedef struct rs_libp2p_cdr_buffer rs_libp2p_cdr_buffer_t;
 
 extern rs_libp2p_custom_node_t *
-rs_libp2p_custom_node_new(const CustomNodeInfo *, void (*)(const CustomNodeHandle *, uint8_t*, const uintptr_t));
+rs_libp2p_custom_node_new();
 
 extern void
 rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
@@ -50,7 +52,10 @@ extern size_t
 rs_libp2p_custom_publisher_get_gid(rs_libp2p_custom_publisher_t *, uint8_t *);
 
 extern rs_libp2p_custom_subscription_t *
-rs_libp2p_custom_subscription_new(rs_libp2p_custom_node_t *, const char *);
+rs_libp2p_custom_subscription_new(
+  rs_libp2p_custom_node_t *, const char *, const CustomSubscriptionInfo *,
+  void (*)(const CustomSubscriptionHandle *, uint8_t*, const uintptr_t)
+);
 
 extern void
 rs_libp2p_custom_subscription_free(rs_libp2p_custom_subscription_t *);

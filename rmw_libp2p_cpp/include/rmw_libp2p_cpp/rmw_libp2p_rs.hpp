@@ -35,7 +35,7 @@ typedef struct rs_libp2p_custom_subscription rs_libp2p_custom_subscription_t;
 typedef struct rs_libp2p_cdr_buffer rs_libp2p_cdr_buffer_t;
 
 extern rs_libp2p_custom_node_t *
-rs_libp2p_custom_node_new(void *, void (*)(void *, uint8_t*, uintptr_t));
+rs_libp2p_custom_node_new(const CustomNodeInfo *, void (*)(const CustomNodeHandle *, uint8_t*, const uintptr_t));
 
 extern void
 rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);

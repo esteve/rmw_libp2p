@@ -35,11 +35,10 @@ extern "C"
 {
 
 void _add_message_to_queue_in_subscription(
-  void * node_ptr, uint8_t * message,
+  const CustomNodeHandle * node_handle, uint8_t * message,
   uintptr_t length)
 {
   std::cout << "====== I WILL ADD A MESSAGE TO THE QUEUE IN SUBSCRIPTION\n";
-  CustomNodeHandle *node_handle = static_cast<CustomNodeHandle *>(node_ptr);
   CustomNodeInfo * node_impl = static_cast<CustomNodeInfo *>(node_handle->custom_node_info);
 
   RCUTILS_LOG_WARN_NAMED(

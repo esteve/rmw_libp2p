@@ -69,16 +69,16 @@ rmw_wait(
     return RMW_RET_ERROR;
   }
 
-  if (subscriptions) {
-    for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
-      void * data = subscriptions->subscribers[i];
-      auto custom_subscriber_info = static_cast<CustomSubscriptionInfo *>(data);
-      // Short circuiting out of this function is possible
-      if (custom_subscriber_info && custom_subscriber_info->listener_->hasData()) {
-        return true;
-      }
-    }
-  }
+  // if (subscriptions) {
+  //   for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
+  //     void * data = subscriptions->subscribers[i];
+  //     auto custom_subscriber_info = static_cast<CustomSubscriptionInfo *>(data);
+  //     // Short circuiting out of this function is possible
+  //     if (custom_subscriber_info && custom_subscriber_info->listener_->hasData()) {
+  //       return true;
+  //     }
+  //   }
+  // }
 
   // return RMW_RET_ERROR;
   // return RMW_RET_OK;

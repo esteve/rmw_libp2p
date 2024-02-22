@@ -16,7 +16,7 @@ use tokio::{select, task};
 use deadqueue::unlimited::Queue;
 
 #[repr(C)]
-struct CustomNodeHandle(*mut c_void);
+struct CustomNodeHandle(*const c_void);
 
 unsafe impl Send for CustomNodeHandle {}
 unsafe impl Sync for CustomNodeHandle {}

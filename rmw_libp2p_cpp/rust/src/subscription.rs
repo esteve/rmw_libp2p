@@ -22,8 +22,6 @@ impl Libp2pCustomSubscription {
         obj: CustomSubscriptionHandle,
         callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
     ) -> Self {
-        println!("1 === Creating new Libp2pCustomSubscription {:p}", obj.ptr);
-
         let libp2p2_custom_node = unsafe {
             assert!(!ptr_node.is_null());
             &mut *ptr_node

@@ -47,11 +47,6 @@ public:
   {
     CustomSubscriptionInfo * subscription_impl = static_cast<CustomSubscriptionInfo *>(subscription_handle->custom_subscription_info);
 
-    RCUTILS_LOG_WARN_NAMED(
-      "rmw_libp2p_cpp",
-      "%s(node_impl=%p)",
-      __FUNCTION__, (void *)subscription_impl);
-
     Listener * listener = subscription_impl->listener_;
     Data data = std::make_pair(message, length);
 
@@ -94,27 +89,14 @@ public:
   bool
   take_next_data(uint8_t ** message, uintptr_t & length)
   {
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
     std::lock_guard<std::mutex> lock(internal_mutex_);
     if (message_queue_.empty()) {
-      RCUTILS_LOG_WARN_NAMED(
-      "rmw_libp2p_cpp",
-      "%s() NO DATA", __FUNCTION__);
-
       return false;
     }
     Data & data = message_queue_.front();
     *message = std::move(data.first);
     length = std::move(data.second);
     message_queue_.pop();
-
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s() YES DATA", __FUNCTION__);
-
     return true;
   }
 

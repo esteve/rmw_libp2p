@@ -50,7 +50,7 @@ rmw_subscription_count_matched_publishers(
   const rmw_subscription_t * subscription,
   size_t * publisher_count)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -66,7 +66,7 @@ rmw_publisher_event_init(
   const rmw_publisher_t * publisher,
   rmw_event_type_t event_type)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -83,7 +83,7 @@ rmw_subscription_event_init(
   const rmw_subscription_t * subscription,
   rmw_event_type_t event_type)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -98,7 +98,7 @@ rmw_take_loaned_message_with_info(
   rmw_message_info_t * message_info,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -118,7 +118,7 @@ rmw_create_client(
   const char * service_name,
   const rmw_qos_profile_t * qos_policies)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -136,7 +136,7 @@ rmw_service_server_is_available(
   const rmw_client_t * client,
   bool * is_available)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -153,7 +153,7 @@ rmw_send_response(
   rmw_request_id_t * request_header,
   void * ros_response)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -171,7 +171,7 @@ rmw_take_request(
   void * ros_request,
   bool * taken)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -188,7 +188,7 @@ rmw_destroy_service(
   rmw_node_t * node,
   rmw_service_t * service)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -205,7 +205,7 @@ rmw_take_response(
   void * ros_response,
   bool * taken)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -223,7 +223,7 @@ rmw_send_request(
   const void * ros_request,
   int64_t * sequence_id)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -239,7 +239,7 @@ rmw_destroy_client(
   rmw_node_t * node,
   rmw_client_t * client)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -254,7 +254,7 @@ rmw_return_loaned_message_from_subscription(
   const rmw_subscription_t * subscription,
   void * loaned_message)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -270,7 +270,7 @@ rmw_borrow_loaned_message(
   const rosidl_message_type_support_t * type_support,
   void ** ros_message)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -286,7 +286,7 @@ rmw_client_request_publisher_get_actual_qos(
   const rmw_client_t * client,
   rmw_qos_profile_t * qos)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -301,7 +301,7 @@ rmw_client_response_subscription_get_actual_qos(
   const rmw_client_t * client,
   rmw_qos_profile_t * qos)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -317,7 +317,7 @@ rmw_client_set_on_new_response_callback(
   rmw_event_callback_t callback,
   const void * user_data)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -331,7 +331,7 @@ rmw_client_set_on_new_response_callback(
 rmw_ret_t
 rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * result)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -348,7 +348,7 @@ rmw_init_publisher_allocation(
   const rosidl_runtime_c__Sequence__bound * message_bounds,
   rmw_publisher_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -363,7 +363,7 @@ rmw_ret_t
 rmw_fini_publisher_allocation(
   rmw_publisher_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -377,7 +377,7 @@ rmw_return_loaned_message_from_publisher(
   const rmw_publisher_t * publisher,
   void * loaned_message)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -392,7 +392,7 @@ rmw_publisher_count_matched_subscriptions(
   const rmw_publisher_t * publisher,
   size_t * subscription_count)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -408,7 +408,7 @@ rmw_publish_serialized_message(
   const rmw_serialized_message_t * serialized_message,
   rmw_publisher_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -425,7 +425,7 @@ rmw_get_serialized_message_size(
   const rosidl_runtime_c__Sequence__bound * message_bounds,
   size_t * size)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -439,7 +439,7 @@ rmw_get_serialized_message_size(
 rmw_ret_t
 rmw_publisher_assert_liveliness(const rmw_publisher_t * publisher)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -453,7 +453,7 @@ rmw_publisher_wait_for_all_acked(
   const rmw_publisher_t * publisher,
   rmw_time_t wait_timeout)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -469,7 +469,7 @@ rmw_serialize(
   const rosidl_message_type_support_t * type_support,
   rmw_serialized_message_t * serialized_message)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -486,7 +486,7 @@ rmw_deserialize(
   const rosidl_message_type_support_t * type_support,
   void * ros_message)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -503,7 +503,7 @@ rmw_init_subscription_allocation(
   const rosidl_runtime_c__Sequence__bound * message_bounds,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -518,7 +518,7 @@ rmw_ret_t
 rmw_fini_subscription_allocation(
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -533,7 +533,7 @@ rmw_count_publishers(
   const char * topic_name,
   size_t * count)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -550,7 +550,7 @@ rmw_count_subscribers(
   const char * topic_name,
   size_t * count)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -568,7 +568,7 @@ rmw_get_node_names_with_enclaves(
   rcutils_string_array_t * node_namespaces,
   rcutils_string_array_t * enclaves)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -586,7 +586,7 @@ rmw_get_node_names(
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -600,7 +600,7 @@ rmw_get_node_names(
 rmw_ret_t
 rmw_set_log_severity(rmw_log_severity_t severity)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -615,7 +615,7 @@ rmw_subscription_set_on_new_message_callback(
   rmw_event_callback_t callback,
   const void * user_data)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -632,7 +632,7 @@ rmw_service_set_on_new_request_callback(
   rmw_event_callback_t callback,
   const void * user_data)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -649,7 +649,7 @@ rmw_event_set_callback(
   rmw_event_callback_t callback,
   const void * user_data)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -667,7 +667,7 @@ rmw_take_loaned_message(
   bool * taken,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -687,7 +687,7 @@ rmw_take_serialized_message_with_info(
   rmw_message_info_t * message_info,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -707,7 +707,7 @@ rmw_take_serialized_message(
   bool * taken,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -728,7 +728,7 @@ rmw_take_sequence(
   size_t * taken,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -748,7 +748,7 @@ rmw_subscription_get_content_filter(
   rcutils_allocator_t * allocator,
   rmw_subscription_content_filter_options_t * options)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -764,7 +764,7 @@ rmw_subscription_set_content_filter(
   rmw_subscription_t * subscription,
   const rmw_subscription_content_filter_options_t * options)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -777,7 +777,7 @@ rmw_subscription_set_content_filter(
 bool
 rmw_feature_supported(rmw_feature_t feature)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -792,7 +792,7 @@ rmw_take_event(
   void * event_info,
   bool * taken)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -811,7 +811,7 @@ rmw_get_client_names_and_types_by_node(
   const char * node_namespace,
   rmw_names_and_types_t * service_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -832,7 +832,7 @@ rmw_get_service_names_and_types_by_node(
   const char * node_namespace,
   rmw_names_and_types_t * service_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -854,7 +854,7 @@ rmw_get_publisher_names_and_types_by_node(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -877,7 +877,7 @@ rmw_get_subscriber_names_and_types_by_node(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -899,7 +899,7 @@ rmw_get_publishers_info_by_topic(
   bool no_mangle,
   rmw_topic_endpoint_info_array_t * publishers_info)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -918,7 +918,7 @@ rmw_get_service_names_and_types(
   rcutils_allocator_t * allocator,
   rmw_names_and_types_t * service_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -937,7 +937,7 @@ rmw_get_subscriptions_info_by_topic(
   bool no_mangle,
   rmw_topic_endpoint_info_array_t * subscriptions_info)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -957,7 +957,7 @@ rmw_get_topic_names_and_types(
   bool no_demangle,
   rmw_names_and_types_t * topic_names_and_types)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -975,7 +975,7 @@ rmw_publisher_get_network_flow_endpoints(
   rcutils_allocator_t * allocator,
   rmw_network_flow_endpoint_array_t * network_flow_endpoint_array)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -994,7 +994,7 @@ rmw_qos_profile_check_compatible(
   char * reason,
   size_t reason_size)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -1013,7 +1013,7 @@ rmw_subscription_get_network_flow_endpoints(
   rcutils_allocator_t * allocator,
   rmw_network_flow_endpoint_array_t * network_flow_endpoint_array)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

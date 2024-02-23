@@ -142,14 +142,15 @@ impl Libp2pCustomNode {
                     },
 
                     (topic, obj, callback) = new_subscribers_queue_clone.pop() => {
-                        println!("Subscribing to topic: {}", topic);
+                        // println!("Subscribing to topic: {}", topic);
                         swarm.behaviour_mut().gossipsub.subscribe(&topic).unwrap();
                         subscription_callback.insert(topic.hash().into_string(), (obj, callback));
                     },
 
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
-                        println!("Publishing message on topic {} : {:?}", topic, buffer);
+                        // TODO(esteve): use some sort of debug log
+                        // println!("Publishing message on topic {} : {:?}", topic, buffer);
                         if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
                             println!("Publish error: {e:?}");
                         }
@@ -173,14 +174,14 @@ impl Libp2pCustomNode {
                             message_id: id,
                             message,
                         })) => {
-                            println!(
-                                "Got message: {:?} with id: {} from peer: {:?} topic: {}",
-                                message.data,
-                                id,
-                                peer_id,
-                                message.topic.as_str(),
-                            );
-                            // // incoming_queue.push((message.topic.into_string(), callback, message.data));
+                            // TODO(esteve): use some sort of debug log
+                            // println!(
+                            //     "Got message: {:?} with id: {} from peer: {:?} topic: {}",
+                            //     message.data,
+                            //     id,
+                            //     peer_id,
+                            //     message.topic.as_str(),
+                            // );
                             let mut vec = message.data;
                             vec.shrink_to_fit();
                             let ptr: *mut u8 = vec.as_mut_ptr();
@@ -217,7 +218,8 @@ impl Libp2pCustomNode {
                             }
                         },
                         _ => {
-                            println!("UNKNOWN EVENT");
+                            // TODO(esteve): use some sort of debug log
+                            // println!("UNKNOWN EVENT");
                         }
                     },
                 }

@@ -45,11 +45,11 @@ rmw_create_publisher(
   const rmw_qos_profile_t * qos_policies,
   const rmw_publisher_options_t * publisher_options)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
-//   RCUTILS_LOG_WARN_NAMED(
+//   RCUTILS_LOG_DEBUG_NAMED(
 //     "rmw_libp2p_cpp",
 //     "%s(node=%p,type_supports=%p,topic_name=%s,"
 //     "qos_policies={history=%s,depth=%zu,reliability=%s,durability=%s},publisher_options=%p)",
@@ -91,23 +91,16 @@ rmw_create_publisher(
     return nullptr;
   }
 
-  std::cout << "rmw_create_publisher: " << topic_name << std::endl;
-  std::cout << "PUB: TRY TYPESUPPORT 1" << std::endl;
   const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
     type_supports, rosidl_typesupport_introspection_c__identifier);
-  std::cout << "PUB: TRY TYPESUPPORT 2" << std::endl;
   if (!type_support) {
-    std::cout << "PUB: TRY TYPESUPPORT 2a" << std::endl;
     type_support = get_message_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
-      std::cout << "PUB: TRY TYPESUPPORT 2aa" << std::endl;
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
-
-  std::cout << "PUB: TRY TYPESUPPORT 3" << std::endl;
 
   CustomPublisherInfo * info = nullptr;
 //   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
@@ -128,7 +121,6 @@ rmw_create_publisher(
       info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
-  std::cout << "PUB: TRY TYPESUPPORT 4" << std::endl;
 
   info->qos_ = *qos_policies;
   /* Set to best-effort & volatile since QoS features are not supported by DPS at the moment. */
@@ -205,7 +197,7 @@ rmw_destroy_publisher(
   rmw_node_t * node,
   rmw_publisher_t * publisher)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -220,7 +212,7 @@ rmw_publisher_get_actual_qos(
   const rmw_publisher_t * publisher,
   rmw_qos_profile_t * qos)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

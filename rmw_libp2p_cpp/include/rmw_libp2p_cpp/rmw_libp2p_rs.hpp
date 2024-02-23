@@ -20,13 +20,9 @@ extern "C"
 {
 #endif
 
-struct CustomNodeInfo;
-
-struct CustomNodeHandle;
+struct CustomSubscriptionHandle;
 
 struct CustomSubscriptionInfo;
-
-struct CustomSubscriptionHandle;
 
 typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 

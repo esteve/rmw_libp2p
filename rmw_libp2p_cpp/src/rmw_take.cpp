@@ -44,10 +44,6 @@ _take(
   uintptr_t length = 0;
 
   if (info->listener_->take_next_data(&message, length)) {
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s() TAKE NEXT DATA YES", __FUNCTION__);
-
     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
     _deserialize_ros_message(buffer, ros_message, info->type_support_,
       info->typesupport_identifier_);
@@ -68,7 +64,7 @@ rmw_take_with_info(
   rmw_message_info_t * message_info,
   rmw_subscription_allocation_t * allocation)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(subscription=%p,ros_message=%p,taken=%p,message_info=%p,allocation=%p)", __FUNCTION__,
     (void *)subscription, ros_message, (void *)taken, (void *)message_info, (void *)allocation);

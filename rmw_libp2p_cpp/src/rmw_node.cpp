@@ -42,7 +42,7 @@ rmw_create_node(
   const char * name,
   const char * namespace_)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(name=%s,namespace_=%s)",
     __FUNCTION__, name, namespace_);
@@ -103,11 +103,6 @@ rmw_create_node(
     goto fail;
   }
 
-  RCUTILS_LOG_WARN_NAMED(
-  "rmw_libp2p_cpp",
-  "%s(node_impl:rs_libp2p_custom_node_new=%p)",
-  __FUNCTION__, (void *)node_impl);
-
   node_impl->node_handle_ = rs_libp2p_custom_node_new();
   if (!node_impl->node_handle_) {
     RMW_SET_ERROR_MSG("failed to allocate libp2p node");
@@ -134,7 +129,7 @@ rmw_ret_t
 rmw_destroy_node(
   rmw_node_t * node)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(node=%p)", __FUNCTION__, (void *)node);
 
@@ -177,7 +172,7 @@ rmw_destroy_node(
 const rmw_guard_condition_t *
 rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(node=%p)", __FUNCTION__, (void *)node);
 

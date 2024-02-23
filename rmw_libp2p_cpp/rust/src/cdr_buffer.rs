@@ -12,7 +12,10 @@ pub extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Cursor<Vec<u8>>) {
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_cdr_buffer_read_new(data: *const u8, length: usize) -> *mut Cursor<Vec<u8>> {
+pub extern "C" fn rs_libp2p_cdr_buffer_read_new(
+    data: *const u8,
+    length: usize,
+) -> *mut Cursor<Vec<u8>> {
     let libp2p2_cdr_buffer = Cursor::new(unsafe { slice::from_raw_parts(data, length) }.to_vec());
     Box::into_raw(Box::new(libp2p2_cdr_buffer))
 }
@@ -25,7 +28,6 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_uint64(ptr: *mut Cursor<Vec<u8>>, n:
     };
     unsafe {
         let x = cdr::deserialize_from::<_, u64, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
-        println!("========== read_uint64: {}", x);
         *n = x
     }
 }

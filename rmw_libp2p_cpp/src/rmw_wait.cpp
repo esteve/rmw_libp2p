@@ -32,30 +32,16 @@ check_wait_set_for_data(
   const rmw_services_t * services,
   const rmw_clients_t * clients)
 {
-  RCUTILS_LOG_WARN_NAMED(
-  "rmw_libp2p_cpp",
-  "%s()", __FUNCTION__);
-
   if (subscriptions) {
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s() YES SUBS", __FUNCTION__);
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
       void * data = subscriptions->subscribers[i];
       auto custom_subscriber_info = static_cast<CustomSubscriptionInfo *>(data);
       // Short circuiting out of this function is possible
       if (custom_subscriber_info && custom_subscriber_info->listener_->has_data()) {
-          RCUTILS_LOG_WARN_NAMED(
-            "rmw_libp2p_cpp",
-            "%s() has_data true", __FUNCTION__);
         return true;
       }
     }
   }
-
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s() NO SUBS", __FUNCTION__);
 
   // if (clients) {
   //   for (size_t i = 0; i < clients->client_count; ++i) {
@@ -169,29 +155,15 @@ rmw_wait(
   lock.unlock();
 
   if (subscriptions) {
-    RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s() YES SUBS x2", __FUNCTION__);
-
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
       void * data = subscriptions->subscribers[i];
       auto custom_subscriber_info = static_cast<CustomSubscriptionInfo *>(data);
       custom_subscriber_info->listener_->detach_condition();
       if (!custom_subscriber_info->listener_->has_data()) {
-        RCUTILS_LOG_WARN_NAMED(
-          "rmw_libp2p_cpp",
-          "%s() === NO DATA", __FUNCTION__);
-
         subscriptions->subscribers[i] = 0;
-      } else {
-        RCUTILS_LOG_WARN_NAMED(
-          "rmw_libp2p_cpp",
-          "%s() === YES DATA", __FUNCTION__);
-
       }
     }
   }
 
-  return RMW_RET_OK;
-  // return timeout ? RMW_RET_TIMEOUT : RMW_RET_OK;
+  return timeout ? RMW_RET_TIMEOUT : RMW_RET_OK;
 }

@@ -45,11 +45,11 @@ rmw_create_subscription(
   const rmw_qos_profile_t * qos_policies,
   const rmw_subscription_options_t * subscription_options)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
-  //   RCUTILS_LOG_WARN_NAMED(
+  //   RCUTILS_LOG_DEBUG_NAMED(
   //     "rmw_libp2p_cpp",
   //     "%s(node=%p,type_supports=%p,topic_name=%s,"
   //     "qos_policies={history=%s,depth=%zu,reliability=%s,durability=%s},publisher_options=%p)",
@@ -91,23 +91,16 @@ rmw_create_subscription(
     return nullptr;
   }
 
-  std::cout << "rmw_create_subscription: " << topic_name << std::endl;
-  std::cout << "SUB: TRY TYPESUPPORT 1" << std::endl;
   const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
     type_supports, rosidl_typesupport_introspection_c__identifier);
-  std::cout << "SUB: TRY TYPESUPPORT 2" << std::endl;
   if (!type_support) {
-    std::cout << "SUB: TRY TYPESUPPORT 2a" << std::endl;
     type_support = get_message_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
-      std::cout << "SUB: TRY TYPESUPPORT 2aa" << std::endl;
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
-
-  std::cout << "SUB: TRY TYPESUPPORT 3" << std::endl;
 
   CustomSubscriptionInfo * info = nullptr;
   //   std::string dps_topic = _get_dps_topic_name(impl->domain_id_, topic_name);
@@ -120,11 +113,6 @@ rmw_create_subscription(
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
 
-  RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(info=%p)",
-    __FUNCTION__, (void *)info);
-
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
@@ -133,7 +121,6 @@ rmw_create_subscription(
       info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
-  std::cout << "SUB: TRY TYPESUPPORT 4" << std::endl;
 
   info->qos_ = *qos_policies;
   /* Set to best-effort & volatile since QoS features are not supported by DPS at the moment. */
@@ -141,6 +128,7 @@ rmw_create_subscription(
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
 
+  // TODO(esteve): delete Listener in the destructor
   info->listener_ = new Listener;
 
   info->subscription_handle_ =
@@ -150,7 +138,6 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("failed to create libp2p subscription");
     goto fail;
   }
-  std::cout << "SUB: TRY TYPESUPPORT 5" << std::endl;
 
   // info->publication_ = DPS_CreatePublication(node_data->impl);
   // if (!info->publication_) {
@@ -168,7 +155,6 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("failed to allocate subscription");
     goto fail;
   }
-  std::cout << "SUB: TRY TYPESUPPORT 6" << std::endl;
 
   rmw_subscription->implementation_identifier = libp2p_identifier;
   rmw_subscription->data = info;
@@ -190,8 +176,6 @@ rmw_create_subscription(
     std::lock_guard<std::mutex> lock(node_data->subscriptions_mutex_);
     node_data->subscriptions_[topic_name].insert(info);
   }
-
-  std::cout << "SUB: TRY TYPESUPPORT 9" << std::endl;
 
   return rmw_subscription;
 
@@ -218,7 +202,7 @@ rmw_destroy_subscription(
   rmw_node_t * node,
   rmw_subscription_t * subscription)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
@@ -233,7 +217,7 @@ rmw_subscription_get_actual_qos(
   const rmw_subscription_t * subscription,
   rmw_qos_profile_t * qos)
 {
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 

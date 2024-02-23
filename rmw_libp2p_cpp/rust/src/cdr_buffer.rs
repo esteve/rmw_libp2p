@@ -24,7 +24,9 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_uint64(ptr: *mut Cursor<Vec<u8>>, n:
         &mut *ptr
     };
     unsafe {
-        *n = cdr::deserialize_from::<_, u64, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+        let x = cdr::deserialize_from::<_, u64, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
+        println!("========== read_uint64: {}", x);
+        *n = x
     }
 }
 

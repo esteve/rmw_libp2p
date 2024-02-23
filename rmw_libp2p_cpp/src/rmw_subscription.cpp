@@ -120,6 +120,11 @@ rmw_create_subscription(
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
 
+  RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s(info=%p)",
+    __FUNCTION__, (void *)info);
+
   std::string type_name = _create_type_name(
     type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
@@ -135,6 +140,8 @@ rmw_create_subscription(
   info->qos_.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
   info->qos_.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
   info->qos_.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
+
+  info->listener_ = new Listener;
 
   info->subscription_handle_ =
     rs_libp2p_custom_subscription_new(node_data->node_handle_, topic_name,

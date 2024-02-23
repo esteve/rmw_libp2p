@@ -91,60 +91,6 @@ rmw_subscription_event_init(
 }
 
 rmw_ret_t
-rmw_take(
-  const rmw_subscription_t * subscription,
-  void * ros_message,
-  bool * taken,
-  rmw_subscription_allocation_t * allocation)
-{
-  RCUTILS_LOG_WARN_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)subscription;
-  (void)ros_message;
-  (void)taken;
-  (void)allocation;
-  CustomSubscriptionInfo * info = static_cast<CustomSubscriptionInfo *>(subscription->data);
-  // if (info->message_queue_.empty()) {
-  //   RCUTILS_LOG_WARN_NAMED(
-  //     "rmw_libp2p_cpp",
-  //     "%s(info is empty)", __FUNCTION__);
-  // } else {
-  //   RCUTILS_LOG_WARN_NAMED(
-  //     "rmw_libp2p_cpp",
-  //     "%s(info is not empty)", __FUNCTION__);
-  //   RCUTILS_LOG_WARN_NAMED(
-  //     "rmw_libp2p_cpp",
-  //     "%s(info size: %ld)", __FUNCTION__, info->message_queue_.size());
-  // }
-  // return RMW_RET_ERROR;
-  return RMW_RET_OK;
-}
-
-rmw_ret_t
-rmw_take_with_info(
-  const rmw_subscription_t * subscription,
-  void * ros_message,
-  bool * taken,
-  rmw_message_info_t * message_info,
-  rmw_subscription_allocation_t * allocation)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)subscription;
-  (void)ros_message;
-  (void)taken;
-  (void)message_info;
-  (void)allocation;
-
-  // return RMW_RET_ERROR;
-  return RMW_RET_OK;
-}
-
-rmw_ret_t
 rmw_take_loaned_message_with_info(
   const rmw_subscription_t * subscription,
   void ** loaned_message,

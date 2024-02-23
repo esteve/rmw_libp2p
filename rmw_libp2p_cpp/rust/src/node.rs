@@ -18,7 +18,9 @@ use tokio::{select, task};
 use deadqueue::unlimited::Queue;
 
 #[repr(C)]
-pub(crate) struct CustomSubscriptionHandle(*const c_void);
+pub(crate) struct CustomSubscriptionHandle{
+    pub ptr: *const c_void
+}
 
 unsafe impl Send for CustomSubscriptionHandle {}
 unsafe impl Sync for CustomSubscriptionHandle {}

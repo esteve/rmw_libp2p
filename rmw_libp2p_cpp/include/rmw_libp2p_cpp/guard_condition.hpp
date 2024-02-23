@@ -29,15 +29,15 @@ class GuardCondition
 public:
   GuardCondition()
   : hasTriggered_(false),
-    conditionMutex_(nullptr), conditionVariable_(nullptr) {}
+    condition_mutex_(nullptr), conditionVariable_(nullptr) {}
 
   void
   trigger()
   {
     std::lock_guard<std::mutex> lock(internalMutex_);
 
-    if (conditionMutex_) {
-      std::unique_lock<std::mutex> clock(*conditionMutex_);
+    if (condition_mutex_) {
+      std::unique_lock<std::mutex> clock(*condition_mutex_);
       // the change to hasTriggered_ needs to be mutually exclusive with
       // rmw_wait() which checks hasTriggered() and decides if wait() needs to
       // be called
@@ -50,10 +50,10 @@ public:
   }
 
   void
-  attachCondition(std::mutex * conditionMutex, std::condition_variable * conditionVariable)
+  attachCondition(std::mutex * condition_mutex, std::condition_variable * conditionVariable)
   {
     std::lock_guard<std::mutex> lock(internalMutex_);
-    conditionMutex_ = conditionMutex;
+    condition_mutex_ = condition_mutex;
     conditionVariable_ = conditionVariable;
   }
 
@@ -61,7 +61,7 @@ public:
   detachCondition()
   {
     std::lock_guard<std::mutex> lock(internalMutex_);
-    conditionMutex_ = nullptr;
+    condition_mutex_ = nullptr;
     conditionVariable_ = nullptr;
   }
 
@@ -80,7 +80,7 @@ public:
 private:
   std::mutex internalMutex_;
   std::atomic_bool hasTriggered_;
-  std::mutex * conditionMutex_ RCPPUTILS_TSA_GUARDED_BY(internalMutex_);
+  std::mutex * condition_mutex_ RCPPUTILS_TSA_GUARDED_BY(internalMutex_);
   std::condition_variable * conditionVariable_ RCPPUTILS_TSA_GUARDED_BY(internalMutex_);
 };
 

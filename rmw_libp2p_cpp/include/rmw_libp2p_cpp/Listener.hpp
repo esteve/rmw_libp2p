@@ -34,6 +34,8 @@ struct CustomSubscriptionHandle {
 class Listener
 {
 public:
+  using Data = std::pair<uint8_t *, uintptr_t>;
+
   Listener()
   : condition_mutex_(nullptr), condition_variable_(nullptr)
   {
@@ -50,19 +52,21 @@ public:
       "%s(node_impl=%p)",
       __FUNCTION__, (void *)subscription_impl);
 
-    // Listener * listener = subscription_impl->listener_;
-    // std::lock_guard<std::mutex> lock(listener->internal_mutex_);
+    Listener * listener = subscription_impl->listener_;
+    Data data = std::make_pair(message, length);
 
-    // if (listener->condition_mutex_) {
-    //   std::unique_lock<std::mutex> clock(*listener->condition_mutex_);
-    //   // the change to data_ needs to be mutually exclusive with rmw_wait()
-    //   // which checks has_data() and decides if wait() needs to be called
-    //   listener->message_queue_.push(std::move(message));
-    //   clock.unlock();
-    //   listener->condition_variable_->notify_one();
-    // } else {
-    //   listener->message_queue_.push(std::move(message));
-    // }
+    std::lock_guard<std::mutex> lock(listener->internal_mutex_);
+
+    if (listener->condition_mutex_) {
+      std::unique_lock<std::mutex> clock(*listener->condition_mutex_);
+      // the change to data_ needs to be mutually exclusive with rmw_wait()
+      // which checks has_data() and decides if wait() needs to be called
+      listener->message_queue_.push(std::move(data));
+      clock.unlock();
+      listener->condition_variable_->notify_one();
+    } else {
+      listener->message_queue_.push(std::move(data));
+    }
   }
 
   void
@@ -72,7 +76,6 @@ public:
     condition_mutex_ = condition_mutex;
     condition_variable_ = condition_variable;
   }
-
 
   void
   detach_condition()
@@ -88,9 +91,36 @@ public:
     return message_queue_.size() > 0;
   }
 
+  bool
+  take_next_data(uint8_t ** message, uintptr_t & length)
+  {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+    if (message_queue_.empty()) {
+      RCUTILS_LOG_WARN_NAMED(
+      "rmw_libp2p_cpp",
+      "%s() NO DATA", __FUNCTION__);
+
+      return false;
+    }
+    Data & data = message_queue_.front();
+    *message = std::move(data.first);
+    length = std::move(data.second);
+    message_queue_.pop();
+
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() YES DATA", __FUNCTION__);
+
+    return true;
+  }
+
 private:
   std::mutex internal_mutex_;
-  std::queue<uint8_t *> message_queue_;
+  std::queue<Data> message_queue_;
   std::mutex * condition_mutex_;
   std::condition_variable * condition_variable_;
 };

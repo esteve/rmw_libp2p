@@ -79,8 +79,8 @@ rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
     RMW_SET_ERROR_MSG("wait set info is null");
     return RMW_RET_ERROR;
   }
-  std::mutex * conditionMutex = &wait_set_info->condition_mutex;
-  if (!conditionMutex) {
+  std::mutex * condition_mutex = &wait_set_info->condition_mutex;
+  if (!condition_mutex) {
     RMW_SET_ERROR_MSG("wait set mutex is null");
     return RMW_RET_ERROR;
   }

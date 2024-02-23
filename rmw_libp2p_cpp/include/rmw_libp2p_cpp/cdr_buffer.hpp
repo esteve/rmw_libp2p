@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "rcutils/logging_macros.h"
+
 namespace rmw_libp2p_cpp
 {
 namespace cdr
@@ -121,66 +123,118 @@ public:
   }
   inline ReadCDRBuffer & operator>>(uint64_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ uint64_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_uint64(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(uint32_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ uint32_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_uint32(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(uint16_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ uint16_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_uint16(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(uint8_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ uint8_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_uint8(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(int64_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ int64_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_int64(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(int32_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ int32_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_int32(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(int16_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ int16_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_int16(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(int8_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ int8_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_int8(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(char & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ char", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_char(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(char16_t & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ char16_t", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_char16(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(float & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ float", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_float(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(double & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ double", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_double(buffer_, &n);
     return *this;
   }
   inline ReadCDRBuffer & operator>>(bool & n)
   {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() READ bool", __FUNCTION__);
+
     rs_libp2p_cdr_buffer_read_bool(buffer_, &n);
     return *this;
   }

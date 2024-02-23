@@ -45,9 +45,15 @@ _deserialize_ros_message(
   const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() TYPESUPPORT C", __FUNCTION__);
     auto typed_typesupport = static_cast<TypeSupport_c *>(untyped_typesupport);
     return typed_typesupport->deserializeROSmessage(deser, ros_message);
   } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
+    RCUTILS_LOG_WARN_NAMED(
+    "rmw_libp2p_cpp",
+    "%s() TYPESUPPORT C++", __FUNCTION__);
     auto typed_typesupport = static_cast<TypeSupport_cpp *>(untyped_typesupport);
     return typed_typesupport->deserializeROSmessage(deser, ros_message);
   }

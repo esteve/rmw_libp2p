@@ -525,8 +525,20 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
   assert(members);
   assert(ros_message);
 
+  RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s() DESER NEXT ENTRY", __FUNCTION__);
+
   size_t member_count = 0;
+  RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s() PRE COUNT %ld", __FUNCTION__, member_count);
+
   deser >> member_count;
+  RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s() POST COUNT %ld", __FUNCTION__, member_count);
+
   if (member_count != members->member_count_) {
     throw std::runtime_error("failed to deserialize value");
   }
@@ -621,8 +633,14 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
   cdr::ReadCDRBuffer & deser, void * ros_message)
 {
   assert(ros_message);
+  RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s() DESER ENTRY", __FUNCTION__);
 
   if (members_->member_count_ != 0) {
+      RCUTILS_LOG_WARN_NAMED(
+  "rmw_libp2p_cpp",
+  "%s() MEMBER COUNT : %ld DESER ENTRY", __FUNCTION__, members_->member_count_);
     TypeSupport::deserializeROSmessage(deser, members_, ros_message, false);
   }
 

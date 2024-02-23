@@ -1,10 +1,17 @@
+use core::slice;
 use std::ffi::CString;
 use std::io::Cursor;
 use std::os::raw::c_char;
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_cdr_buffer_new() -> *mut Cursor<Vec<u8>> {
+pub extern "C" fn rs_libp2p_cdr_buffer_write_new() -> *mut Cursor<Vec<u8>> {
     let libp2p2_cdr_buffer = Cursor::new(Vec::<u8>::new());
+    Box::into_raw(Box::new(libp2p2_cdr_buffer))
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_read_new(data: *const u8, length: usize) -> *mut Cursor<Vec<u8>> {
+    let libp2p2_cdr_buffer = Cursor::new(unsafe { slice::from_raw_parts(data, length) }.to_vec());
     Box::into_raw(Box::new(libp2p2_cdr_buffer))
 }
 

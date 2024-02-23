@@ -32,7 +32,7 @@ class WriteCDRBuffer
 public:
   explicit WriteCDRBuffer()
   {
-    buffer_ = rs_libp2p_cdr_buffer_new();
+    buffer_ = rs_libp2p_cdr_buffer_write_new();
   }
   ~WriteCDRBuffer()
   {
@@ -111,9 +111,9 @@ private:
 class ReadCDRBuffer
 {
 public:
-  explicit ReadCDRBuffer()
+  explicit ReadCDRBuffer(const uint8_t * data, uintptr_t length)
   {
-    buffer_ = rs_libp2p_cdr_buffer_new();
+    buffer_ = rs_libp2p_cdr_buffer_read_new(data, length);
   }
   ~ReadCDRBuffer()
   {

@@ -17,9 +17,11 @@
 
 #include "rcutils/logging_macros.h"
 
+#include "rmw_libp2p_cpp/cdr_buffer.hpp"
 #include "rmw_libp2p_cpp/identifier.hpp"
 #include "rmw_libp2p_cpp/custom_subscription_info.hpp"
 #include "rmw_libp2p_cpp/Listener.hpp"
+#include "ros_message_serialization.hpp"
 
 rmw_ret_t
 _take(
@@ -46,12 +48,13 @@ _take(
     "rmw_libp2p_cpp",
     "%s() TAKE NEXT DATA YES", __FUNCTION__);
 
-    // _deserialize_ros_message(buffer, ros_message, info->type_support_,
-    //   info->typesupport_identifier_);
+    rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
+    _deserialize_ros_message(buffer, ros_message, info->type_support_,
+      info->typesupport_identifier_);
     // if (message_info) {
     //   _assign_message_info(message_info, pub.get());
     // }
-    // *taken = true;
+    *taken = true;
   }
 
   return RMW_RET_OK;

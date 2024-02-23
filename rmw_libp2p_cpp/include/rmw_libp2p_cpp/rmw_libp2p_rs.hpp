@@ -64,7 +64,10 @@ extern size_t
 rs_libp2p_custom_subscription_get_gid(rs_libp2p_custom_subscription_t *, uint8_t *);
 
 extern rs_libp2p_cdr_buffer_t *
-rs_libp2p_cdr_buffer_new(void);
+rs_libp2p_cdr_buffer_write_new();
+
+extern rs_libp2p_cdr_buffer_t *
+rs_libp2p_cdr_buffer_read_new(const uint8_t *, size_t);
 
 extern void
 rs_libp2p_cdr_buffer_free(rs_libp2p_cdr_buffer_t *);

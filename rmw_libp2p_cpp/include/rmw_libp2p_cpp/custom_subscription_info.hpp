@@ -39,10 +39,4 @@ typedef struct CustomSubscriptionInfo
   rs_libp2p_custom_subscription_t * subscription_handle_;
 } CustomSubscriptionInfo;
 
-~CustomSubscriptionInfo()
-{
-  if (listener_) {
-    delete listener_;
-  }
-}
 #endif  // RMW_LIBP2P_CPP__CUSTOM_SUBSCRIPTION_INFO_HPP_

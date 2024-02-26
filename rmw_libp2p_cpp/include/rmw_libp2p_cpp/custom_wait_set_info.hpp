@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_libp2p_cpp/identifier.hpp"
+#ifndef TYPES__CUSTOM_WAIT_SET_INFO_HPP_
+#define TYPES__CUSTOM_WAIT_SET_INFO_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include <condition_variable>
+#include <mutex>
+
+typedef struct CustomWaitsetInfo
+{
+  std::condition_variable condition;
+  std::mutex condition_mutex;
+} CustomWaitsetInfo;
+
+#endif  // TYPES__CUSTOM_WAIT_SET_INFO_HPP_

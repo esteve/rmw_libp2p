@@ -12,6 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw_libp2p_cpp/identifier.hpp"
+#include "rcutils/logging_macros.h"
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include "rmw/rmw.h"
+
+#include "rmw_libp2p_cpp/serialization_format.hpp"
+
+extern "C"
+{
+const char *
+rmw_get_serialization_format()
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  return libp2p_serialization_format;
+}
+}  // extern "C"

@@ -12,6 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#ifndef IMPL__MACROS_HPP_
+#define IMPL__MACROS_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include <limits>
+#include <string>
+
+#define SPECIALIZE_GENERIC_C_SEQUENCE(C_NAME, C_TYPE) \
+  template<> \
+  struct GenericCSequence<C_TYPE> \
+  { \
+    using type = rosidl_runtime_c__ ## C_NAME ## __Sequence; \
+ \
+    static void fini(type * sequence) { \
+      rosidl_runtime_c__ ## C_NAME ## __Sequence__fini(sequence); \
+    } \
+ \
+    static bool init(type * sequence, size_t size) { \
+      return rosidl_runtime_c__ ## C_NAME ## __Sequence__init(sequence, size); \
+    } \
+  };
+
+#endif  // IMPL__MACROS_HPP_

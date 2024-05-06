@@ -12,6 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#ifndef ROS_MESSAGE_SERIALIZATION_HPP_
+#define ROS_MESSAGE_SERIALIZATION_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include "impl/cdr_buffer.hpp"
+#include "impl/rmw_libp2p_rs.hpp"
+
+bool
+_serialize_ros_message(
+  const void * ros_message,
+  rmw_libp2p_cpp::cdr::WriteCDRBuffer & ser,
+  void * untyped_members,
+  const char * typesupport_identifier);
+
+bool
+_deserialize_ros_message(
+  rmw_libp2p_cpp::cdr::ReadCDRBuffer & deser,
+  void * ros_message,
+  void * untyped_members,
+  const char * typesupport_identifier);
+
+#endif  // ROS_MESSAGE_SERIALIZATION_HPP_

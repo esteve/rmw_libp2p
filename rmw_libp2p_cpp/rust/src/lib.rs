@@ -1,4 +1,4 @@
-// Copyright 2022 Esteve Fernandez All rights reserved.
+// Copyright 2024 Esteve Fernandez
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+mod cdr_buffer;
+mod node;
+mod publisher;
+mod subscription;
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+pub use cdr_buffer::*;
+pub use node::*;
+pub use publisher::*;
+pub use subscription::*;

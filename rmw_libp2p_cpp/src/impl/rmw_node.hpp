@@ -1,4 +1,4 @@
-// Copyright 2022 Esteve Fernandez All rights reserved.
+// Copyright 2024 Esteve Fernandez
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#ifndef IMPL__RMW_NODE_HPP_
+#define IMPL__RMW_NODE_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include "rmw/rmw.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
+
+extern rs_libp2p_custom_node_t *
+rs_libp2p_custom_node_new(void);
+
+extern void
+rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // IMPL__RMW_NODE_HPP_

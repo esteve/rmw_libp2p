@@ -1,4 +1,4 @@
-// Copyright 2022 Esteve Fernandez
+// Copyright 2022 Esteve Fernandez All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_LIBP2P_CPP__IDENTIFIER_HPP_
-#define RMW_LIBP2P_CPP__IDENTIFIER_HPP_
+#include "rcutils/logging_macros.h"
 
-extern const char * const libp2p_identifier;
+#include "rmw/rmw.h"
 
-#endif  // RMW_LIBP2P_CPP__IDENTIFIER_HPP_
+#include "impl/serialization_format.hpp"
+
+extern "C"
+{
+const char *
+rmw_get_serialization_format()
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  return libp2p_serialization_format;
+}
+}  // extern "C"

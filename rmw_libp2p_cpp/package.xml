@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rmw_libp2p_cpp</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Implement the ROS middleware interface using libp2p</description>
   <maintainer email="esteve@apache.org">Esteve Fernandez</maintainer>
   <license>Apache License 2.0</license>
@@ -10,15 +10,19 @@
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
-  <depend>rcpputils</depend>
-  <depend>rcutils</depend>
-  <depend>rmw</depend>
-  <depend>rmw_implementation</depend>
-  <depend>rosidl_runtime_c</depend>
-  <depend>rosidl_runtime_cpp</depend>
-  <depend>rosidl_typesupport_cpp</depend>
-  <depend>rosidl_typesupport_introspection_c</depend>
-  <depend>rosidl_typesupport_introspection_cpp</depend>
+  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
+
+  <build_depend>rcpputils</build_depend>
+  <build_depend>rcutils</build_depend>
+  <build_depend>rmw</build_depend>
+  <build_depend>rosidl_typesupport_introspection_c</build_depend>
+  <build_depend>rosidl_typesupport_introspection_cpp</build_depend>
+
+  <build_export_depend>rcpputils</build_export_depend>
+  <build_export_depend>rcutils</build_export_depend>
+  <build_export_depend>rmw</build_export_depend>
+  <build_export_depend>rosidl_typesupport_introspection_c</build_export_depend>
+  <build_export_depend>rosidl_typesupport_introspection_cpp</build_export_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

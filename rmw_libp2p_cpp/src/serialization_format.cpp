@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#include "impl/serialization_format.hpp"
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+const char * const libp2p_serialization_format = "cdr";

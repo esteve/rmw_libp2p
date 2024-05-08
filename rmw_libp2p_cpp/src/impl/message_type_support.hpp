@@ -12,6 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#ifndef IMPL__MESSAGE_TYPE_SUPPORT_HPP_
+#define IMPL__MESSAGE_TYPE_SUPPORT_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+#include <cassert>
+#include <memory>
+
+#include "impl/type_support.hpp"
+#include "rosidl_typesupport_introspection_cpp/message_introspection.hpp"
+#include "rosidl_typesupport_introspection_cpp/field_types.hpp"
+
+namespace rmw_libp2p_cpp
+{
+
+template<typename MembersType>
+class MessageTypeSupport : public TypeSupport<MembersType>
+{
+public:
+  explicit MessageTypeSupport(const MembersType * members);
+};
+
+}  // namespace rmw_libp2p_cpp
+
+#include "impl/message_type_support_impl.hpp"
+
+#endif  // IMPL__MESSAGE_TYPE_SUPPORT_HPP_

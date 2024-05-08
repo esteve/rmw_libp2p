@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "impl/identifier.hpp"
+#ifndef IMPL__IDENTIFIER_HPP_
+#define IMPL__IDENTIFIER_HPP_
 
-const char * const libp2p_identifier = "rmw_libp2p_cpp";
+extern const char * const libp2p_identifier;
+
+#endif  // IMPL__IDENTIFIER_HPP_

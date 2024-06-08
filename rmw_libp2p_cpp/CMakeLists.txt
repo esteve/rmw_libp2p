@@ -54,7 +54,6 @@ add_library(rmw_libp2p_cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
   src/ros_message_serialization.cpp
-  src/serialization_format.cpp
   src/type_support_common.cpp
 )
 target_include_directories(rmw_libp2p_cpp

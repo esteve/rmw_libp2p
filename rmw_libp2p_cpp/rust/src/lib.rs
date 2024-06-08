@@ -24,3 +24,6 @@ pub use subscription::*;
 
 #[no_mangle]
 pub static mut libp2p_identifier: *const ::std::os::raw::c_char = "rmw_libp2p_cpp".as_ptr() as *const ::std::os::raw::c_char;
+
+#[no_mangle]
+pub static mut libp2p_serialization_format: *const ::std::os::raw::c_char = "cdr".as_ptr() as *const ::std::os::raw::c_char;

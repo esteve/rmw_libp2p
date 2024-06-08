@@ -16,11 +16,13 @@ mod cdr_buffer;
 mod node;
 mod publisher;
 mod subscription;
+mod rmw_get_serialization_format;
 
 pub use cdr_buffer::*;
 pub use node::*;
 pub use publisher::*;
 pub use subscription::*;
+pub use rmw_get_serialization_format::*;
 
 #[no_mangle]
 pub static mut libp2p_identifier: *const ::std::os::raw::c_char = "rmw_libp2p_cpp".as_ptr() as *const ::std::os::raw::c_char;

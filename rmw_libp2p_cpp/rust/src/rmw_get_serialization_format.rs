@@ -1,4 +1,4 @@
-// Copyright 2022 Esteve Fernandez All rights reserved.
+// Copyright 2024 Esteve Fernandez All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcutils/logging_macros.h"
+use std::os::raw::c_char;
+use stdext::function_name;
 
-#include "rmw/rmw.h"
-
-#include "impl/serialization_format.hpp"
-
-extern "C"
-{
-const char *
-rmw_get_serialization_format()
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  return libp2p_serialization_format;
+#[no_mangle]
+pub extern "C" fn rmw_get_serialization_format() -> *const c_char {
+    debug!(target: "rmw_libp2p_cpp", function_name!());
+    unsafe { libp2p_serialization_format }
 }
-}  // extern "C"

@@ -37,7 +37,6 @@ find_package(rosidl_typesupport_introspection_c REQUIRED)
 find_package(rosidl_typesupport_introspection_cpp REQUIRED)
 
 add_library(rmw_libp2p_cpp
-  src/identifier.cpp
   src/rmw_guard_condition.cpp
   src/rmw_get_gid_for_publisher.cpp
   src/rmw_get_implementation_identifier.cpp

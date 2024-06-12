@@ -98,6 +98,11 @@ register_rmw_implementation(
   "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp")
 
 install(
+  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs-shared
+  LIBRARY DESTINATION lib
+)
+
+install(
   TARGETS rmw_libp2p_cpp
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

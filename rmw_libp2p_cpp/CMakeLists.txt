@@ -108,6 +108,11 @@ corrosion_link_libraries(rmw_libp2p_rs rmw_libp2p_cpp)
   
   
 install(
+  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs-shared
+  LIBRARY DESTINATION lib
+)
+
+install(
   TARGETS rmw_libp2p_cpp
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

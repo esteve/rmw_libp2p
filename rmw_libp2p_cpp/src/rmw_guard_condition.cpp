@@ -25,7 +25,7 @@
 extern "C"
 {
 rmw_guard_condition_t *
-rmw_create_guard_condition(rmw_context_t * context)
+libp2p_c__rmw_create_guard_condition(rmw_context_t * context)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(

@@ -36,9 +36,11 @@
 
 #include "type_support_common.hpp"
 
+extern "C"
+{
 // Create and return an rmw subscriber
 rmw_subscription_t *
-rmw_create_subscription(
+libp2p_c__rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
@@ -167,7 +169,7 @@ fail:
 
 // Destroy and deallocate an RMW subscription
 rmw_ret_t
-rmw_destroy_subscription(
+libp2p_c__rmw_destroy_subscription(
   rmw_node_t * node,
   rmw_subscription_t * subscription)
 {
@@ -182,7 +184,7 @@ rmw_destroy_subscription(
 }
 
 rmw_ret_t
-rmw_subscription_get_actual_qos(
+libp2p_c__rmw_subscription_get_actual_qos(
   const rmw_subscription_t * subscription,
   rmw_qos_profile_t * qos)
 {
@@ -200,3 +202,4 @@ rmw_subscription_get_actual_qos(
   *qos = info->qos_;
   return RMW_RET_OK;
 }
+} // extern "C"

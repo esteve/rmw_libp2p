@@ -24,6 +24,8 @@
 #include "impl/custom_wait_set_info.hpp"
 #include "impl/listener.hpp"
 
+extern "C"
+{
 // helper function for wait
 bool
 check_wait_set_for_data(
@@ -46,7 +48,7 @@ check_wait_set_for_data(
 }
 
 rmw_ret_t
-rmw_wait(
+libp2p_c__rmw_wait(
   rmw_subscriptions_t * subscriptions,
   rmw_guard_conditions_t * guard_conditions,
   rmw_services_t * services,
@@ -138,3 +140,4 @@ rmw_wait(
 
   return timeout ? RMW_RET_TIMEOUT : RMW_RET_OK;
 }
+}  // extern "C"

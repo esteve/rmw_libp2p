@@ -59,11 +59,17 @@ target_include_directories(rmw_libp2p_cpp
   PRIVATE src
 )
 
+corrosion_import_crate(MANIFEST_PATH rust_internal/Cargo.toml)
+
+target_link_libraries(rmw_libp2p_rs_internal INTERFACE ZLIB::ZLIB)
+
+target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs_internal)
+
 corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
 
 target_link_libraries(rmw_libp2p_rs INTERFACE ZLIB::ZLIB)
 
-target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs)
+target_link_libraries(rmw_libp2p_rs rmw_libp2p_cpp)
 
 # Add the definitions, include directories and libraries of packages
 # to a target

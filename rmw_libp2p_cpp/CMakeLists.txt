@@ -19,7 +19,7 @@ include(FetchContent)
 fetchcontent_declare(
     Corrosion
     GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-    GIT_TAG v0.4
+    GIT_TAG v0.5
 )
 
 fetchcontent_makeavailable(Corrosion)
@@ -99,6 +99,13 @@ register_rmw_implementation(
 
 install(
   TARGETS rmw_libp2p_cpp
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(
+  TARGETS rmw_libp2p_rs
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

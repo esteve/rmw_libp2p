@@ -50,4 +50,4 @@ features = [
 ]
 
 [lib]
-crate-type=["staticlib"]
+crate-type=["cdylib"]

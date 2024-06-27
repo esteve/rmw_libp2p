@@ -14,9 +14,10 @@
 
 use std::os::raw::c_char;
 use stdext::function_name;
+use log::debug;
 
 #[no_mangle]
 pub extern "C" fn rmw_get_serialization_format() -> *const c_char {
-    debug!(target: "rmw_libp2p_cpp", function_name!());
-    unsafe { libp2p_serialization_format }
+    debug!(target: "rmw_libp2p_cpp", "{}", function_name!());
+    unsafe { crate::libp2p_serialization_format }
 }

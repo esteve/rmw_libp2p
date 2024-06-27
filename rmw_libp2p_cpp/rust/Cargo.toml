@@ -1,0 +1,17 @@
+[package]
+name = "rmw_libp2p_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+cbindgen = "0.24.3"
+
+[dependencies]
+cdr = "0.2.4"
+log = "0.4.21"
+stdext = "0.3.3"
+
+[lib]
+crate-type=["cdylib"]

@@ -65,12 +65,6 @@ target_link_libraries(rmw_libp2p_rs_internal INTERFACE ZLIB::ZLIB)
 
 target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs_internal)
 
-corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
-
-target_link_libraries(rmw_libp2p_rs INTERFACE ZLIB::ZLIB)
-
-target_link_libraries(rmw_libp2p_rs rmw_libp2p_cpp)
-
 # Add the definitions, include directories and libraries of packages
 # to a target
 ament_target_dependencies(rmw_libp2p_cpp
@@ -103,6 +97,16 @@ register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_introspection_c"
   "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp")
 
+corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
+
+add_dependencies(rmw_libp2p_rs-shared rmw_libp2p_cpp)
+add_dependencies(rmw_libp2p_rs rmw_libp2p_cpp)
+target_link_libraries(rmw_libp2p_rs INTERFACE ZLIB::ZLIB)
+
+corrosion_link_libraries(rmw_libp2p_rs rmw_libp2p_cpp)
+# target_link_libraries(rmw_libp2p_rs INTERFACE rmw_libp2p_cpp)
+  
+  
 install(
   TARGETS rmw_libp2p_cpp
   ARCHIVE DESTINATION lib
@@ -111,8 +115,13 @@ install(
 )
 
 install(
-  TARGETS rmw_libp2p_rs
-  ARCHIVE DESTINATION lib
+  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs_internal-shared
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(
+  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs-shared
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )

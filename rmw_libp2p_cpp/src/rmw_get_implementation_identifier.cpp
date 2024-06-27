@@ -20,6 +20,7 @@
 
 extern "C"
 {
+RMW_PUBLIC
 const char *
 libp2p_c__rmw_get_implementation_identifier()
 {

@@ -34,6 +34,7 @@ extern "C"
 //
 // Note: You should call rmw_get_zero_initialized_init_options()
 // to get a zero initialized rmw_init_options_t struct first
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_init_options_init(
   rmw_init_options_t * init_options,
@@ -61,6 +62,7 @@ libp2p_c__rmw_init_options_init(
 }
 
 // Copy the given source init options to the destination init options.
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_init_options_copy(
   const rmw_init_options_t * src,
@@ -105,6 +107,7 @@ libp2p_c__rmw_init_options_copy(
 }
 
 // Finalize the given init_options. (Cleanup and deallocation.)
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_init_options_fini(
   rmw_init_options_t * init_options)
@@ -127,6 +130,7 @@ libp2p_c__rmw_init_options_fini(
 // Initialize the middleware with the given options, and yielding an context.
 //
 // rmw_context_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__context__t.html
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_init(
   const rmw_init_options_t * options,
@@ -176,7 +180,7 @@ libp2p_c__rmw_init(
 
   // context->impl->rs_event_loop_thread = rs_rmw_init();
   context->options = rmw_get_zero_initialized_init_options();
-  rmw_ret_t ret = rmw_init_options_copy(options, &context->options);
+  rmw_ret_t ret = libp2p_c__rmw_init_options_copy(options, &context->options);
   if (RMW_RET_OK != ret) {
     return ret;
   }
@@ -192,6 +196,7 @@ libp2p_c__rmw_init(
 }
 
 // Shutdown the middleware for a given context.
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_shutdown(
   rmw_context_t * context)
@@ -216,6 +221,7 @@ libp2p_c__rmw_shutdown(
 }
 
 // Finalize a context. (Cleanup and deallocation)
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_context_fini(
   rmw_context_t * context)
@@ -238,7 +244,7 @@ libp2p_c__rmw_context_fini(
     RCUTILS_SET_ERROR_MSG("context has not been shutdown");
     return RMW_RET_INVALID_ARGUMENT;
   }
-  rmw_ret_t ret = rmw_init_options_fini(&context->options);
+  rmw_ret_t ret = libp2p_c__rmw_init_options_fini(&context->options);
   delete context->impl;
   *context = rmw_get_zero_initialized_context();
   return ret;

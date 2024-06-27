@@ -32,6 +32,16 @@
 
 extern "C"
 {
+
+// TODO(esteve): cleanup
+rmw_guard_condition_t *
+libp2p_c__rmw_create_guard_condition(rmw_context_t * context);
+
+rmw_ret_t
+libp2p_c__rmw_destroy_node(
+  rmw_node_t * node);
+
+
 // Create a node and return a handle to that node.
 //
 // rmw_node_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__node__t.html
@@ -96,7 +106,7 @@ libp2p_c__rmw_create_node(
   }
   node_handle->data = node_impl;
 
-  node_impl->graph_guard_condition_ = rmw_create_guard_condition(context);
+  node_impl->graph_guard_condition_ = libp2p_c__rmw_create_guard_condition(context);
   if (!node_impl->graph_guard_condition_) {
     // error already set
     goto fail;
@@ -114,7 +124,7 @@ libp2p_c__rmw_create_node(
   return node_handle;
 
 fail:
-  rmw_ret_t ret = rmw_destroy_node(node_handle);
+  rmw_ret_t ret = libp2p_c__rmw_destroy_node(node_handle);
   if (ret != RMW_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_libp2p_cpp",

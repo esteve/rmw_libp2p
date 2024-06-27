@@ -23,7 +23,7 @@
 extern "C"
 {
 rmw_ret_t
-rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
+libp2p_c__rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

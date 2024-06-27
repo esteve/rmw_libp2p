@@ -35,7 +35,7 @@ extern "C"
 // Note: You should call rmw_get_zero_initialized_init_options()
 // to get a zero initialized rmw_init_options_t struct first
 rmw_ret_t
-rmw_init_options_init(
+libp2p_c__rmw_init_options_init(
   rmw_init_options_t * init_options,
   rcutils_allocator_t allocator)
 {
@@ -62,7 +62,7 @@ rmw_init_options_init(
 
 // Copy the given source init options to the destination init options.
 rmw_ret_t
-rmw_init_options_copy(
+libp2p_c__rmw_init_options_copy(
   const rmw_init_options_t * src,
   rmw_init_options_t * dst)
 {
@@ -106,7 +106,7 @@ rmw_init_options_copy(
 
 // Finalize the given init_options. (Cleanup and deallocation.)
 rmw_ret_t
-rmw_init_options_fini(
+libp2p_c__rmw_init_options_fini(
   rmw_init_options_t * init_options)
 {
   RCUTILS_LOG_DEBUG_NAMED(
@@ -128,7 +128,7 @@ rmw_init_options_fini(
 //
 // rmw_context_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__context__t.html
 rmw_ret_t
-rmw_init(
+libp2p_c__rmw_init(
   const rmw_init_options_t * options,
   rmw_context_t * context)
 {
@@ -193,7 +193,7 @@ rmw_init(
 
 // Shutdown the middleware for a given context.
 rmw_ret_t
-rmw_shutdown(
+libp2p_c__rmw_shutdown(
   rmw_context_t * context)
 {
   RCUTILS_LOG_DEBUG_NAMED(
@@ -217,7 +217,7 @@ rmw_shutdown(
 
 // Finalize a context. (Cleanup and deallocation)
 rmw_ret_t
-rmw_context_fini(
+libp2p_c__rmw_context_fini(
   rmw_context_t * context)
 {
   RCUTILS_LOG_DEBUG_NAMED(

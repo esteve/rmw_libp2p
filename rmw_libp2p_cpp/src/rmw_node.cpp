@@ -36,7 +36,7 @@ extern "C"
 //
 // rmw_node_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__node__t.html
 rmw_node_t *
-rmw_create_node(
+libp2p_c__rmw_create_node(
   rmw_context_t * context,
   const char * name,
   const char * namespace_)
@@ -125,7 +125,7 @@ fail:
 
 // Finalize a given node handle, reclaim the resources, and deallocate the node handle.
 rmw_ret_t
-rmw_destroy_node(
+libp2p_c__rmw_destroy_node(
   rmw_node_t * node)
 {
   RCUTILS_LOG_DEBUG_NAMED(
@@ -169,7 +169,7 @@ rmw_destroy_node(
 }
 
 const rmw_guard_condition_t *
-rmw_node_get_graph_guard_condition(const rmw_node_t * node)
+libp2p_c__rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

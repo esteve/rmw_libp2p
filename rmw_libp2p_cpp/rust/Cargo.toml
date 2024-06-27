@@ -1,5 +1,5 @@
 [package]
-name = "rmw_libp2p_rs"
+name = "rmw_libp2p_rs_internal"
 version = "0.1.0"
 edition = "2021"
 

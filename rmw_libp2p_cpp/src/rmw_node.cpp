@@ -37,6 +37,7 @@ extern "C"
 rmw_guard_condition_t *
 libp2p_c__rmw_create_guard_condition(rmw_context_t * context);
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_destroy_node(
   rmw_node_t * node);
@@ -45,6 +46,7 @@ libp2p_c__rmw_destroy_node(
 // Create a node and return a handle to that node.
 //
 // rmw_node_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__node__t.html
+RMW_PUBLIC
 rmw_node_t *
 libp2p_c__rmw_create_node(
   rmw_context_t * context,
@@ -134,6 +136,7 @@ fail:
 }
 
 // Finalize a given node handle, reclaim the resources, and deallocate the node handle.
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_destroy_node(
   rmw_node_t * node)
@@ -178,6 +181,7 @@ libp2p_c__rmw_destroy_node(
   return RMW_RET_OK;
 }
 
+RMW_PUBLIC
 const rmw_guard_condition_t *
 libp2p_c__rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {

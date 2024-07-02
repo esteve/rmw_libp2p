@@ -47,6 +47,7 @@ check_wait_set_for_data(
   return false;
 }
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_wait(
   rmw_subscriptions_t * subscriptions,

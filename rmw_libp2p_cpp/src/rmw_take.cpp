@@ -57,6 +57,7 @@ _take(
   return RMW_RET_OK;
 }
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_take_with_info(
   const rmw_subscription_t * subscription,

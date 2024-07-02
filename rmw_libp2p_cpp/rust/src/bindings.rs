@@ -295,4 +295,12 @@ extern "C" {
         callback: rmw_event_callback_t,
         user_data: *const ::std::os::raw::c_void,
     ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_init_options_init(
+        options: *mut rmw_init_options_t,
+        allocator: rcutils_allocator_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_init_options_copy(
+        src: *const rmw_init_options_t,
+        dst: *mut rmw_init_options_t,
+      ) -> rmw_ret_t;
 }

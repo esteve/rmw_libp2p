@@ -24,6 +24,7 @@
 
 extern "C"
 {
+RMW_PUBLIC
 rmw_wait_set_t *
 libp2p_c__rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 {
@@ -62,6 +63,7 @@ fail:
   return nullptr;
 }
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {

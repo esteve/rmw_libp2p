@@ -31,6 +31,7 @@
 
 extern "C"
 {
+RMW_PUBLIC
 rmw_service_t *
 libp2p_c__rmw_create_service(
   const rmw_node_t * node,
@@ -97,6 +98,7 @@ libp2p_c__rmw_create_service(
   return rmw_service;
 }
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_service_response_publisher_get_actual_qos(
   const rmw_service_t * service,
@@ -112,6 +114,7 @@ libp2p_c__rmw_service_response_publisher_get_actual_qos(
   return RMW_RET_OK;
 }
 
+RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_service_request_subscription_get_actual_qos(
   const rmw_service_t * service,

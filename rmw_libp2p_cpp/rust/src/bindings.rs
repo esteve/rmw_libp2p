@@ -302,5 +302,17 @@ extern "C" {
     pub fn libp2p_c__rmw_init_options_copy(
         src: *const rmw_init_options_t,
         dst: *mut rmw_init_options_t,
-      ) -> rmw_ret_t;
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_init_options_fini(
+        init_options: *mut rmw_init_options_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_init(
+        options: *const rmw_init_options_t,
+        context: *mut rmw_context_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_subscription_event_init(
+        event: *mut rmw_event_t,
+        subscription: *const rmw_subscription_t,
+        event_type: *mut rmw_event_type_t,
+    ) -> rmw_ret_t;
 }

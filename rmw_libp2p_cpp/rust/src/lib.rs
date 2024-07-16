@@ -705,3 +705,226 @@ pub extern "C" fn rmw_subscription_event_init(
 ) -> rmw_ret_t {
     unsafe { libp2p_c__rmw_subscription_event_init(event, subscription, event_type) }
 }
+
+#[no_mangle]
+pub extern "C" fn rmw_context_fini(context: *mut rmw_context_t) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_context_fini(context) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_feature_supported(feature: rmw_feature_t) -> bool {
+    unsafe { libp2p_c__rmw_feature_supported(feature) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_client_names_and_types_by_node(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    node_name: *const ::std::os::raw::c_char,
+    node_namespace: *const ::std::os::raw::c_char,
+    service_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_client_names_and_types_by_node(
+            node,
+            allocator,
+            node_name,
+            node_namespace,
+            service_names_and_types,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_publisher_names_and_types_by_node(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    node_name: *const ::std::os::raw::c_char,
+    node_namespace: *const ::std::os::raw::c_char,
+    no_demangle: bool,
+    topic_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_publisher_names_and_types_by_node(
+            node,
+            allocator,
+            node_name,
+            node_namespace,
+            no_demangle,
+            topic_names_and_types,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_publishers_info_by_topic(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    topic_name: *const ::std::os::raw::c_char,
+    no_mangle: bool,
+    publishers_info: *mut rmw_topic_endpoint_info_array_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_publishers_info_by_topic(
+            node,
+            allocator,
+            topic_name,
+            no_mangle,
+            publishers_info,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_service_names_and_types(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    service_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_get_service_names_and_types(node, allocator, service_names_and_types) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_service_names_and_types_by_node(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    node_name: *const ::std::os::raw::c_char,
+    node_namespace: *const ::std::os::raw::c_char,
+    service_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_service_names_and_types_by_node(
+            node,
+            allocator,
+            node_name,
+            node_namespace,
+            service_names_and_types,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_subscriber_names_and_types_by_node(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    node_name: *const ::std::os::raw::c_char
+    node_namespace: *const ::std::os::raw::c_char
+    no_demangle: bool,
+    topic_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_subscriber_names_and_types_by_node(
+            node,
+            allocator,
+            node_name,
+            node_namespace,
+            no_demangle,
+            topic_names_and_types,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_subscriptions_info_by_topic(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    topic_name: *const char,
+    no_mangle: bool,
+    subscriptions_info: *mut rmw_topic_endpoint_info_array_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_subscriptions_info_by_topic(
+            node,
+            allocator,
+            topic_name,
+            no_mangle,
+            subscriptions_info,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_get_topic_names_and_types(
+    node: *const rmw_node_t,
+    allocator: *mut rcutils_allocator_t,
+    no_demangle: bool,
+    topic_names_and_types: *mut rmw_names_and_types_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_get_topic_names_and_types(node, allocator, no_demangle, topic_names_and_types)
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_publisher_event_init(
+    event: *mut rmw_event_t,
+    publisher: *mut rmw_publisher_t,
+    event_type: rmw_event_type_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_publisher_event_init(event, publisher, event_type) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_publisher_get_network_flow_endpoints(
+    publisher: *const rmw_publisher_t,
+    allocator: *mut rcutils_allocator_t,
+    network_flow_endpoint_array: *mut rmw_network_flow_endpoint_array_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_publisher_get_network_flow_endpoints(
+            publisher,
+            allocator,
+            network_flow_endpoint_array,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_qos_profile_check_compatible(
+    publisher_profile: rmw_qos_profile_t,
+    subscription_profile: rmw_qos_profile_t,
+    compatibility: *mut rmw_qos_compatibility_type_t,
+    reason: *mut ::std::os::raw::c_char,
+    reason_size: usize,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_qos_profile_check_compatible(
+            publisher_profile,
+            subscription_profile,
+            compatibility,
+            reason,
+            reason_size,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_shutdown(
+    context: *mut rmw_context_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_shutdown(context) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_subscription_get_network_flow_endpoints(
+    subscription: *const rmw_subscription_t,
+    allocator: *mut rcutils_allocator_t,
+    network_flow_endpoint_array: *mut rmw_network_flow_endpoint_array_t,
+) -> rmw_ret_t {
+    unsafe {
+        libp2p_c__rmw_subscription_get_network_flow_endpoints(
+            subscription,
+            allocator,
+            network_flow_endpoint_array,
+        )
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_take_event(
+    event_handle: *const rmw_event_t,
+    event_info: *mut ::std::os::raw::c_void,
+    taken: *mut bool,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_take_event(event_handle, event_info, taken) }
+}

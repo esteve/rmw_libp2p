@@ -19,7 +19,9 @@ extern "C" {
         message_bounds: *const rosidl_runtime_c__Sequence__bound,
         allocation: *mut rmw_publisher_allocation_t,
     ) -> rmw_ret_t;
-    pub fn libp2p_c__rmw_fini_publisher_allocation(allocation: *mut rmw_publisher_allocation_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_fini_publisher_allocation(
+        allocation: *mut rmw_publisher_allocation_t,
+    ) -> rmw_ret_t;
     pub fn libp2p_c__rmw_create_publisher(
         node: *const rmw_node_t,
         type_support: *const rosidl_message_type_support_t,
@@ -68,7 +70,9 @@ extern "C" {
         message_bounds: *const rosidl_runtime_c__Sequence__bound,
         size: *mut usize,
     ) -> rmw_ret_t;
-    pub fn libp2p_c__rmw_publisher_assert_liveliness(publisher: *const rmw_publisher_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_publisher_assert_liveliness(
+        publisher: *const rmw_publisher_t,
+    ) -> rmw_ret_t;
     pub fn libp2p_c__rmw_publisher_wait_for_all_acked(
         publisher: *const rmw_publisher_t,
         wait_timeout: rmw_time_t,
@@ -176,7 +180,10 @@ extern "C" {
         service_name: *const ::std::os::raw::c_char,
         qos_policies: *const rmw_qos_profile_t,
     ) -> *mut rmw_client_t;
-    pub fn libp2p_c__rmw_destroy_client(node: *mut rmw_node_t, client: *mut rmw_client_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_destroy_client(
+        node: *mut rmw_node_t,
+        client: *mut rmw_client_t,
+    ) -> rmw_ret_t;
     pub fn libp2p_c__rmw_send_request(
         client: *const rmw_client_t,
         ros_request: *const ::std::os::raw::c_void,
@@ -202,7 +209,10 @@ extern "C" {
         service_name: *const ::std::os::raw::c_char,
         qos_profile: *const rmw_qos_profile_t,
     ) -> *mut rmw_service_t;
-    pub fn libp2p_c__rmw_destroy_service(node: *mut rmw_node_t, service: *mut rmw_service_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_destroy_service(
+        node: *mut rmw_node_t,
+        service: *mut rmw_service_t,
+    ) -> rmw_ret_t;
     pub fn libp2p_c__rmw_take_request(
         service: *const rmw_service_t,
         request_header: *mut rmw_service_info_t,
@@ -222,9 +232,15 @@ extern "C" {
         service: *const rmw_service_t,
         qos: *mut rmw_qos_profile_t,
     ) -> rmw_ret_t;
-    pub fn libp2p_c__rmw_create_guard_condition(context: *mut rmw_context_t) -> *mut rmw_guard_condition_t;
-    pub fn libp2p_c__rmw_destroy_guard_condition(guard_condition: *mut rmw_guard_condition_t) -> rmw_ret_t;
-    pub fn libp2p_c__rmw_trigger_guard_condition(guard_condition: *const rmw_guard_condition_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_create_guard_condition(
+        context: *mut rmw_context_t,
+    ) -> *mut rmw_guard_condition_t;
+    pub fn libp2p_c__rmw_destroy_guard_condition(
+        guard_condition: *mut rmw_guard_condition_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_trigger_guard_condition(
+        guard_condition: *const rmw_guard_condition_t,
+    ) -> rmw_ret_t;
     pub fn libp2p_c__rmw_create_wait_set(
         context: *mut rmw_context_t,
         max_conditions: usize,
@@ -303,9 +319,7 @@ extern "C" {
         src: *const rmw_init_options_t,
         dst: *mut rmw_init_options_t,
     ) -> rmw_ret_t;
-    pub fn libp2p_c__rmw_init_options_fini(
-        init_options: *mut rmw_init_options_t,
-    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_init_options_fini(init_options: *mut rmw_init_options_t) -> rmw_ret_t;
     pub fn libp2p_c__rmw_init(
         options: *const rmw_init_options_t,
         context: *mut rmw_context_t,
@@ -314,5 +328,92 @@ extern "C" {
         event: *mut rmw_event_t,
         subscription: *const rmw_subscription_t,
         event_type: *mut rmw_event_type_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_context_fini(context: *mut rmw_context_t) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_feature_supported(feature: rmw_feature_t) -> bool;
+    pub fn libp2p_c__rmw_get_client_names_and_types_by_node(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        node_name: *const ::std::os::raw::c_char,
+        node_namespace: *const ::std::os::raw::c_char,
+        service_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_publisher_names_and_types_by_node(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        node_name: *const ::std::os::raw::c_char,
+        node_namespace: *const ::std::os::raw::c_char,
+        no_demangle: bool,
+        topic_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_publishers_info_by_topic(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        topic_name: *const ::std::os::raw::c_char,
+        no_mangle: bool,
+        publishers_info: *mut rmw_topic_endpoint_info_array_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_service_names_and_types(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        service_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_service_names_and_types_by_node(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        node_name: *const ::std::os::raw::c_char,
+        node_namespace: *const ::std::os::raw::c_char,
+        service_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_subscriber_names_and_types_by_node(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        node_name: *const ::std::os::raw::c_char,
+        node_namespace: *const ::std::os::raw::c_char,
+        no_demangle: bool,
+        topic_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_subscriptions_info_by_topic(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        topic_name: *const char,
+        no_mangle: bool,
+        subscriptions_info: *mut rmw_topic_endpoint_info_array_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_get_topic_names_and_types(
+        node: *const rmw_node_t,
+        allocator: *mut rcutils_allocator_t,
+        no_demangle: bool,
+        topic_names_and_types: *mut rmw_names_and_types_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_publisher_event_init(
+        event: *mut rmw_event_t,
+        publisher: *mut rmw_publisher_t,
+        event_type: rmw_event_type_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_publisher_get_network_flow_endpoints(
+        publisher: *const rmw_publisher_t,
+        allocator: *mut rcutils_allocator_t,
+        network_flow_endpoint_array: *mut rmw_network_flow_endpoint_array_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_qos_profile_check_compatible(
+        publisher_profile: rmw_qos_profile_t,
+        subscription_profile: rmw_qos_profile_t,
+        compatibility: *mut rmw_qos_compatibility_type_t,
+        reason: *mut ::std::os::raw::c_char,
+        reason_size: usize,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_shutdown(
+        context: *mut rmw_context_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_subscription_get_network_flow_endpoints(
+        subscription: *const rmw_subscription_t,
+        allocator: *mut rcutils_allocator_t,
+        network_flow_endpoint_array: *mut rmw_network_flow_endpoint_array_t,
+    ) -> rmw_ret_t;
+    pub fn libp2p_c__rmw_take_event(
+        event_handle: *const rmw_event_t,
+        event_info: *mut ::std::os::raw::c_void,
+        taken: *mut bool,
     ) -> rmw_ret_t;
 }

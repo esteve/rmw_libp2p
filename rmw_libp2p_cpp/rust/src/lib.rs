@@ -681,3 +681,27 @@ pub extern "C" fn rmw_init_options_copy(
 ) -> rmw_ret_t {
     unsafe { libp2p_c__rmw_init_options_copy(src, dst) }
 }
+
+#[no_mangle]
+pub extern "C" fn rmw_init_options_fini(
+  init_options: *mut rmw_init_options_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_init_options_fini(init_options) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_init(
+  options: *const rmw_init_options_t,
+  context: *mut rmw_context_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_init(options, context) }
+}
+
+#[no_mangle]
+pub extern "C" fn rmw_subscription_event_init(
+    event: *mut rmw_event_t,
+    subscription: *const rmw_subscription_t,
+    event_type: *mut rmw_event_type_t,
+) -> rmw_ret_t {
+    unsafe { libp2p_c__rmw_subscription_event_init(event, subscription, event_type) }
+}

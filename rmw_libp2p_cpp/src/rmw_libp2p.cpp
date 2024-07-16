@@ -817,6 +817,7 @@ libp2p_c__rmw_subscription_set_content_filter(
   return RMW_RET_ERROR;
 }
 
+RMW_PUBLIC
 bool
 libp2p_c__rmw_feature_supported(rmw_feature_t feature)
 {

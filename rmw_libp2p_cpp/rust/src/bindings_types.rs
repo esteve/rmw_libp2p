@@ -9,41 +9,6 @@ pub struct max_align_t {
     pub __bindgen_padding_0: u64,
     pub __clang_max_align_nonce2: u128,
 }
-#[test]
-fn bindgen_test_layout_max_align_t() {
-    const UNINIT: ::std::mem::MaybeUninit<max_align_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<max_align_t>(),
-        32usize,
-        concat!("Size of: ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<max_align_t>(),
-        16usize,
-        concat!("Alignment of ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__clang_max_align_nonce1) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce1)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__clang_max_align_nonce2) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce2)
-        )
-    );
-}
 pub type __u_char = ::std::os::raw::c_uchar;
 pub type __u_short = ::std::os::raw::c_ushort;
 pub type __u_int = ::std::os::raw::c_uint;
@@ -82,31 +47,6 @@ pub type __pid_t = ::std::os::raw::c_int;
 #[derive(Debug, Copy, Clone)]
 pub struct __fsid_t {
     pub __val: [::std::os::raw::c_int; 2usize],
-}
-#[test]
-fn bindgen_test_layout___fsid_t() {
-    const UNINIT: ::std::mem::MaybeUninit<__fsid_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__fsid_t>(),
-        8usize,
-        concat!("Size of: ", stringify!(__fsid_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__fsid_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(__fsid_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__val) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__fsid_t),
-            "::",
-            stringify!(__val)
-        )
-    );
 }
 pub type __clock_t = ::std::os::raw::c_long;
 pub type __rlim_t = ::std::os::raw::c_ulong;
@@ -154,27 +94,22 @@ pub type uint_fast32_t = ::std::os::raw::c_ulong;
 pub type uint_fast64_t = ::std::os::raw::c_ulong;
 pub type intmax_t = __intmax_t;
 pub type uintmax_t = __uintmax_t;
-#[doc = " The type that holds a return value for an rcutils operation."]
 pub type rcutils_ret_t = ::std::os::raw::c_int;
-#[doc = " Encapsulation of an allocator.\n**\n* The default allocator uses malloc(), free(), calloc(), and realloc().\n* It can be obtained using rcutils_get_default_allocator().\n*\n* The allocator should be trivially copyable.\n* Meaning that the struct should continue to work after being assignment\n* copied into a new struct.\n* Specifically the object pointed to by the state pointer should remain valid\n* until all uses of the allocator have been made.\n* Particular care should be taken when giving an allocator to functions like\n* rcutils_*_init() where it is stored within another object and used later.\n* Developers should note that, while the fields of a const-qualified allocator\n* struct cannot be modified, the state of the allocator can be modified.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_allocator_s {
-    #[doc = " Allocate memory, given a size and the `state` pointer.\n** An error should be indicated by returning `NULL`. */"]
     pub allocate: ::std::option::Option<
         unsafe extern "C" fn(
             size: usize,
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Deallocate previously allocated memory, mimicking free().\n** Also takes the `state` pointer. */"]
     pub deallocate: ::std::option::Option<
         unsafe extern "C" fn(
             pointer: *mut ::std::os::raw::c_void,
             state: *mut ::std::os::raw::c_void,
         ),
     >,
-    #[doc = " Reallocate if possible, otherwise it deallocates and allocates.\n**\n* Also takes the `state` pointer.\n*\n* If unsupported then do deallocate and then allocate.\n* This should behave as realloc() does, as opposed to posix's\n* [reallocf](https://linux.die.net/man/3/reallocf), i.e. the memory given\n* by pointer will not be free'd automatically if realloc() fails.\n* For reallocf-like behavior use rcutils_reallocf().\n* This function must be able to take an input pointer of `NULL` and succeed.\n*/"]
     pub reallocate: ::std::option::Option<
         unsafe extern "C" fn(
             pointer: *mut ::std::os::raw::c_void,
@@ -182,7 +117,6 @@ pub struct rcutils_allocator_s {
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Allocate memory with all elements set to zero, given a number of elements and their size.\n** An error should be indicated by returning `NULL`. */"]
     pub zero_allocate: ::std::option::Option<
         unsafe extern "C" fn(
             number_of_elements: usize,
@@ -190,75 +124,8 @@ pub struct rcutils_allocator_s {
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Implementation defined state storage.\n**\n* This is passed as the final parameter to other allocator functions.\n* Note that the contents of the state can be modified even in const-qualified\n* allocator objects.\n*/"]
     pub state: *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rcutils_allocator_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_allocator_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_allocator_s>(),
-        40usize,
-        concat!("Size of: ", stringify!(rcutils_allocator_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_allocator_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_allocator_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocate) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_allocator_s),
-            "::",
-            stringify!(allocate)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).deallocate) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_allocator_s),
-            "::",
-            stringify!(deallocate)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reallocate) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_allocator_s),
-            "::",
-            stringify!(reallocate)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).zero_allocate) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_allocator_s),
-            "::",
-            stringify!(zero_allocate)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).state) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_allocator_s),
-            "::",
-            stringify!(state)
-        )
-    );
-}
-#[doc = " Encapsulation of an allocator.\n**\n* The default allocator uses malloc(), free(), calloc(), and realloc().\n* It can be obtained using rcutils_get_default_allocator().\n*\n* The allocator should be trivially copyable.\n* Meaning that the struct should continue to work after being assignment\n* copied into a new struct.\n* Specifically the object pointed to by the state pointer should remain valid\n* until all uses of the allocator have been made.\n* Particular care should be taken when giving an allocator to functions like\n* rcutils_*_init() where it is stored within another object and used later.\n* Developers should note that, while the fields of a const-qualified allocator\n* struct cannot be modified, the state of the allocator can be modified.\n*/"]
 pub type rcutils_allocator_t = rcutils_allocator_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -269,71 +136,6 @@ pub struct __locale_struct {
     pub __ctype_toupper: *const ::std::os::raw::c_int,
     pub __names: [*const ::std::os::raw::c_char; 13usize],
 }
-#[test]
-fn bindgen_test_layout___locale_struct() {
-    const UNINIT: ::std::mem::MaybeUninit<__locale_struct> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__locale_struct>(),
-        232usize,
-        concat!("Size of: ", stringify!(__locale_struct))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__locale_struct>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__locale_struct))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__locales) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__locales)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__ctype_b) as usize - ptr as usize },
-        104usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__ctype_b)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__ctype_tolower) as usize - ptr as usize },
-        112usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__ctype_tolower)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__ctype_toupper) as usize - ptr as usize },
-        120usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__ctype_toupper)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__names) as usize - ptr as usize },
-        128usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__names)
-        )
-    );
-}
 pub type __locale_t = *mut __locale_struct;
 pub type locale_t = __locale_t;
 #[repr(C)]
@@ -341,167 +143,37 @@ pub type locale_t = __locale_t;
 pub struct rcutils_array_list_impl_s {
     _unused: [u8; 0],
 }
-#[doc = " The structure holding the metadata for an array list."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_array_list_s {
-    #[doc = " A pointer to the PIMPL implementation type."]
     pub impl_: *mut rcutils_array_list_impl_s,
 }
-#[test]
-fn bindgen_test_layout_rcutils_array_list_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_array_list_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_array_list_s>(),
-        8usize,
-        concat!("Size of: ", stringify!(rcutils_array_list_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_array_list_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_array_list_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).impl_) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_array_list_s),
-            "::",
-            stringify!(impl_)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for an array list."]
 pub type rcutils_array_list_t = rcutils_array_list_s;
 pub type va_list = __builtin_va_list;
 pub type __gnuc_va_list = __builtin_va_list;
-#[doc = " The structure holding the metadata for a char array."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_char_array_s {
-    #[doc = " A pointer to the allocated memory for this char array."]
     pub buffer: *mut ::std::os::raw::c_char,
-    #[doc = " if this is true, we may safely free/realloc the buffer as needed;\n otherwise we will leave the buffer alone and alloc new memory if\n more space is needed"]
     pub owns_buffer: bool,
-    #[doc = " The length of the data stored in the buffer pointer."]
     pub buffer_length: usize,
-    #[doc = " The maximum capacity of the buffer pointer."]
     pub buffer_capacity: usize,
-    #[doc = " The allocator used to allocate and free the data in the pointer."]
     pub allocator: rcutils_allocator_t,
 }
-#[test]
-fn bindgen_test_layout_rcutils_char_array_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_char_array_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_char_array_s>(),
-        72usize,
-        concat!("Size of: ", stringify!(rcutils_char_array_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_char_array_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_char_array_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_char_array_s),
-            "::",
-            stringify!(buffer)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).owns_buffer) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_char_array_s),
-            "::",
-            stringify!(owns_buffer)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer_length) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_char_array_s),
-            "::",
-            stringify!(buffer_length)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer_capacity) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_char_array_s),
-            "::",
-            stringify!(buffer_capacity)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_char_array_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for a char array."]
 pub type rcutils_char_array_t = rcutils_char_array_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_hash_map_impl_s {
     _unused: [u8; 0],
 }
-#[doc = " The structure holding the metadata for a hash map."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_hash_map_s {
-    #[doc = " A pointer to the PIMPL implementation type."]
     pub impl_: *mut rcutils_hash_map_impl_s,
 }
-#[test]
-fn bindgen_test_layout_rcutils_hash_map_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_hash_map_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_hash_map_s>(),
-        8usize,
-        concat!("Size of: ", stringify!(rcutils_hash_map_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_hash_map_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_hash_map_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).impl_) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_hash_map_s),
-            "::",
-            stringify!(impl_)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for a hash map."]
 pub type rcutils_hash_map_t = rcutils_hash_map_s;
-#[doc = " The function signature for a key hashing function.\n**\n* \\param[in] key The key that needs to be hashed\n* \\return A hash value for the provided string\n*/"]
 pub type rcutils_hash_map_key_hasher_t =
     ::std::option::Option<unsafe extern "C" fn(arg1: *const ::std::os::raw::c_void) -> usize>;
-#[doc = " The function signature for a key comparison function.\n**\n* \\param[in] val1 The first value to compare\n* \\param[in] val2 The second value to compare\n* \\return A negative number if val1 < val2, or\n* \\return A positve number if val1 > val2, or\n* \\return Zero if val1 == val2.\n*/"]
 pub type rcutils_hash_map_key_cmp_t = ::std::option::Option<
     unsafe extern "C" fn(
         arg1: *const ::std::os::raw::c_void,
@@ -520,117 +192,11 @@ pub union __mbstate_t__bindgen_ty_1 {
     pub __wch: ::std::os::raw::c_uint,
     pub __wchb: [::std::os::raw::c_char; 4usize],
 }
-#[test]
-fn bindgen_test_layout___mbstate_t__bindgen_ty_1() {
-    const UNINIT: ::std::mem::MaybeUninit<__mbstate_t__bindgen_ty_1> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__mbstate_t__bindgen_ty_1>(),
-        4usize,
-        concat!("Size of: ", stringify!(__mbstate_t__bindgen_ty_1))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__mbstate_t__bindgen_ty_1>(),
-        4usize,
-        concat!("Alignment of ", stringify!(__mbstate_t__bindgen_ty_1))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__wch) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t__bindgen_ty_1),
-            "::",
-            stringify!(__wch)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__wchb) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t__bindgen_ty_1),
-            "::",
-            stringify!(__wchb)
-        )
-    );
-}
-#[test]
-fn bindgen_test_layout___mbstate_t() {
-    const UNINIT: ::std::mem::MaybeUninit<__mbstate_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__mbstate_t>(),
-        8usize,
-        concat!("Size of: ", stringify!(__mbstate_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__mbstate_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(__mbstate_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t),
-            "::",
-            stringify!(__count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__value) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t),
-            "::",
-            stringify!(__value)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct _G_fpos_t {
     pub __pos: __off_t,
     pub __state: __mbstate_t,
-}
-#[test]
-fn bindgen_test_layout__G_fpos_t() {
-    const UNINIT: ::std::mem::MaybeUninit<_G_fpos_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<_G_fpos_t>(),
-        16usize,
-        concat!("Size of: ", stringify!(_G_fpos_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<_G_fpos_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(_G_fpos_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pos) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_G_fpos_t),
-            "::",
-            stringify!(__pos)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__state) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_G_fpos_t),
-            "::",
-            stringify!(__state)
-        )
-    );
 }
 pub type __fpos_t = _G_fpos_t;
 #[repr(C)]
@@ -638,41 +204,6 @@ pub type __fpos_t = _G_fpos_t;
 pub struct _G_fpos64_t {
     pub __pos: __off64_t,
     pub __state: __mbstate_t,
-}
-#[test]
-fn bindgen_test_layout__G_fpos64_t() {
-    const UNINIT: ::std::mem::MaybeUninit<_G_fpos64_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<_G_fpos64_t>(),
-        16usize,
-        concat!("Size of: ", stringify!(_G_fpos64_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<_G_fpos64_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(_G_fpos64_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pos) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_G_fpos64_t),
-            "::",
-            stringify!(__pos)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__state) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_G_fpos64_t),
-            "::",
-            stringify!(__state)
-        )
-    );
 }
 pub type __fpos64_t = _G_fpos64_t;
 pub type __FILE = _IO_FILE;
@@ -726,311 +257,6 @@ pub struct _IO_FILE {
     pub _mode: ::std::os::raw::c_int,
     pub _unused2: [::std::os::raw::c_char; 20usize],
 }
-#[test]
-fn bindgen_test_layout__IO_FILE() {
-    const UNINIT: ::std::mem::MaybeUninit<_IO_FILE> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<_IO_FILE>(),
-        216usize,
-        concat!("Size of: ", stringify!(_IO_FILE))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<_IO_FILE>(),
-        8usize,
-        concat!("Alignment of ", stringify!(_IO_FILE))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._flags) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_flags)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_read_ptr) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_read_ptr)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_read_end) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_read_end)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_read_base) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_read_base)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_write_base) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_write_base)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_write_ptr) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_write_ptr)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_write_end) as usize - ptr as usize },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_write_end)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_buf_base) as usize - ptr as usize },
-        56usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_buf_base)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_buf_end) as usize - ptr as usize },
-        64usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_buf_end)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_save_base) as usize - ptr as usize },
-        72usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_save_base)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_backup_base) as usize - ptr as usize },
-        80usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_backup_base)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._IO_save_end) as usize - ptr as usize },
-        88usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_IO_save_end)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._markers) as usize - ptr as usize },
-        96usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_markers)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._chain) as usize - ptr as usize },
-        104usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_chain)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._fileno) as usize - ptr as usize },
-        112usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_fileno)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._flags2) as usize - ptr as usize },
-        116usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_flags2)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._old_offset) as usize - ptr as usize },
-        120usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_old_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._cur_column) as usize - ptr as usize },
-        128usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_cur_column)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._vtable_offset) as usize - ptr as usize },
-        130usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_vtable_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._shortbuf) as usize - ptr as usize },
-        131usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_shortbuf)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._lock) as usize - ptr as usize },
-        136usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_lock)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._offset) as usize - ptr as usize },
-        144usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._codecvt) as usize - ptr as usize },
-        152usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_codecvt)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._wide_data) as usize - ptr as usize },
-        160usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_wide_data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._freeres_list) as usize - ptr as usize },
-        168usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_freeres_list)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._freeres_buf) as usize - ptr as usize },
-        176usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_freeres_buf)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pad5) as usize - ptr as usize },
-        184usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(__pad5)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._mode) as usize - ptr as usize },
-        192usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_mode)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._unused2) as usize - ptr as usize },
-        196usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(_IO_FILE),
-            "::",
-            stringify!(_unused2)
-        )
-    );
-}
 pub type off_t = __off_t;
 pub type fpos_t = __fpos_t;
 pub type _Float32 = f32;
@@ -1043,122 +269,17 @@ pub struct div_t {
     pub quot: ::std::os::raw::c_int,
     pub rem: ::std::os::raw::c_int,
 }
-#[test]
-fn bindgen_test_layout_div_t() {
-    const UNINIT: ::std::mem::MaybeUninit<div_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<div_t>(),
-        8usize,
-        concat!("Size of: ", stringify!(div_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<div_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(div_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).quot) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(div_t),
-            "::",
-            stringify!(quot)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rem) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(div_t),
-            "::",
-            stringify!(rem)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ldiv_t {
     pub quot: ::std::os::raw::c_long,
     pub rem: ::std::os::raw::c_long,
 }
-#[test]
-fn bindgen_test_layout_ldiv_t() {
-    const UNINIT: ::std::mem::MaybeUninit<ldiv_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<ldiv_t>(),
-        16usize,
-        concat!("Size of: ", stringify!(ldiv_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<ldiv_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(ldiv_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).quot) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ldiv_t),
-            "::",
-            stringify!(quot)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rem) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ldiv_t),
-            "::",
-            stringify!(rem)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct lldiv_t {
     pub quot: ::std::os::raw::c_longlong,
     pub rem: ::std::os::raw::c_longlong,
-}
-#[test]
-fn bindgen_test_layout_lldiv_t() {
-    const UNINIT: ::std::mem::MaybeUninit<lldiv_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<lldiv_t>(),
-        16usize,
-        concat!("Size of: ", stringify!(lldiv_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<lldiv_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(lldiv_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).quot) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(lldiv_t),
-            "::",
-            stringify!(quot)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rem) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(lldiv_t),
-            "::",
-            stringify!(rem)
-        )
-    );
 }
 pub type u_char = __u_char;
 pub type u_short = __u_short;
@@ -1196,31 +317,6 @@ pub type register_t = ::std::os::raw::c_long;
 pub struct __sigset_t {
     pub __val: [::std::os::raw::c_ulong; 16usize],
 }
-#[test]
-fn bindgen_test_layout___sigset_t() {
-    const UNINIT: ::std::mem::MaybeUninit<__sigset_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__sigset_t>(),
-        128usize,
-        concat!("Size of: ", stringify!(__sigset_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__sigset_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__sigset_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__val) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__sigset_t),
-            "::",
-            stringify!(__val)
-        )
-    );
-}
 pub type sigset_t = __sigset_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1228,81 +324,11 @@ pub struct timeval {
     pub tv_sec: __time_t,
     pub tv_usec: __suseconds_t,
 }
-#[test]
-fn bindgen_test_layout_timeval() {
-    const UNINIT: ::std::mem::MaybeUninit<timeval> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<timeval>(),
-        16usize,
-        concat!("Size of: ", stringify!(timeval))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<timeval>(),
-        8usize,
-        concat!("Alignment of ", stringify!(timeval))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).tv_sec) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(timeval),
-            "::",
-            stringify!(tv_sec)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).tv_usec) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(timeval),
-            "::",
-            stringify!(tv_usec)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct timespec {
     pub tv_sec: __time_t,
     pub tv_nsec: __syscall_slong_t,
-}
-#[test]
-fn bindgen_test_layout_timespec() {
-    const UNINIT: ::std::mem::MaybeUninit<timespec> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<timespec>(),
-        16usize,
-        concat!("Size of: ", stringify!(timespec))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<timespec>(),
-        8usize,
-        concat!("Alignment of ", stringify!(timespec))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).tv_sec) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(timespec),
-            "::",
-            stringify!(tv_sec)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).tv_nsec) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(timespec),
-            "::",
-            stringify!(tv_nsec)
-        )
-    );
 }
 pub type suseconds_t = __suseconds_t;
 pub type __fd_mask = ::std::os::raw::c_long;
@@ -1310,31 +336,6 @@ pub type __fd_mask = ::std::os::raw::c_long;
 #[derive(Debug, Copy, Clone)]
 pub struct fd_set {
     pub __fds_bits: [__fd_mask; 16usize],
-}
-#[test]
-fn bindgen_test_layout_fd_set() {
-    const UNINIT: ::std::mem::MaybeUninit<fd_set> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<fd_set>(),
-        128usize,
-        concat!("Size of: ", stringify!(fd_set))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<fd_set>(),
-        8usize,
-        concat!("Alignment of ", stringify!(fd_set))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__fds_bits) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(fd_set),
-            "::",
-            stringify!(__fds_bits)
-        )
-    );
 }
 pub type fd_mask = __fd_mask;
 pub type blksize_t = __blksize_t;
@@ -1353,154 +354,17 @@ pub struct __atomic_wide_counter__bindgen_ty_1 {
     pub __low: ::std::os::raw::c_uint,
     pub __high: ::std::os::raw::c_uint,
 }
-#[test]
-fn bindgen_test_layout___atomic_wide_counter__bindgen_ty_1() {
-    const UNINIT: ::std::mem::MaybeUninit<__atomic_wide_counter__bindgen_ty_1> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__atomic_wide_counter__bindgen_ty_1>(),
-        8usize,
-        concat!("Size of: ", stringify!(__atomic_wide_counter__bindgen_ty_1))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__atomic_wide_counter__bindgen_ty_1>(),
-        4usize,
-        concat!(
-            "Alignment of ",
-            stringify!(__atomic_wide_counter__bindgen_ty_1)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__low) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__atomic_wide_counter__bindgen_ty_1),
-            "::",
-            stringify!(__low)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__high) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__atomic_wide_counter__bindgen_ty_1),
-            "::",
-            stringify!(__high)
-        )
-    );
-}
-#[test]
-fn bindgen_test_layout___atomic_wide_counter() {
-    const UNINIT: ::std::mem::MaybeUninit<__atomic_wide_counter> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__atomic_wide_counter>(),
-        8usize,
-        concat!("Size of: ", stringify!(__atomic_wide_counter))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__atomic_wide_counter>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__atomic_wide_counter))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__value64) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__atomic_wide_counter),
-            "::",
-            stringify!(__value64)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__value32) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__atomic_wide_counter),
-            "::",
-            stringify!(__value32)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __pthread_internal_list {
     pub __prev: *mut __pthread_internal_list,
     pub __next: *mut __pthread_internal_list,
 }
-#[test]
-fn bindgen_test_layout___pthread_internal_list() {
-    const UNINIT: ::std::mem::MaybeUninit<__pthread_internal_list> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__pthread_internal_list>(),
-        16usize,
-        concat!("Size of: ", stringify!(__pthread_internal_list))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__pthread_internal_list>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__pthread_internal_list))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__prev) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_internal_list),
-            "::",
-            stringify!(__prev)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__next) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_internal_list),
-            "::",
-            stringify!(__next)
-        )
-    );
-}
 pub type __pthread_list_t = __pthread_internal_list;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __pthread_internal_slist {
     pub __next: *mut __pthread_internal_slist,
-}
-#[test]
-fn bindgen_test_layout___pthread_internal_slist() {
-    const UNINIT: ::std::mem::MaybeUninit<__pthread_internal_slist> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__pthread_internal_slist>(),
-        8usize,
-        concat!("Size of: ", stringify!(__pthread_internal_slist))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__pthread_internal_slist>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__pthread_internal_slist))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__next) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_internal_slist),
-            "::",
-            stringify!(__next)
-        )
-    );
 }
 pub type __pthread_slist_t = __pthread_internal_slist;
 #[repr(C)]
@@ -1514,101 +378,6 @@ pub struct __pthread_mutex_s {
     pub __spins: ::std::os::raw::c_short,
     pub __elision: ::std::os::raw::c_short,
     pub __list: __pthread_list_t,
-}
-#[test]
-fn bindgen_test_layout___pthread_mutex_s() {
-    const UNINIT: ::std::mem::MaybeUninit<__pthread_mutex_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__pthread_mutex_s>(),
-        40usize,
-        concat!("Size of: ", stringify!(__pthread_mutex_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__pthread_mutex_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__pthread_mutex_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__lock) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__lock)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__count) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__owner) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__owner)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__nusers) as usize - ptr as usize },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__nusers)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__kind) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__kind)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__spins) as usize - ptr as usize },
-        20usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__spins)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__elision) as usize - ptr as usize },
-        22usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__elision)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__list) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_mutex_s),
-            "::",
-            stringify!(__list)
-        )
-    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1626,142 +395,6 @@ pub struct __pthread_rwlock_arch_t {
     pub __pad2: ::std::os::raw::c_ulong,
     pub __flags: ::std::os::raw::c_uint,
 }
-#[test]
-fn bindgen_test_layout___pthread_rwlock_arch_t() {
-    const UNINIT: ::std::mem::MaybeUninit<__pthread_rwlock_arch_t> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__pthread_rwlock_arch_t>(),
-        56usize,
-        concat!("Size of: ", stringify!(__pthread_rwlock_arch_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__pthread_rwlock_arch_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__pthread_rwlock_arch_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__readers) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__readers)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__writers) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__writers)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__wrphase_futex) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__wrphase_futex)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__writers_futex) as usize - ptr as usize },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__writers_futex)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pad3) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__pad3)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pad4) as usize - ptr as usize },
-        20usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__pad4)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__cur_writer) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__cur_writer)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__shared) as usize - ptr as usize },
-        28usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__shared)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__rwelision) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__rwelision)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pad1) as usize - ptr as usize },
-        33usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__pad1)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__pad2) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__pad2)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__flags) as usize - ptr as usize },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_rwlock_arch_t),
-            "::",
-            stringify!(__flags)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct __pthread_cond_s {
@@ -1773,122 +406,12 @@ pub struct __pthread_cond_s {
     pub __wrefs: ::std::os::raw::c_uint,
     pub __g_signals: [::std::os::raw::c_uint; 2usize],
 }
-#[test]
-fn bindgen_test_layout___pthread_cond_s() {
-    const UNINIT: ::std::mem::MaybeUninit<__pthread_cond_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__pthread_cond_s>(),
-        48usize,
-        concat!("Size of: ", stringify!(__pthread_cond_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__pthread_cond_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__pthread_cond_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__wseq) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__wseq)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__g1_start) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__g1_start)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__g_refs) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__g_refs)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__g_size) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__g_size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__g1_orig_size) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__g1_orig_size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__wrefs) as usize - ptr as usize },
-        36usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__wrefs)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__g_signals) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__pthread_cond_s),
-            "::",
-            stringify!(__g_signals)
-        )
-    );
-}
 pub type __tss_t = ::std::os::raw::c_uint;
 pub type __thrd_t = ::std::os::raw::c_ulong;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __once_flag {
     pub __data: ::std::os::raw::c_int,
-}
-#[test]
-fn bindgen_test_layout___once_flag() {
-    const UNINIT: ::std::mem::MaybeUninit<__once_flag> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__once_flag>(),
-        4usize,
-        concat!("Size of: ", stringify!(__once_flag))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__once_flag>(),
-        4usize,
-        concat!("Alignment of ", stringify!(__once_flag))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__once_flag),
-            "::",
-            stringify!(__data)
-        )
-    );
 }
 pub type pthread_t = ::std::os::raw::c_ulong;
 #[repr(C)]
@@ -1897,81 +420,11 @@ pub union pthread_mutexattr_t {
     pub __size: [::std::os::raw::c_char; 4usize],
     pub __align: ::std::os::raw::c_int,
 }
-#[test]
-fn bindgen_test_layout_pthread_mutexattr_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_mutexattr_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_mutexattr_t>(),
-        4usize,
-        concat!("Size of: ", stringify!(pthread_mutexattr_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_mutexattr_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(pthread_mutexattr_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_mutexattr_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_mutexattr_t),
-            "::",
-            stringify!(__align)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union pthread_condattr_t {
     pub __size: [::std::os::raw::c_char; 4usize],
     pub __align: ::std::os::raw::c_int,
-}
-#[test]
-fn bindgen_test_layout_pthread_condattr_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_condattr_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_condattr_t>(),
-        4usize,
-        concat!("Size of: ", stringify!(pthread_condattr_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_condattr_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(pthread_condattr_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_condattr_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_condattr_t),
-            "::",
-            stringify!(__align)
-        )
-    );
 }
 pub type pthread_key_t = ::std::os::raw::c_uint;
 pub type pthread_once_t = ::std::os::raw::c_int;
@@ -1981,92 +434,12 @@ pub union pthread_attr_t {
     pub __size: [::std::os::raw::c_char; 56usize],
     pub __align: ::std::os::raw::c_long,
 }
-#[test]
-fn bindgen_test_layout_pthread_attr_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_attr_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_attr_t>(),
-        56usize,
-        concat!("Size of: ", stringify!(pthread_attr_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_attr_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_attr_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_attr_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_attr_t),
-            "::",
-            stringify!(__align)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union pthread_mutex_t {
     pub __data: __pthread_mutex_s,
     pub __size: [::std::os::raw::c_char; 40usize],
     pub __align: ::std::os::raw::c_long,
-}
-#[test]
-fn bindgen_test_layout_pthread_mutex_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_mutex_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_mutex_t>(),
-        40usize,
-        concat!("Size of: ", stringify!(pthread_mutex_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_mutex_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_mutex_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_mutex_t),
-            "::",
-            stringify!(__data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_mutex_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_mutex_t),
-            "::",
-            stringify!(__align)
-        )
-    );
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -2075,51 +448,6 @@ pub union pthread_cond_t {
     pub __size: [::std::os::raw::c_char; 48usize],
     pub __align: ::std::os::raw::c_longlong,
 }
-#[test]
-fn bindgen_test_layout_pthread_cond_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_cond_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_cond_t>(),
-        48usize,
-        concat!("Size of: ", stringify!(pthread_cond_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_cond_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_cond_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_cond_t),
-            "::",
-            stringify!(__data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_cond_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_cond_t),
-            "::",
-            stringify!(__align)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union pthread_rwlock_t {
@@ -2127,91 +455,11 @@ pub union pthread_rwlock_t {
     pub __size: [::std::os::raw::c_char; 56usize],
     pub __align: ::std::os::raw::c_long,
 }
-#[test]
-fn bindgen_test_layout_pthread_rwlock_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_rwlock_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_rwlock_t>(),
-        56usize,
-        concat!("Size of: ", stringify!(pthread_rwlock_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_rwlock_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_rwlock_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_rwlock_t),
-            "::",
-            stringify!(__data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_rwlock_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_rwlock_t),
-            "::",
-            stringify!(__align)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union pthread_rwlockattr_t {
     pub __size: [::std::os::raw::c_char; 8usize],
     pub __align: ::std::os::raw::c_long,
-}
-#[test]
-fn bindgen_test_layout_pthread_rwlockattr_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_rwlockattr_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_rwlockattr_t>(),
-        8usize,
-        concat!("Size of: ", stringify!(pthread_rwlockattr_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_rwlockattr_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_rwlockattr_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_rwlockattr_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_rwlockattr_t),
-            "::",
-            stringify!(__align)
-        )
-    );
 }
 pub type pthread_spinlock_t = ::std::os::raw::c_int;
 #[repr(C)]
@@ -2220,82 +468,11 @@ pub union pthread_barrier_t {
     pub __size: [::std::os::raw::c_char; 32usize],
     pub __align: ::std::os::raw::c_long,
 }
-#[test]
-fn bindgen_test_layout_pthread_barrier_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_barrier_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_barrier_t>(),
-        32usize,
-        concat!("Size of: ", stringify!(pthread_barrier_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_barrier_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(pthread_barrier_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_barrier_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_barrier_t),
-            "::",
-            stringify!(__align)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union pthread_barrierattr_t {
     pub __size: [::std::os::raw::c_char; 4usize],
     pub __align: ::std::os::raw::c_int,
-}
-#[test]
-fn bindgen_test_layout_pthread_barrierattr_t() {
-    const UNINIT: ::std::mem::MaybeUninit<pthread_barrierattr_t> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<pthread_barrierattr_t>(),
-        4usize,
-        concat!("Size of: ", stringify!(pthread_barrierattr_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<pthread_barrierattr_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(pthread_barrierattr_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_barrierattr_t),
-            "::",
-            stringify!(__size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__align) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(pthread_barrierattr_t),
-            "::",
-            stringify!(__align)
-        )
-    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2308,91 +485,6 @@ pub struct random_data {
     pub rand_sep: ::std::os::raw::c_int,
     pub end_ptr: *mut i32,
 }
-#[test]
-fn bindgen_test_layout_random_data() {
-    const UNINIT: ::std::mem::MaybeUninit<random_data> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<random_data>(),
-        48usize,
-        concat!("Size of: ", stringify!(random_data))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<random_data>(),
-        8usize,
-        concat!("Alignment of ", stringify!(random_data))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).fptr) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(fptr)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rptr) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(rptr)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).state) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(state)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rand_type) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(rand_type)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rand_deg) as usize - ptr as usize },
-        28usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(rand_deg)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).rand_sep) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(rand_sep)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).end_ptr) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(random_data),
-            "::",
-            stringify!(end_ptr)
-        )
-    );
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct drand48_data {
@@ -2402,339 +494,53 @@ pub struct drand48_data {
     pub __init: ::std::os::raw::c_ushort,
     pub __a: ::std::os::raw::c_ulonglong,
 }
-#[test]
-fn bindgen_test_layout_drand48_data() {
-    const UNINIT: ::std::mem::MaybeUninit<drand48_data> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<drand48_data>(),
-        24usize,
-        concat!("Size of: ", stringify!(drand48_data))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<drand48_data>(),
-        8usize,
-        concat!("Alignment of ", stringify!(drand48_data))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__x) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(drand48_data),
-            "::",
-            stringify!(__x)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__old_x) as usize - ptr as usize },
-        6usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(drand48_data),
-            "::",
-            stringify!(__old_x)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__c) as usize - ptr as usize },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(drand48_data),
-            "::",
-            stringify!(__c)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__init) as usize - ptr as usize },
-        14usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(drand48_data),
-            "::",
-            stringify!(__init)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__a) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(drand48_data),
-            "::",
-            stringify!(__a)
-        )
-    );
-}
 pub type __compar_fn_t = ::std::option::Option<
     unsafe extern "C" fn(
         arg1: *const ::std::os::raw::c_void,
         arg2: *const ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int,
 >;
-#[doc = " Struct wrapping a fixed-size c string used for returning the formatted error string."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_error_string_s {
-    #[doc = " The fixed-size C string used for returning the formatted error string."]
     pub str_: [::std::os::raw::c_char; 1024usize],
 }
-#[test]
-fn bindgen_test_layout_rcutils_error_string_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_error_string_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_error_string_s>(),
-        1024usize,
-        concat!("Size of: ", stringify!(rcutils_error_string_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_error_string_s>(),
-        1usize,
-        concat!("Alignment of ", stringify!(rcutils_error_string_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).str_) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_error_string_s),
-            "::",
-            stringify!(str_)
-        )
-    );
-}
-#[doc = " Struct wrapping a fixed-size c string used for returning the formatted error string."]
 pub type rcutils_error_string_t = rcutils_error_string_s;
-#[doc = " Struct which encapsulates the error state set by RCUTILS_SET_ERROR_MSG()."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_error_state_s {
-    #[doc = " User message storage, limited to RCUTILS_ERROR_STATE_MESSAGE_MAX_LENGTH characters."]
     pub message: [::std::os::raw::c_char; 768usize],
-    #[doc = " File name, limited to what's left from RCUTILS_ERROR_STATE_MAX_SIZE characters\n after subtracting storage for others."]
     pub file: [::std::os::raw::c_char; 229usize],
-    #[doc = " Line number of error."]
     pub line_number: u64,
 }
-#[test]
-fn bindgen_test_layout_rcutils_error_state_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_error_state_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_error_state_s>(),
-        1008usize,
-        concat!("Size of: ", stringify!(rcutils_error_state_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_error_state_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_error_state_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).message) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_error_state_s),
-            "::",
-            stringify!(message)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).file) as usize - ptr as usize },
-        768usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_error_state_s),
-            "::",
-            stringify!(file)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).line_number) as usize - ptr as usize },
-        1000usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_error_state_s),
-            "::",
-            stringify!(line_number)
-        )
-    );
-}
-#[doc = " Struct which encapsulates the error state set by RCUTILS_SET_ERROR_MSG()."]
 pub type rcutils_error_state_t = rcutils_error_state_s;
-#[doc = " The structure holding the metadata for a string array."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_string_array_s {
-    #[doc = " The number of strings that can be stored in the string array."]
     pub size: usize,
-    #[doc = " The allocated memory for the string array."]
     pub data: *mut *mut ::std::os::raw::c_char,
-    #[doc = " The allocator used to allocate and free memory for the string array."]
     pub allocator: rcutils_allocator_t,
 }
-#[test]
-fn bindgen_test_layout_rcutils_string_array_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_string_array_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_string_array_s>(),
-        56usize,
-        concat!("Size of: ", stringify!(rcutils_string_array_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_string_array_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_string_array_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).size) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_string_array_s),
-            "::",
-            stringify!(size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_string_array_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_string_array_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for a string array."]
 pub type rcutils_string_array_t = rcutils_string_array_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_string_map_impl_s {
     _unused: [u8; 0],
 }
-#[doc = " The structure holding the metadata for a string map."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_string_map_s {
-    #[doc = " A pointer to the PIMPL implementation type."]
     pub impl_: *mut rcutils_string_map_impl_s,
 }
-#[test]
-fn bindgen_test_layout_rcutils_string_map_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_string_map_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_string_map_s>(),
-        8usize,
-        concat!("Size of: ", stringify!(rcutils_string_map_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_string_map_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_string_map_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).impl_) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_string_map_s),
-            "::",
-            stringify!(impl_)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for a string map."]
 pub type rcutils_string_map_t = rcutils_string_map_s;
-#[doc = " The structure holding the metadata for a uint8 array."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_uint8_array_s {
-    #[doc = " The allocated memory for the uint8 array."]
     pub buffer: *mut u8,
-    #[doc = " The number of valid elements in the uint8 array."]
     pub buffer_length: usize,
-    #[doc = " The maximum capacity of the uint8 array."]
     pub buffer_capacity: usize,
-    #[doc = " The allocator used to allocate and free memory for the uint8 array."]
     pub allocator: rcutils_allocator_t,
 }
-#[test]
-fn bindgen_test_layout_rcutils_uint8_array_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_uint8_array_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_uint8_array_s>(),
-        64usize,
-        concat!("Size of: ", stringify!(rcutils_uint8_array_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_uint8_array_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_uint8_array_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_uint8_array_s),
-            "::",
-            stringify!(buffer)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer_length) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_uint8_array_s),
-            "::",
-            stringify!(buffer_length)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).buffer_capacity) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_uint8_array_s),
-            "::",
-            stringify!(buffer_capacity)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_uint8_array_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-}
-#[doc = " The structure holding the metadata for a uint8 array."]
 pub type rcutils_uint8_array_t = rcutils_uint8_array_s;
 pub type rosidl_message_typesupport_handle_function = ::std::option::Option<
     unsafe extern "C" fn(
@@ -2742,62 +548,12 @@ pub type rosidl_message_typesupport_handle_function = ::std::option::Option<
         arg2: *const ::std::os::raw::c_char,
     ) -> *const rosidl_message_type_support_t,
 >;
-#[doc = " Contains rosidl message type support data"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_message_type_support_t {
-    #[doc = " String identifier for the type_support."]
     pub typesupport_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Pointer to the message type support library"]
     pub data: *const ::std::os::raw::c_void,
-    #[doc = " Pointer to the message type support handler function"]
     pub func: rosidl_message_typesupport_handle_function,
-}
-#[test]
-fn bindgen_test_layout_rosidl_message_type_support_t() {
-    const UNINIT: ::std::mem::MaybeUninit<rosidl_message_type_support_t> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rosidl_message_type_support_t>(),
-        24usize,
-        concat!("Size of: ", stringify!(rosidl_message_type_support_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rosidl_message_type_support_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rosidl_message_type_support_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).typesupport_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_message_type_support_t),
-            "::",
-            stringify!(typesupport_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_message_type_support_t),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).func) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_message_type_support_t),
-            "::",
-            stringify!(func)
-        )
-    );
 }
 pub type rosidl_service_typesupport_handle_function = ::std::option::Option<
     unsafe extern "C" fn(
@@ -2805,62 +561,12 @@ pub type rosidl_service_typesupport_handle_function = ::std::option::Option<
         arg2: *const ::std::os::raw::c_char,
     ) -> *const rosidl_service_type_support_t,
 >;
-#[doc = " Contains rosidl service type support data"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_service_type_support_t {
-    #[doc = " String identifier for the type_support."]
     pub typesupport_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Pointer to the service type support library"]
     pub data: *const ::std::os::raw::c_void,
-    #[doc = " Pointer to the service type support handler function"]
     pub func: rosidl_service_typesupport_handle_function,
-}
-#[test]
-fn bindgen_test_layout_rosidl_service_type_support_t() {
-    const UNINIT: ::std::mem::MaybeUninit<rosidl_service_type_support_t> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rosidl_service_type_support_t>(),
-        24usize,
-        concat!("Size of: ", stringify!(rosidl_service_type_support_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rosidl_service_type_support_t>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rosidl_service_type_support_t))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).typesupport_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_service_type_support_t),
-            "::",
-            stringify!(typesupport_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_service_type_support_t),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).func) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_service_type_support_t),
-            "::",
-            stringify!(func)
-        )
-    );
 }
 pub type rosidl_runtime_c__bound_handle_function = ::std::option::Option<
     unsafe extern "C" fn(
@@ -2871,139 +577,27 @@ pub type rosidl_runtime_c__bound_handle_function = ::std::option::Option<
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__Sequence__bound {
-    #[doc = " String identifier for the type_support."]
     pub typesupport_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Pointer to type support handle function"]
     pub data: *const ::std::os::raw::c_void,
     pub func: rosidl_runtime_c__bound_handle_function,
 }
-#[test]
-fn bindgen_test_layout_rosidl_runtime_c__Sequence__bound() {
-    const UNINIT: ::std::mem::MaybeUninit<rosidl_runtime_c__Sequence__bound> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rosidl_runtime_c__Sequence__bound>(),
-        24usize,
-        concat!("Size of: ", stringify!(rosidl_runtime_c__Sequence__bound))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rosidl_runtime_c__Sequence__bound>(),
-        8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(rosidl_runtime_c__Sequence__bound)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).typesupport_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_runtime_c__Sequence__bound),
-            "::",
-            stringify!(typesupport_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_runtime_c__Sequence__bound),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).func) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rosidl_runtime_c__Sequence__bound),
-            "::",
-            stringify!(func)
-        )
-    );
-}
-#[doc = " A single point in time, measured in nanoseconds since the Unix epoch."]
 pub type rcutils_time_point_value_t = i64;
-#[doc = " A duration of time, measured in nanoseconds."]
 pub type rcutils_duration_value_t = i64;
-#[doc = " The structure identifying the caller location in the source code."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_log_location_s {
-    #[doc = " The name of the function containing the log call."]
     pub function_name: *const ::std::os::raw::c_char,
-    #[doc = " The name of the source file containing the log call."]
     pub file_name: *const ::std::os::raw::c_char,
-    #[doc = " The line number containing the log call."]
     pub line_number: usize,
 }
-#[test]
-fn bindgen_test_layout_rcutils_log_location_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rcutils_log_location_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rcutils_log_location_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rcutils_log_location_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rcutils_log_location_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rcutils_log_location_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).function_name) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_log_location_s),
-            "::",
-            stringify!(function_name)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).file_name) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_log_location_s),
-            "::",
-            stringify!(file_name)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).line_number) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rcutils_log_location_s),
-            "::",
-            stringify!(line_number)
-        )
-    );
-}
-#[doc = " The structure identifying the caller location in the source code."]
 pub type rcutils_log_location_t = rcutils_log_location_s;
-#[doc = "< The unset log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_UNSET: RCUTILS_LOG_SEVERITY = 0;
-#[doc = "< The debug log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_DEBUG: RCUTILS_LOG_SEVERITY = 10;
-#[doc = "< The info log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_INFO: RCUTILS_LOG_SEVERITY = 20;
-#[doc = "< The warn log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_WARN: RCUTILS_LOG_SEVERITY = 30;
-#[doc = "< The error log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_ERROR: RCUTILS_LOG_SEVERITY = 40;
-#[doc = "< The fatal log level"]
 pub const RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_FATAL: RCUTILS_LOG_SEVERITY = 50;
-#[doc = " The severity levels of log messages / loggers."]
 pub type RCUTILS_LOG_SEVERITY = ::std::os::raw::c_uint;
-#[doc = " The function signature to log messages.\n**\n* \\param[in] location The location information about where the log came from\n* \\param[in] severity The severity of the log message expressed as an integer\n* \\param[in] name The name of the logger that this message came from\n* \\param[in] timestamp The time at which the log message was generated\n* \\param[in] format The list of arguments to insert into the formatted log message\n* \\param[in] args The variable argument list\n*/"]
 pub type rcutils_logging_output_handler_t = ::std::option::Option<
     unsafe extern "C" fn(
         arg1: *const rcutils_log_location_t,
@@ -3026,354 +620,60 @@ pub const rmw_qos_policy_kind_e_RMW_QOS_POLICY_LIVELINESS_LEASE_DURATION: rmw_qo
     256;
 pub const rmw_qos_policy_kind_e_RMW_QOS_POLICY_AVOID_ROS_NAMESPACE_CONVENTIONS:
     rmw_qos_policy_kind_e = 512;
-#[doc = " QoS Policy Kinds"]
 pub type rmw_qos_policy_kind_e = ::std::os::raw::c_uint;
-#[doc = " QoS Policy Kinds"]
 pub use self::rmw_qos_policy_kind_e as rmw_qos_policy_kind_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_qos_incompatible_event_status_s {
-    #[doc = " Total cumulative number of times the concerned subscription discovered a\n publisher for the same topic with an offered QoS that was incompatible\n with that requested by the subscription."]
     pub total_count: i32,
-    #[doc = " The change in total_count since the last time the status was read."]
     pub total_count_change: i32,
-    #[doc = " The Qos Policy Kind of one of the policies that was found to be\n incompatible the last time an incompatibility was detected."]
     pub last_policy_kind: rmw_qos_policy_kind_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_qos_incompatible_event_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_qos_incompatible_event_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_qos_incompatible_event_status_s>(),
-        12usize,
-        concat!("Size of: ", stringify!(rmw_qos_incompatible_event_status_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_qos_incompatible_event_status_s>(),
-        4usize,
-        concat!(
-            "Alignment of ",
-            stringify!(rmw_qos_incompatible_event_status_s)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_incompatible_event_status_s),
-            "::",
-            stringify!(total_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count_change) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_incompatible_event_status_s),
-            "::",
-            stringify!(total_count_change)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).last_policy_kind) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_incompatible_event_status_s),
-            "::",
-            stringify!(last_policy_kind)
-        )
-    );
-}
 pub type rmw_qos_incompatible_event_status_t = rmw_qos_incompatible_event_status_s;
-#[doc = " Event state for a subscription's 'RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE' events."]
 pub type rmw_requested_qos_incompatible_event_status_t = rmw_qos_incompatible_event_status_t;
-#[doc = " Event state for a publisher's 'RMW_EVENT_OFFERED_QOS_INCOMPATIBLE' events."]
 pub type rmw_offered_qos_incompatible_event_status_t = rmw_qos_incompatible_event_status_t;
-#[doc = " QoS Liveliness Changed information provided by a subscription."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_liveliness_changed_status_s {
-    #[doc = " The total number of currently active Publishers which publish to the topic associated with\n the Subscription.\n This count increases when a newly matched Publisher asserts its liveliness for the first time\n or when a Publisher previously considered to be not alive reasserts its liveliness.\n The count decreases when a Publisher considered alive fails to assert its liveliness and\n becomes not alive, whether because it was deleted normally or for some other reason."]
     pub alive_count: i32,
-    #[doc = " The total count of current Publishers which publish to the topic associated with the\n Subscription that are no longer asserting their liveliness.\n This count increases when a Publisher considered alive fails to assert its liveliness and\n becomes not alive for some reason other than the normal deletion of that Publisher.\n It decreases when a previously not alive Publisher either reasserts its liveliness or is\n deleted normally."]
     pub not_alive_count: i32,
-    #[doc = " The change in the alive_count since the status was last read."]
     pub alive_count_change: i32,
-    #[doc = " The change in the not_alive_count since the status was last read."]
     pub not_alive_count_change: i32,
 }
-#[test]
-fn bindgen_test_layout_rmw_liveliness_changed_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_liveliness_changed_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_liveliness_changed_status_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_liveliness_changed_status_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_liveliness_changed_status_s>(),
-        4usize,
-        concat!("Alignment of ", stringify!(rmw_liveliness_changed_status_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).alive_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_changed_status_s),
-            "::",
-            stringify!(alive_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).not_alive_count) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_changed_status_s),
-            "::",
-            stringify!(not_alive_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).alive_count_change) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_changed_status_s),
-            "::",
-            stringify!(alive_count_change)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).not_alive_count_change) as usize - ptr as usize },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_changed_status_s),
-            "::",
-            stringify!(not_alive_count_change)
-        )
-    );
-}
-#[doc = " QoS Liveliness Changed information provided by a subscription."]
 pub type rmw_liveliness_changed_status_t = rmw_liveliness_changed_status_s;
-#[doc = " QoS Liveliness Lost information provided by a publisher."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_liveliness_lost_status_s {
-    #[doc = " Lifetime cumulative number of times that a previously-alive Publisher became not alive due to\n a failure to actively signal its liveliness within its offered liveliness period.\n This count does not change when an already not alive Publisher simply remains not alive for\n another liveliness period."]
     pub total_count: i32,
-    #[doc = " The change in total_count since the last time the status was last read."]
     pub total_count_change: i32,
 }
-#[test]
-fn bindgen_test_layout_rmw_liveliness_lost_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_liveliness_lost_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_liveliness_lost_status_s>(),
-        8usize,
-        concat!("Size of: ", stringify!(rmw_liveliness_lost_status_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_liveliness_lost_status_s>(),
-        4usize,
-        concat!("Alignment of ", stringify!(rmw_liveliness_lost_status_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_lost_status_s),
-            "::",
-            stringify!(total_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count_change) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_liveliness_lost_status_s),
-            "::",
-            stringify!(total_count_change)
-        )
-    );
-}
-#[doc = " QoS Liveliness Lost information provided by a publisher."]
 pub type rmw_liveliness_lost_status_t = rmw_liveliness_lost_status_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_message_lost_status_s {
-    #[doc = " Total number of messages lost."]
     pub total_count: usize,
-    #[doc = " Number of messages lost since last callback."]
     pub total_count_change: usize,
 }
-#[test]
-fn bindgen_test_layout_rmw_message_lost_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_message_lost_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_message_lost_status_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_message_lost_status_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_message_lost_status_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_message_lost_status_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_lost_status_s),
-            "::",
-            stringify!(total_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count_change) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_lost_status_s),
-            "::",
-            stringify!(total_count_change)
-        )
-    );
-}
 pub type rmw_message_lost_status_t = rmw_message_lost_status_s;
-#[doc = " QoS Deadline Missed information provided by a publisher."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_offered_deadline_missed_status_s {
-    #[doc = " Lifetime cumulative number of offered deadline periods elapsed during which a Publisher failed\n to provide data.\n Missed deadlines accumulate; that is, each deadline period the total_count will be incremented\n by one."]
     pub total_count: i32,
-    #[doc = " The change in total_count since the last time the status was last read."]
     pub total_count_change: i32,
 }
-#[test]
-fn bindgen_test_layout_rmw_offered_deadline_missed_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_offered_deadline_missed_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_offered_deadline_missed_status_s>(),
-        8usize,
-        concat!(
-            "Size of: ",
-            stringify!(rmw_offered_deadline_missed_status_s)
-        )
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_offered_deadline_missed_status_s>(),
-        4usize,
-        concat!(
-            "Alignment of ",
-            stringify!(rmw_offered_deadline_missed_status_s)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_offered_deadline_missed_status_s),
-            "::",
-            stringify!(total_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count_change) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_offered_deadline_missed_status_s),
-            "::",
-            stringify!(total_count_change)
-        )
-    );
-}
-#[doc = " QoS Deadline Missed information provided by a publisher."]
 pub type rmw_offered_deadline_missed_status_t = rmw_offered_deadline_missed_status_s;
-#[doc = " QoS Requested Deadline Missed information provided by a subscription."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_requested_deadline_missed_status_s {
-    #[doc = " Lifetime cumulative number of missed deadlines detected for any instance read by the\n subscription.\n Missed deadlines accumulate; that is, each deadline period the total_count will be incremented\n by one for each instance for which data was not received."]
     pub total_count: i32,
-    #[doc = " The incremental number of deadlines detected since the status was read."]
     pub total_count_change: i32,
 }
-#[test]
-fn bindgen_test_layout_rmw_requested_deadline_missed_status_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_requested_deadline_missed_status_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_requested_deadline_missed_status_s>(),
-        8usize,
-        concat!(
-            "Size of: ",
-            stringify!(rmw_requested_deadline_missed_status_s)
-        )
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_requested_deadline_missed_status_s>(),
-        4usize,
-        concat!(
-            "Alignment of ",
-            stringify!(rmw_requested_deadline_missed_status_s)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_requested_deadline_missed_status_s),
-            "::",
-            stringify!(total_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).total_count_change) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_requested_deadline_missed_status_s),
-            "::",
-            stringify!(total_count_change)
-        )
-    );
-}
-#[doc = " QoS Requested Deadline Missed information provided by a subscription."]
 pub type rmw_requested_deadline_missed_status_t = rmw_requested_deadline_missed_status_s;
-#[doc = " Uses ROS_LOCALHOST_ONLY environment variable."]
 pub const rmw_localhost_only_e_RMW_LOCALHOST_ONLY_DEFAULT: rmw_localhost_only_e = 0;
-#[doc = " Forces using only localhost."]
 pub const rmw_localhost_only_e_RMW_LOCALHOST_ONLY_ENABLED: rmw_localhost_only_e = 1;
-#[doc = " Forces disabling localhost only."]
 pub const rmw_localhost_only_e_RMW_LOCALHOST_ONLY_DISABLED: rmw_localhost_only_e = 2;
-#[doc = " Used to specify if the context can only communicate through localhost."]
 pub type rmw_localhost_only_e = ::std::os::raw::c_uint;
-#[doc = " Used to specify if the context can only communicate through localhost."]
 pub use self::rmw_localhost_only_e as rmw_localhost_only_t;
-#[doc = " Return code for rmw functions"]
 pub type rmw_ret_t = i32;
 pub const rmw_security_enforcement_policy_e_RMW_SECURITY_ENFORCEMENT_PERMISSIVE:
     rmw_security_enforcement_policy_e = 0;
@@ -3387,1367 +687,205 @@ pub struct rmw_security_options_s {
     pub enforce_security: rmw_security_enforcement_policy_t,
     pub security_root_path: *mut ::std::os::raw::c_char,
 }
-#[test]
-fn bindgen_test_layout_rmw_security_options_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_security_options_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_security_options_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_security_options_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_security_options_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_security_options_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).enforce_security) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_security_options_s),
-            "::",
-            stringify!(enforce_security)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).security_root_path) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_security_options_s),
-            "::",
-            stringify!(security_root_path)
-        )
-    );
-}
 pub type rmw_security_options_t = rmw_security_options_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_init_options_impl_s {
     _unused: [u8; 0],
 }
-#[doc = " Implementation defined options structure used during rmw_init().\n**\n* This should be defined by the rmw implementation.\n*/"]
 pub type rmw_init_options_impl_t = rmw_init_options_impl_s;
-#[doc = " Options structure used during rmw_init()."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_init_options_s {
-    #[doc = " Locally (process local) unique ID that represents this init/shutdown cycle.\n**\n* This should be set by the caller of `rmw_init()` to a number that is\n* unique within this process.\n* It is designed to be used with `rcl_init()` and `rcl_get_instance_id()`.\n*/"]
     pub instance_id: u64,
-    #[doc = " Implementation identifier, used to ensure two different implementations are not being mixed."]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " ROS domain id"]
     pub domain_id: usize,
-    #[doc = " Security options"]
     pub security_options: rmw_security_options_t,
-    #[doc = " Enable localhost only"]
     pub localhost_only: rmw_localhost_only_t,
-    #[doc = " Enclave, name used to find security artifacts in a sros2 keystore."]
     pub enclave: *mut ::std::os::raw::c_char,
-    #[doc = " Allocator used during internal allocation of init options, if needed."]
     pub allocator: rcutils_allocator_t,
-    #[doc = " Implementation defined init options.\n** May be NULL if there are no implementation defined options. */"]
     pub impl_: *mut rmw_init_options_impl_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_init_options_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_init_options_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_init_options_s>(),
-        104usize,
-        concat!("Size of: ", stringify!(rmw_init_options_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_init_options_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_init_options_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).instance_id) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(instance_id)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).domain_id) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(domain_id)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).security_options) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(security_options)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).localhost_only) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(localhost_only)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).enclave) as usize - ptr as usize },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(enclave)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        56usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).impl_) as usize - ptr as usize },
-        96usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_init_options_s),
-            "::",
-            stringify!(impl_)
-        )
-    );
-}
-#[doc = " Options structure used during rmw_init()."]
 pub type rmw_init_options_t = rmw_init_options_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_context_impl_s {
     _unused: [u8; 0],
 }
-#[doc = " Implementation defined context structure returned by rmw_init().\n**\n* This should be defined by the rmw implementation.\n*/"]
 pub type rmw_context_impl_t = rmw_context_impl_s;
-#[doc = " Initialization context structure which is used to store init specific information."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_context_s {
-    #[doc = " Locally (process local) unique ID that represents this init/shutdown cycle."]
     pub instance_id: u64,
-    #[doc = " Implementation identifier, used to ensure two different implementations are not being mixed."]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Options used to initialize the context."]
     pub options: rmw_init_options_t,
-    #[doc = " Domain id that is being used."]
     pub actual_domain_id: usize,
-    #[doc = " Implementation defined context information.\n** May be NULL if there is no implementation defined context information. */"]
     pub impl_: *mut rmw_context_impl_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_context_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_context_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_context_s>(),
-        136usize,
-        concat!("Size of: ", stringify!(rmw_context_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_context_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_context_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).instance_id) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_context_s),
-            "::",
-            stringify!(instance_id)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_context_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).options) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_context_s),
-            "::",
-            stringify!(options)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).actual_domain_id) as usize - ptr as usize },
-        120usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_context_s),
-            "::",
-            stringify!(actual_domain_id)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).impl_) as usize - ptr as usize },
-        128usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_context_s),
-            "::",
-            stringify!(impl_)
-        )
-    );
-}
-#[doc = " Initialization context structure which is used to store init specific information."]
 pub type rmw_context_t = rmw_context_s;
-#[doc = " \\brief Serialized message as a string of bytes.\n\n It includes (but it is not limited to) the following members:\n   \\e \\c buffer the reference to internal storage, as a pointer\n   \\e \\c buffer_length the size of stored contents, as an unsigned integer\n   \\e \\c buffer_capacity the capacity of internal storage, as an unsigned integer"]
 pub type rmw_serialized_message_t = rcutils_uint8_array_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_subscription_content_filter_options_s {
-    #[doc = " Specify the criteria to select the data samples of interest.\n\n It is similar to the WHERE part of an SQL clause."]
     pub filter_expression: *mut ::std::os::raw::c_char,
-    #[doc = " Give values to the tokens placeholder ‘parameters’ (i.e., \"%n\" tokens begin from 0) in the\n filter_expression. The number of supplied parameters must fit with the requested values.\n\n It can be NULL if there is no \"%n\" tokens placeholder in filter_expression.\n The maximum index number must be smaller than 100."]
     pub expression_parameters: rcutils_string_array_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_subscription_content_filter_options_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_subscription_content_filter_options_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_subscription_content_filter_options_s>(),
-        64usize,
-        concat!(
-            "Size of: ",
-            stringify!(rmw_subscription_content_filter_options_s)
-        )
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_subscription_content_filter_options_s>(),
-        8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(rmw_subscription_content_filter_options_s)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).filter_expression) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_content_filter_options_s),
-            "::",
-            stringify!(filter_expression)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).expression_parameters) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_content_filter_options_s),
-            "::",
-            stringify!(expression_parameters)
-        )
-    );
-}
 pub type rmw_subscription_content_filter_options_t = rmw_subscription_content_filter_options_s;
-#[doc = " A struct representing a duration or relative time in RMW - does not encode an origin."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_time_s {
-    #[doc = " Seconds component"]
     pub sec: u64,
-    #[doc = " Nanoseconds component"]
     pub nsec: u64,
 }
-#[test]
-fn bindgen_test_layout_rmw_time_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_time_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_time_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_time_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_time_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_time_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).sec) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_time_s),
-            "::",
-            stringify!(sec)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).nsec) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_time_s),
-            "::",
-            stringify!(nsec)
-        )
-    );
-}
-#[doc = " A struct representing a duration or relative time in RMW - does not encode an origin."]
 pub type rmw_time_t = rmw_time_s;
 pub type rmw_time_point_value_t = rcutils_time_point_value_t;
 pub type rmw_duration_t = rcutils_duration_value_t;
-#[doc = " Structure which encapsulates an rmw node"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_node_s {
-    #[doc = " Name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this node's data"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " A concise name of this rmw node for identification"]
     pub name: *const ::std::os::raw::c_char,
-    #[doc = " The namespace of this rmw node"]
     pub namespace_: *const ::std::os::raw::c_char,
-    #[doc = " Context information about node's init specific information"]
     pub context: *mut rmw_context_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_node_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_node_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_node_s>(),
-        40usize,
-        concat!("Size of: ", stringify!(rmw_node_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_node_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_node_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_node_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_node_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).name) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_node_s),
-            "::",
-            stringify!(name)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).namespace_) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_node_s),
-            "::",
-            stringify!(namespace_)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).context) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_node_s),
-            "::",
-            stringify!(context)
-        )
-    );
-}
-#[doc = " Structure which encapsulates an rmw node"]
 pub type rmw_node_t = rmw_node_s;
-#[doc = " Endpoint type has not yet been set"]
 pub const rmw_endpoint_type_e_RMW_ENDPOINT_INVALID: rmw_endpoint_type_e = 0;
-#[doc = " Creates and publishes messages to the ROS topic"]
 pub const rmw_endpoint_type_e_RMW_ENDPOINT_PUBLISHER: rmw_endpoint_type_e = 1;
-#[doc = " Listens for and receives messages from a topic"]
 pub const rmw_endpoint_type_e_RMW_ENDPOINT_SUBSCRIPTION: rmw_endpoint_type_e = 2;
-#[doc = " Endpoint enumeration type"]
 pub type rmw_endpoint_type_e = ::std::os::raw::c_uint;
-#[doc = " Endpoint enumeration type"]
 pub use self::rmw_endpoint_type_e as rmw_endpoint_type_t;
-#[doc = " Unique network flow endpoints not required"]
 pub const rmw_unique_network_flow_endpoints_requirement_e_RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED : rmw_unique_network_flow_endpoints_requirement_e = 0 ;
-#[doc = " Unique network flow endpoins strictly required.\n Error if not provided by RMW implementation."]
 pub const rmw_unique_network_flow_endpoints_requirement_e_RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_STRICTLY_REQUIRED : rmw_unique_network_flow_endpoints_requirement_e = 1 ;
-#[doc = " Unique network flow endpoints optionally required.\n No error if not provided RMW implementation."]
 pub const rmw_unique_network_flow_endpoints_requirement_e_RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_OPTIONALLY_REQUIRED : rmw_unique_network_flow_endpoints_requirement_e = 2 ;
-#[doc = " Unique network flow endpoints requirement decided by system."]
 pub const rmw_unique_network_flow_endpoints_requirement_e_RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_SYSTEM_DEFAULT : rmw_unique_network_flow_endpoints_requirement_e = 3 ;
-#[doc = " Unique network flow endpoints requirement enumeration"]
 pub type rmw_unique_network_flow_endpoints_requirement_e = ::std::os::raw::c_uint;
-#[doc = " Unique network flow endpoints requirement enumeration"]
 pub use self::rmw_unique_network_flow_endpoints_requirement_e as rmw_unique_network_flow_endpoints_requirement_t;
-#[doc = " Options that can be used to configure the creation of a publisher in rmw."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_publisher_options_s {
-    #[doc = " Used to pass rmw implementation specific resources during publisher creation.\n**\n* This field is type erased (rather than forward declared) because it will\n* usually be a non-owned reference to an language specific object, e.g.\n* C++ it may be a polymorphic class that only the rmw implementation can use.\n*\n* The resource pointed to here needs to outlive this options structure, and\n* any rmw_publisher objects that are created using it, as they copy this\n* structure and may use this payload throughout their lifetime.\n*/"]
     pub rmw_specific_publisher_payload: *mut ::std::os::raw::c_void,
-    #[doc = " Require middleware to generate unique network flow endpoints.\n**\n* Unique network flow endpoints are required to differentiate the QoS provided by\n* networks for flows between publishers and subscribers in communicating\n* nodes.\n* Default value is RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED.\n*/"]
     pub require_unique_network_flow_endpoints: rmw_unique_network_flow_endpoints_requirement_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_publisher_options_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_publisher_options_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_publisher_options_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_publisher_options_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_publisher_options_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_publisher_options_s))
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).rmw_specific_publisher_payload) as usize - ptr as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_options_s),
-            "::",
-            stringify!(rmw_specific_publisher_payload)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).require_unique_network_flow_endpoints) as usize
-                - ptr as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_options_s),
-            "::",
-            stringify!(require_unique_network_flow_endpoints)
-        )
-    );
-}
-#[doc = " Options that can be used to configure the creation of a publisher in rmw."]
 pub type rmw_publisher_options_t = rmw_publisher_options_s;
-#[doc = " Structure which encapsulates an rmw publisher"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_publisher_s {
-    #[doc = " Name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this publisher's data"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " The name of the ROS topic this publisher publishes to"]
     pub topic_name: *const ::std::os::raw::c_char,
-    #[doc = " Publisher options.\n**\n* The options structure passed to rmw_create_publisher() should be\n* assigned to this field by the rmw implementation.\n* The fields should not be modified after creation, but\n* the contents of the options structure may or may not be const, i.e.\n* shallow const-ness.\n* This field is not marked const to avoid any const casting during setup.\n*/"]
     pub options: rmw_publisher_options_t,
-    #[doc = " Indicate whether this publisher supports loaning messages"]
     pub can_loan_messages: bool,
 }
-#[test]
-fn bindgen_test_layout_rmw_publisher_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_publisher_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_publisher_s>(),
-        48usize,
-        concat!("Size of: ", stringify!(rmw_publisher_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_publisher_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_publisher_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).topic_name) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_s),
-            "::",
-            stringify!(topic_name)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).options) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_s),
-            "::",
-            stringify!(options)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).can_loan_messages) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_s),
-            "::",
-            stringify!(can_loan_messages)
-        )
-    );
-}
-#[doc = " Structure which encapsulates an rmw publisher"]
 pub type rmw_publisher_t = rmw_publisher_s;
-#[doc = " Options that can be used to configure the creation of a subscription in rmw."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_subscription_options_s {
-    #[doc = " Used to pass rmw implementation specific resources during subscription creation.\n**\n* All the same details and restrictions of this field in\n* rmw_publisher_options_t apply to this struct as well.\n*\n* \\sa rmw_publisher_options_t.rmw_specific_publisher_payload\n*/"]
     pub rmw_specific_subscription_payload: *mut ::std::os::raw::c_void,
-    #[doc = " If true then the middleware should not deliver data from local publishers.\n**\n* This setting is most often used when data should only be received from\n* remote nodes, especially to avoid \"double delivery\" when both intra- and\n* inter- process communication is taking place.\n*\n* \\todo(wjwwood): nail this down when participant mapping is sorted out.\n*   See: https://github.com/ros2/design/pull/250\n*\n* The definition of local is somewhat vague at the moment.\n* Right now it means local to the node, and that definition works best, but\n* may become more complicated when/if participants map to a context instead.\n*/"]
     pub ignore_local_publications: bool,
-    #[doc = " Require middleware to generate unique network flow endpoints.\n**\n* Unique network flow endpoints are required to differentiate the QoS provided by\n* networks for flows between publishers and subscribers in communicating\n* nodes.\n* Default value is RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED.\n*/"]
     pub require_unique_network_flow_endpoints: rmw_unique_network_flow_endpoints_requirement_t,
-    #[doc = " Used to create a content filter options during subscription creation."]
     pub content_filter_options: *mut rmw_subscription_content_filter_options_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_subscription_options_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_subscription_options_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_subscription_options_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_subscription_options_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_subscription_options_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_subscription_options_s))
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).rmw_specific_subscription_payload) as usize - ptr as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_options_s),
-            "::",
-            stringify!(rmw_specific_subscription_payload)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).ignore_local_publications) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_options_s),
-            "::",
-            stringify!(ignore_local_publications)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).require_unique_network_flow_endpoints) as usize
-                - ptr as usize
-        },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_options_s),
-            "::",
-            stringify!(require_unique_network_flow_endpoints)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).content_filter_options) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_options_s),
-            "::",
-            stringify!(content_filter_options)
-        )
-    );
-}
-#[doc = " Options that can be used to configure the creation of a subscription in rmw."]
 pub type rmw_subscription_options_t = rmw_subscription_options_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_subscription_s {
-    #[doc = " Name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this subscription"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " Name of the ros topic this subscription listens to"]
     pub topic_name: *const ::std::os::raw::c_char,
-    #[doc = " Subscription options.\n**\n* The options structure passed to rmw_create_subscription() should be\n* assigned to this field by the rmw implementation.\n* The fields should not be modified after creation, but\n* the contents of the options structure may or may not be const, i.e.\n* shallow const-ness.\n* This field is not marked const to avoid any const casting during setup.\n*/"]
     pub options: rmw_subscription_options_t,
-    #[doc = " Indicates whether this subscription can loan messages"]
     pub can_loan_messages: bool,
-    #[doc = " Indicates whether content filtered topic of this subscription is enabled"]
     pub is_cft_enabled: bool,
 }
-#[test]
-fn bindgen_test_layout_rmw_subscription_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_subscription_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_subscription_s>(),
-        56usize,
-        concat!("Size of: ", stringify!(rmw_subscription_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_subscription_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_subscription_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).topic_name) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(topic_name)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).options) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(options)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).can_loan_messages) as usize - ptr as usize },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(can_loan_messages)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).is_cft_enabled) as usize - ptr as usize },
-        49usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_s),
-            "::",
-            stringify!(is_cft_enabled)
-        )
-    );
-}
 pub type rmw_subscription_t = rmw_subscription_s;
-#[doc = " A handle to an rmw service"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_service_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this service"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " The name of this service as exposed to the ros graph"]
     pub service_name: *const ::std::os::raw::c_char,
 }
-#[test]
-fn bindgen_test_layout_rmw_service_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_service_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_service_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_service_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_service_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_service_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).service_name) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_s),
-            "::",
-            stringify!(service_name)
-        )
-    );
-}
-#[doc = " A handle to an rmw service"]
 pub type rmw_service_t = rmw_service_s;
-#[doc = " A handle to an rmw service client"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_client_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this service client"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " The name of this service as exposed to the ros graph"]
     pub service_name: *const ::std::os::raw::c_char,
 }
-#[test]
-fn bindgen_test_layout_rmw_client_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_client_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_client_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_client_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_client_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_client_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_client_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_client_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).service_name) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_client_s),
-            "::",
-            stringify!(service_name)
-        )
-    );
-}
-#[doc = " A handle to an rmw service client"]
 pub type rmw_client_t = rmw_client_s;
-#[doc = " Handle for an rmw guard condition"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_guard_condition_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this guard condition"]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " rmw context associated with this guard condition"]
     pub context: *mut rmw_context_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_guard_condition_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_guard_condition_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_guard_condition_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_guard_condition_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_guard_condition_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_guard_condition_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_guard_condition_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_guard_condition_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).context) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_guard_condition_s),
-            "::",
-            stringify!(context)
-        )
-    );
-}
-#[doc = " Handle for an rmw guard condition"]
 pub type rmw_guard_condition_t = rmw_guard_condition_s;
-#[doc = " Allocation of memory for an rmw publisher"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_publisher_allocation_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this allocation"]
     pub data: *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_publisher_allocation_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_publisher_allocation_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_publisher_allocation_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_publisher_allocation_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_publisher_allocation_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_publisher_allocation_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_allocation_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_publisher_allocation_s),
-            "::",
-            stringify!(data)
-        )
-    );
-}
-#[doc = " Allocation of memory for an rmw publisher"]
 pub type rmw_publisher_allocation_t = rmw_publisher_allocation_s;
-#[doc = " Allocation of memory for an rmw subscription"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_subscription_allocation_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Type erased pointer to this allocation"]
     pub data: *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_subscription_allocation_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_subscription_allocation_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_subscription_allocation_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_subscription_allocation_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_subscription_allocation_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_subscription_allocation_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_allocation_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscription_allocation_s),
-            "::",
-            stringify!(data)
-        )
-    );
-}
-#[doc = " Allocation of memory for an rmw subscription"]
 pub type rmw_subscription_allocation_t = rmw_subscription_allocation_s;
-#[doc = " Array of subscriber handles.\n**\n* An array of void * pointers representing type-erased middleware-specific subscriptions.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of subscriptions represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_subscriptions_s {
-    #[doc = " The number of subscribers represented by the array."]
     pub subscriber_count: usize,
-    #[doc = " Pointer to an array of void * pointers of subscriptions."]
     pub subscribers: *mut *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_subscriptions_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_subscriptions_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_subscriptions_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_subscriptions_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_subscriptions_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_subscriptions_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).subscriber_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscriptions_s),
-            "::",
-            stringify!(subscriber_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).subscribers) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_subscriptions_s),
-            "::",
-            stringify!(subscribers)
-        )
-    );
-}
-#[doc = " Array of subscriber handles.\n**\n* An array of void * pointers representing type-erased middleware-specific subscriptions.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of subscriptions represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 pub type rmw_subscriptions_t = rmw_subscriptions_s;
-#[doc = " Array of service handles.\n**\n* An array of void * pointers representing type-erased middleware-specific services.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of services represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_services_s {
-    #[doc = " The number of services represented by the array."]
     pub service_count: usize,
-    #[doc = " Pointer to an array of void * pointers of services."]
     pub services: *mut *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_services_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_services_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_services_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_services_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_services_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_services_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).service_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_services_s),
-            "::",
-            stringify!(service_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).services) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_services_s),
-            "::",
-            stringify!(services)
-        )
-    );
-}
-#[doc = " Array of service handles.\n**\n* An array of void * pointers representing type-erased middleware-specific services.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of services represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 pub type rmw_services_t = rmw_services_s;
-#[doc = " Array of client handles.\n**\n* An array of void * pointers representing type-erased middleware-specific clients.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of clients represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_clients_s {
-    #[doc = " The number of clients represented by the array."]
     pub client_count: usize,
-    #[doc = " Pointer to an array of void * pointers of clients."]
     pub clients: *mut *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_clients_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_clients_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_clients_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_clients_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_clients_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_clients_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).client_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_clients_s),
-            "::",
-            stringify!(client_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).clients) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_clients_s),
-            "::",
-            stringify!(clients)
-        )
-    );
-}
-#[doc = " Array of client handles.\n**\n* An array of void * pointers representing type-erased middleware-specific clients.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of clients represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 pub type rmw_clients_t = rmw_clients_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_events_s {
-    #[doc = " The number of events represented by the array."]
     pub event_count: usize,
-    #[doc = " Pointer to an array of void * pointers of events."]
     pub events: *mut *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_events_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_events_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_events_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_events_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_events_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_events_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).event_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_events_s),
-            "::",
-            stringify!(event_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).events) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_events_s),
-            "::",
-            stringify!(events)
-        )
-    );
-}
 pub type rmw_events_t = rmw_events_s;
-#[doc = " Array of guard condition handles.\n**\n* An array of void * pointers representing type-erased middleware-specific guard conditions.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of guard conditions represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_guard_conditions_s {
-    #[doc = " The number of guard conditions represented by the array."]
     pub guard_condition_count: usize,
-    #[doc = " Pointer to an array of void * pointers of guard conditions."]
     pub guard_conditions: *mut *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_guard_conditions_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_guard_conditions_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_guard_conditions_s>(),
-        16usize,
-        concat!("Size of: ", stringify!(rmw_guard_conditions_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_guard_conditions_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_guard_conditions_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).guard_condition_count) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_guard_conditions_s),
-            "::",
-            stringify!(guard_condition_count)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).guard_conditions) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_guard_conditions_s),
-            "::",
-            stringify!(guard_conditions)
-        )
-    );
-}
-#[doc = " Array of guard condition handles.\n**\n* An array of void * pointers representing type-erased middleware-specific guard conditions.\n* The number of non-null entries may be smaller than the allocated size of the array.\n* The number of guard conditions represented may be smaller than the allocated size of the array.\n* The creator of this struct is responsible for allocating and deallocating the array.\n*/"]
 pub type rmw_guard_conditions_t = rmw_guard_conditions_s;
-#[doc = " Container for guard conditions to be waited on"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_wait_set_s {
-    #[doc = " The name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " The guard condition to be waited on"]
     pub guard_conditions: *mut rmw_guard_conditions_t,
-    #[doc = " Type erased pointer to this wait set's data"]
     pub data: *mut ::std::os::raw::c_void,
 }
-#[test]
-fn bindgen_test_layout_rmw_wait_set_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_wait_set_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_wait_set_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_wait_set_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_wait_set_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_wait_set_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_wait_set_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).guard_conditions) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_wait_set_s),
-            "::",
-            stringify!(guard_conditions)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_wait_set_s),
-            "::",
-            stringify!(data)
-        )
-    );
-}
-#[doc = " Container for guard conditions to be waited on"]
 pub type rmw_wait_set_t = rmw_wait_set_s;
-#[doc = " An rmw service request identifier"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_request_id_s {
-    #[doc = " The guid of the writer associated with this request"]
     pub writer_guid: [i8; 16usize],
-    #[doc = " Sequence number of this service"]
     pub sequence_number: i64,
 }
-#[test]
-fn bindgen_test_layout_rmw_request_id_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_request_id_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_request_id_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_request_id_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_request_id_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_request_id_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).writer_guid) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_request_id_s),
-            "::",
-            stringify!(writer_guid)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).sequence_number) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_request_id_s),
-            "::",
-            stringify!(sequence_number)
-        )
-    );
-}
-#[doc = " An rmw service request identifier"]
 pub type rmw_request_id_t = rmw_request_id_s;
-#[doc = " Meta-data for a service-related take."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_service_info_s {
@@ -4755,399 +893,85 @@ pub struct rmw_service_info_s {
     pub received_timestamp: rmw_time_point_value_t,
     pub request_id: rmw_request_id_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_service_info_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_service_info_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_service_info_s>(),
-        40usize,
-        concat!("Size of: ", stringify!(rmw_service_info_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_service_info_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_service_info_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).source_timestamp) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_info_s),
-            "::",
-            stringify!(source_timestamp)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).received_timestamp) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_info_s),
-            "::",
-            stringify!(received_timestamp)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).request_id) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_service_info_s),
-            "::",
-            stringify!(request_id)
-        )
-    );
-}
-#[doc = " Meta-data for a service-related take."]
 pub type rmw_service_info_t = rmw_service_info_s;
-#[doc = " Implementation specific default"]
 pub const rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT:
     rmw_qos_reliability_policy_e = 0;
-#[doc = " Guarantee that samples are delivered, may retry multiple times."]
 pub const rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_RELIABLE:
     rmw_qos_reliability_policy_e = 1;
-#[doc = " Attempt to deliver samples, but some may be lost if the network is not robust"]
 pub const rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT:
     rmw_qos_reliability_policy_e = 2;
-#[doc = " Reliability policy has not yet been set"]
 pub const rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_UNKNOWN:
     rmw_qos_reliability_policy_e = 3;
 pub type rmw_qos_reliability_policy_e = ::std::os::raw::c_uint;
 pub use self::rmw_qos_reliability_policy_e as rmw_qos_reliability_policy_t;
-#[doc = " Implementation default for history policy"]
 pub const rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT: rmw_qos_history_policy_e =
     0;
-#[doc = " Only store up to a maximum number of samples, dropping oldest once max is exceeded"]
 pub const rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_KEEP_LAST: rmw_qos_history_policy_e = 1;
-#[doc = " Store all samples, subject to resource limits"]
 pub const rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_KEEP_ALL: rmw_qos_history_policy_e = 2;
-#[doc = " History policy has not yet been set"]
 pub const rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_UNKNOWN: rmw_qos_history_policy_e = 3;
-#[doc = " QoS history enumerations describing how samples endure"]
 pub type rmw_qos_history_policy_e = ::std::os::raw::c_uint;
-#[doc = " QoS history enumerations describing how samples endure"]
 pub use self::rmw_qos_history_policy_e as rmw_qos_history_policy_t;
-#[doc = " Impplementation specific default"]
 pub const rmw_qos_durability_policy_e_RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT:
     rmw_qos_durability_policy_e = 0;
-#[doc = " The rmw publisher is responsible for persisting samples for “late-joining” subscribers"]
 pub const rmw_qos_durability_policy_e_RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL:
     rmw_qos_durability_policy_e = 1;
-#[doc = " Samples are not persistent"]
 pub const rmw_qos_durability_policy_e_RMW_QOS_POLICY_DURABILITY_VOLATILE:
     rmw_qos_durability_policy_e = 2;
-#[doc = " Durability policy has not yet been set"]
 pub const rmw_qos_durability_policy_e_RMW_QOS_POLICY_DURABILITY_UNKNOWN:
     rmw_qos_durability_policy_e = 3;
-#[doc = " QoS durability enumerations describing how samples persist"]
 pub type rmw_qos_durability_policy_e = ::std::os::raw::c_uint;
-#[doc = " QoS durability enumerations describing how samples persist"]
 pub use self::rmw_qos_durability_policy_e as rmw_qos_durability_policy_t;
-#[doc = " Implementation specific default"]
 pub const rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT:
     rmw_qos_liveliness_policy_e = 0;
-#[doc = " The signal that establishes a Topic is alive comes from the ROS rmw layer."]
 pub const rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_AUTOMATIC:
     rmw_qos_liveliness_policy_e = 1;
 pub const rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE:
     rmw_qos_liveliness_policy_e = 2;
-#[doc = " The signal that establishes a Topic is alive is at the Topic level. Only publishing a message\n on the Topic or an explicit signal from the application to assert liveliness on the Topic\n will mark the Topic as being alive."]
 pub const rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC:
     rmw_qos_liveliness_policy_e = 3;
-#[doc = " Liveliness policy has not yet been set"]
 pub const rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_UNKNOWN:
     rmw_qos_liveliness_policy_e = 4;
-#[doc = " QoS liveliness enumerations that describe a publisher's reporting policy for its alive status.\n For a subscriber, these are its requirements for its topic's publishers."]
 pub type rmw_qos_liveliness_policy_e = ::std::os::raw::c_uint;
-#[doc = " QoS liveliness enumerations that describe a publisher's reporting policy for its alive status.\n For a subscriber, these are its requirements for its topic's publishers."]
 pub use self::rmw_qos_liveliness_policy_e as rmw_qos_liveliness_policy_t;
-#[doc = " ROS MiddleWare quality of service profile."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_qos_profile_s {
     pub history: rmw_qos_history_policy_e,
-    #[doc = " Size of the message queue."]
     pub depth: usize,
-    #[doc = " Reliabiilty QoS policy setting"]
     pub reliability: rmw_qos_reliability_policy_e,
-    #[doc = " Durability QoS policy setting"]
     pub durability: rmw_qos_durability_policy_e,
-    #[doc = " The period at which messages are expected to be sent/received\n**\n* RMW_DURATION_UNSPEFICIED will use the RMW implementation's default value,\n*   which may or may not be infinite.\n* RMW_DURATION_INFINITE explicitly states that messages never miss a deadline expectation.\n*/"]
     pub deadline: rmw_time_s,
-    #[doc = " The age at which messages are considered expired and no longer valid\n**\n* RMW_DURATION_UNSPEFICIED will use the RMW implementation's default value,\n*   which may or may not be infinite.\n* RMW_DURATION_INFINITE explicitly states that messages do not expire.\n*/"]
     pub lifespan: rmw_time_s,
-    #[doc = " Liveliness QoS policy setting"]
     pub liveliness: rmw_qos_liveliness_policy_e,
-    #[doc = " The time within which the RMW node or publisher must show that it is alive\n**\n* RMW_DURATION_UNSPEFICIED will use the RMW implementation's default value,\n*   which may or may not be infinite.\n* RMW_DURATION_INFINITE explicitly states that liveliness is not enforced.\n*/"]
     pub liveliness_lease_duration: rmw_time_s,
-    #[doc = " If true, any ROS specific namespacing conventions will be circumvented.\n**\n* In the case of DDS and topics, for example, this means the typical\n* ROS specific prefix of `rt` would not be applied as described here:\n*\n*   http://design.ros2.org/articles/topic_and_service_names.html#ros-specific-namespace-prefix\n*\n* This might be useful when trying to directly connect a native DDS topic\n* with a ROS 2 topic.\n*/"]
     pub avoid_ros_namespace_conventions: bool,
 }
-#[test]
-fn bindgen_test_layout_rmw_qos_profile_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_qos_profile_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_qos_profile_s>(),
-        88usize,
-        concat!("Size of: ", stringify!(rmw_qos_profile_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_qos_profile_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_qos_profile_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).history) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(history)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).depth) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(depth)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reliability) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(reliability)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).durability) as usize - ptr as usize },
-        20usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(durability)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).deadline) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(deadline)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).lifespan) as usize - ptr as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(lifespan)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).liveliness) as usize - ptr as usize },
-        56usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(liveliness)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).liveliness_lease_duration) as usize - ptr as usize },
-        64usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(liveliness_lease_duration)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).avoid_ros_namespace_conventions) as usize - ptr as usize
-        },
-        80usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_qos_profile_s),
-            "::",
-            stringify!(avoid_ros_namespace_conventions)
-        )
-    );
-}
-#[doc = " ROS MiddleWare quality of service profile."]
 pub type rmw_qos_profile_t = rmw_qos_profile_s;
-#[doc = " ROS graph ID of the topic"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_gid_s {
-    #[doc = " Name of the rmw implementation"]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Bype data Gid value"]
     pub data: [u8; 24usize],
 }
-#[test]
-fn bindgen_test_layout_rmw_gid_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_gid_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_gid_s>(),
-        32usize,
-        concat!("Size of: ", stringify!(rmw_gid_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_gid_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_gid_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_gid_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_gid_s),
-            "::",
-            stringify!(data)
-        )
-    );
-}
-#[doc = " ROS graph ID of the topic"]
 pub type rmw_gid_t = rmw_gid_s;
-#[doc = " Information describing an rmw message"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_message_info_s {
-    #[doc = " Time when the message was published by the publisher.\n**\n* The exact point at which the timestamp is taken is not specified, but\n* it should be taken consistently at the same point in the\n* publishing process each time.\n*/"]
     pub source_timestamp: rmw_time_point_value_t,
-    #[doc = " Time when the message was received by the subscription.\n**\n* The exact point at which the timestamp is taken is not specified, but\n* it should be taken consistently at the same point in the\n* process of receiving a message each time.\n*/"]
     pub received_timestamp: rmw_time_point_value_t,
-    #[doc = " Sequence number of the received message set by the publisher.\n**\n* This sequence number is set by the publisher and therefore uniquely identifies\n* a message when combined with the publisher GID.\n* For long running applications, the sequence number might wrap around at some point.\n*\n* If the rmw implementation doesn't support sequence numbers, its value will be\n* RMW_MESSAGE_INFO_SEQUENCE_NUMBER_UNSUPPORTED.\n*\n* Requirements:\n*\n* If `psn1` and `psn2` are the publication sequence numbers obtained by\n* calls to `rmw_take*()`, where `psn1` was obtained in a call that happened before `psn2` and both\n* sequence numbers are from the same publisher (i.e. also same publisher gid), then:\n*\n* - psn2 > psn1 (except in the case of a wrap around)\n* - `psn2 - psn1 - 1` is the number of messages the publisher sent in the middle of both\n*   received messages.\n*   Those might have already been taken by other `rmw_take*()` calls that happened in between or lost.\n*   `psn2 - psn1 - 1 = 0` if and only if the messages were sent by the publisher consecutively.\n*/"]
     pub publication_sequence_number: u64,
-    #[doc = " Sequence number of the received message set by the subscription.\n**\n* This sequence number is set by the subscription regardless of which\n* publisher sent the message.\n* For long running applications, the sequence number might wrap around at some point.\n*\n* If the rmw implementation doesn't support sequence numbers, its value will be\n* RMW_MESSAGE_INFO_SEQUENCE_NUMBER_UNSUPPORTED.\n*\n* Requirements:\n*\n* If `rsn1` and `rsn2` are the reception sequence numbers obtained by\n* calls to `rmw_take*()`, where `rsn1` was obtained in a call that happened before `rsn2`, then:\n*\n* - rsn2 > rsn1 (except in the case of a wrap around)\n* - `rsn2 = rsn1 + 1` if and only if both `rmw_take*()` calls happened consecutively.\n*/"]
     pub reception_sequence_number: u64,
-    #[doc = " Global unique identifier of the publisher that sent the message.\n**\n* The identifier uniquely identifies the publisher for the local context, but\n* it will not necessarily be the same identifier given in other contexts or processes\n* for the same publisher.\n* Therefore the identifier will uniquely identify the publisher within your application\n* but may disagree about the identifier for that publisher when compared to another\n* application.\n* Even with this limitation, when combined with the publisher sequence number it can\n* uniquely identify a message within your local context.\n* Publisher GIDs generated by the rmw implementation could collide at some point, in which\n* case it is not possible to distinguish which publisher sent the message.\n* The details of how GIDs are generated are rmw implementation dependent.\n*\n* It is possible the the rmw implementation needs to reuse a publisher GID,\n* due to running out of unique identifiers or some other constraint, in which case\n* the rmw implementation may document what happens in that case, but that\n* behavior is not defined here.\n* However, this should be avoided, if at all possible, by the rmw implementation,\n* and should be unlikely to happen in practice.\n*\n* \\todo In the future we want this to uniquely identify the publisher globally across\n*   contexts, processes, and machines.\n*/"]
     pub publisher_gid: rmw_gid_t,
-    #[doc = " Whether this message is from intra_process communication or not"]
     pub from_intra_process: bool,
 }
-#[test]
-fn bindgen_test_layout_rmw_message_info_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_message_info_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_message_info_s>(),
-        72usize,
-        concat!("Size of: ", stringify!(rmw_message_info_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_message_info_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_message_info_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).source_timestamp) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(source_timestamp)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).received_timestamp) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(received_timestamp)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).publication_sequence_number) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(publication_sequence_number)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reception_sequence_number) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(reception_sequence_number)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).publisher_gid) as usize - ptr as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(publisher_gid)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).from_intra_process) as usize - ptr as usize },
-        64usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_s),
-            "::",
-            stringify!(from_intra_process)
-        )
-    );
-}
-#[doc = " Information describing an rmw message"]
 pub type rmw_message_info_t = rmw_message_info_s;
 pub const RMW_QOS_POLICY_DEPTH_SYSTEM_DEFAULT: _bindgen_ty_1 = 0;
-#[doc = " Default size of the rmw queue when history is set to RMW_QOS_POLICY_HISTORY_KEEP_LAST,\n 0 indicates it is currently not set"]
 pub type _bindgen_ty_1 = ::std::os::raw::c_uint;
-#[doc = " Debug log severity, for pedantic messaging"]
 pub const rmw_log_severity_t_RMW_LOG_SEVERITY_DEBUG: rmw_log_severity_t = 10;
-#[doc = " Informational log severity, for reporting expected but not overwhelming information"]
 pub const rmw_log_severity_t_RMW_LOG_SEVERITY_INFO: rmw_log_severity_t = 20;
-#[doc = " Warning log severity, for reporting recoverable issues"]
 pub const rmw_log_severity_t_RMW_LOG_SEVERITY_WARN: rmw_log_severity_t = 30;
-#[doc = " Error log severity, for reporting uncoverable issues"]
 pub const rmw_log_severity_t_RMW_LOG_SEVERITY_ERROR: rmw_log_severity_t = 40;
-#[doc = " Fatal log severity, for reporting issue causing imminent shutdown"]
 pub const rmw_log_severity_t_RMW_LOG_SEVERITY_FATAL: rmw_log_severity_t = 50;
-#[doc = " Type mapping of rcutils log severity types to rmw specific types."]
 pub type rmw_log_severity_t = ::std::os::raw::c_uint;
 pub const rmw_event_type_e_RMW_EVENT_LIVELINESS_CHANGED: rmw_event_type_e = 0;
 pub const rmw_event_type_e_RMW_EVENT_REQUESTED_DEADLINE_MISSED: rmw_event_type_e = 1;
@@ -5157,271 +981,104 @@ pub const rmw_event_type_e_RMW_EVENT_LIVELINESS_LOST: rmw_event_type_e = 4;
 pub const rmw_event_type_e_RMW_EVENT_OFFERED_DEADLINE_MISSED: rmw_event_type_e = 5;
 pub const rmw_event_type_e_RMW_EVENT_OFFERED_QOS_INCOMPATIBLE: rmw_event_type_e = 6;
 pub const rmw_event_type_e_RMW_EVENT_INVALID: rmw_event_type_e = 7;
-#[doc = " Define publisher/subscription events"]
 pub type rmw_event_type_e = ::std::os::raw::c_uint;
-#[doc = " Define publisher/subscription events"]
 pub use self::rmw_event_type_e as rmw_event_type_t;
-#[doc = " Encapsulate the RMW event implementation, data, and type."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_event_s {
-    #[doc = " Implementation identifier, used to ensure two different implementations are not being mixed."]
     pub implementation_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Data specific to this event type from either the publisher or subscriber."]
     pub data: *mut ::std::os::raw::c_void,
-    #[doc = " The event type that occurred."]
     pub event_type: rmw_event_type_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_event_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_event_s> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_event_s>(),
-        24usize,
-        concat!("Size of: ", stringify!(rmw_event_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_event_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_event_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).implementation_identifier) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_event_s),
-            "::",
-            stringify!(implementation_identifier)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_event_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).event_type) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_event_s),
-            "::",
-            stringify!(event_type)
-        )
-    );
-}
-#[doc = " Encapsulate the RMW event implementation, data, and type."]
 pub type rmw_event_t = rmw_event_s;
-#[doc = " Common event callback type signature.\n**\n* Event callbacks of this type can be called in various scenarios, e.g.\n* data becomes available on a subscription, a QoS event has occurred, or\n* something similar.\n*\n* The user_data argument is given by the user when registering the callback,\n* and is given back to the callback each time so it can have associated,\n* user-defined state.\n*\n* The number_of_events argument indicates the number of events since the\n* callback was called.\n* This is most often 1, but can be > 1 when events occur before the callback\n* is registered.\n* It should never be 0.\n*\n* \\sa rmw_subscription_set_on_new_message_callback()\n* \\sa rmw_service_set_on_new_request_callback()\n* \\sa rmw_client_set_on_new_response_callback()\n* \\sa rmw_event_set_callback()\n*/"]
 pub type rmw_event_callback_t = ::std::option::Option<
     unsafe extern "C" fn(user_data: *const ::std::os::raw::c_void, number_of_events: usize),
 >;
-#[doc = " Structure to hold a sequence of ROS messages."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_message_sequence_s {
-    #[doc = " Array of pointers to ROS messages."]
     pub data: *mut *mut ::std::os::raw::c_void,
-    #[doc = " The number of valid entries in `data`."]
     pub size: usize,
-    #[doc = " The total allocated capacity of the data array."]
     pub capacity: usize,
-    #[doc = " The allocator used to allocate the data array."]
     pub allocator: *mut rcutils_allocator_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_message_sequence_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_message_sequence_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_message_sequence_s>(),
-        32usize,
-        concat!("Size of: ", stringify!(rmw_message_sequence_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_message_sequence_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_message_sequence_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_sequence_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).size) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_sequence_s),
-            "::",
-            stringify!(size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).capacity) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_sequence_s),
-            "::",
-            stringify!(capacity)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_sequence_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-}
-#[doc = " Structure to hold a sequence of ROS messages."]
 pub type rmw_message_sequence_t = rmw_message_sequence_s;
-#[doc = " Structure to hold a sequence of message infos."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_message_info_sequence_s {
-    #[doc = " Array of message info."]
     pub data: *mut rmw_message_info_t,
-    #[doc = " The number of valid entries in data."]
     pub size: usize,
-    #[doc = " The total allocated capacity of the data array."]
     pub capacity: usize,
-    #[doc = " The allocator used to allocate the data array."]
     pub allocator: *mut rcutils_allocator_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_message_info_sequence_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_message_info_sequence_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_message_info_sequence_s>(),
-        32usize,
-        concat!("Size of: ", stringify!(rmw_message_info_sequence_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_message_info_sequence_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_message_info_sequence_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).data) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_sequence_s),
-            "::",
-            stringify!(data)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).size) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_sequence_s),
-            "::",
-            stringify!(size)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).capacity) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_sequence_s),
-            "::",
-            stringify!(capacity)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).allocator) as usize - ptr as usize },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_message_info_sequence_s),
-            "::",
-            stringify!(allocator)
-        )
-    );
-}
-#[doc = " Structure to hold a sequence of message infos."]
 pub type rmw_message_info_sequence_t = rmw_message_info_sequence_s;
-#[doc = " QoS policies are compatible"]
 pub const rmw_qos_compatibility_type_e_RMW_QOS_COMPATIBILITY_OK: rmw_qos_compatibility_type_e = 0;
-#[doc = " QoS policies may not be compatible"]
 pub const rmw_qos_compatibility_type_e_RMW_QOS_COMPATIBILITY_WARNING: rmw_qos_compatibility_type_e =
     1;
-#[doc = " QoS policies are not compatible"]
 pub const rmw_qos_compatibility_type_e_RMW_QOS_COMPATIBILITY_ERROR: rmw_qos_compatibility_type_e =
     2;
 pub type rmw_qos_compatibility_type_e = ::std::os::raw::c_uint;
 pub use self::rmw_qos_compatibility_type_e as rmw_qos_compatibility_type_t;
-#[doc = " Associative array of topic or service names and types."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rmw_names_and_types_s {
-    #[doc = " Array of names"]
     pub names: rcutils_string_array_t,
-    #[doc = " Dynamic array of arrays of type names, with the same length as `names`"]
     pub types: *mut rcutils_string_array_t,
 }
-#[test]
-fn bindgen_test_layout_rmw_names_and_types_s() {
-    const UNINIT: ::std::mem::MaybeUninit<rmw_names_and_types_s> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<rmw_names_and_types_s>(),
-        64usize,
-        concat!("Size of: ", stringify!(rmw_names_and_types_s))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<rmw_names_and_types_s>(),
-        8usize,
-        concat!("Alignment of ", stringify!(rmw_names_and_types_s))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).names) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_names_and_types_s),
-            "::",
-            stringify!(names)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).types) as usize - ptr as usize },
-        56usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(rmw_names_and_types_s),
-            "::",
-            stringify!(types)
-        )
-    );
-}
-#[doc = " Associative array of topic or service names and types."]
 pub type rmw_names_and_types_t = rmw_names_and_types_s;
+pub const rmw_feature_e_RMW_FEATURE_MESSAGE_INFO_PUBLICATION_SEQUENCE_NUMBER: rmw_feature_e = 0;
+pub const rmw_feature_e_RMW_FEATURE_MESSAGE_INFO_RECEPTION_SEQUENCE_NUMBER: rmw_feature_e = 1;
+pub type rmw_feature_e = ::std::os::raw::c_uint;
+pub use self::rmw_feature_e as rmw_feature_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rmw_topic_endpoint_info_s {
+    pub node_name: *const ::std::os::raw::c_char,
+    pub node_namespace: *const ::std::os::raw::c_char,
+    pub topic_type: *const ::std::os::raw::c_char,
+    pub endpoint_type: rmw_endpoint_type_t,
+    pub endpoint_gid: [u8; 24usize],
+    pub qos_profile: rmw_qos_profile_t,
+}
+pub type rmw_topic_endpoint_info_t = rmw_topic_endpoint_info_s;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rmw_topic_endpoint_info_array_s {
+    pub size: usize,
+    pub info_array: *mut rmw_topic_endpoint_info_t,
+}
+pub type rmw_topic_endpoint_info_array_t = rmw_topic_endpoint_info_array_s;
+pub const rmw_transport_protocol_e_RMW_TRANSPORT_PROTOCOL_UNKNOWN: rmw_transport_protocol_e = 0;
+pub const rmw_transport_protocol_e_RMW_TRANSPORT_PROTOCOL_UDP: rmw_transport_protocol_e = 1;
+pub const rmw_transport_protocol_e_RMW_TRANSPORT_PROTOCOL_TCP: rmw_transport_protocol_e = 2;
+pub const rmw_transport_protocol_e_RMW_TRANSPORT_PROTOCOL_COUNT: rmw_transport_protocol_e = 3;
+pub type rmw_transport_protocol_e = ::std::os::raw::c_uint;
+pub use self::rmw_transport_protocol_e as rmw_transport_protocol_t;
+pub const rmw_internet_protocol_e_RMW_INTERNET_PROTOCOL_UNKNOWN: rmw_internet_protocol_e = 0;
+pub const rmw_internet_protocol_e_RMW_INTERNET_PROTOCOL_IPV4: rmw_internet_protocol_e = 1;
+pub const rmw_internet_protocol_e_RMW_INTERNET_PROTOCOL_IPV6: rmw_internet_protocol_e = 2;
+pub const rmw_internet_protocol_e_RMW_INTERNET_PROTOCOL_COUNT: rmw_internet_protocol_e = 3;
+pub type rmw_internet_protocol_e = ::std::os::raw::c_uint;
+pub use self::rmw_internet_protocol_e as rmw_internet_protocol_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rmw_network_flow_endpoint_s {
+    pub transport_protocol: rmw_transport_protocol_t,
+    pub internet_protocol: rmw_internet_protocol_t,
+    pub transport_port: u16,
+    pub flow_label: u32,
+    pub dscp: u8,
+    pub internet_address: [::std::os::raw::c_char; 48usize],
+}
+pub type rmw_network_flow_endpoint_t = rmw_network_flow_endpoint_s;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rmw_network_flow_endpoint_array_s {
+    pub size: usize,
+    pub network_flow_endpoint: *mut rmw_network_flow_endpoint_t,
+    pub allocator: *mut rcutils_allocator_t,
+}
+pub type rmw_network_flow_endpoint_array_t = rmw_network_flow_endpoint_array_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __locale_data {
@@ -5435,59 +1092,4 @@ pub struct __va_list_tag {
     pub fp_offset: ::std::os::raw::c_uint,
     pub overflow_arg_area: *mut ::std::os::raw::c_void,
     pub reg_save_area: *mut ::std::os::raw::c_void,
-}
-#[test]
-fn bindgen_test_layout___va_list_tag() {
-    const UNINIT: ::std::mem::MaybeUninit<__va_list_tag> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__va_list_tag>(),
-        24usize,
-        concat!("Size of: ", stringify!(__va_list_tag))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__va_list_tag>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__va_list_tag))
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).gp_offset) as usize - ptr as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(gp_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).fp_offset) as usize - ptr as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(fp_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).overflow_arg_area) as usize - ptr as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(overflow_arg_area)
-        )
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reg_save_area) as usize - ptr as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(reg_save_area)
-        )
-    );
 }

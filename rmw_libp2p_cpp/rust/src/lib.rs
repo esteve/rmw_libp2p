@@ -807,8 +807,8 @@ pub extern "C" fn rmw_get_service_names_and_types_by_node(
 pub extern "C" fn rmw_get_subscriber_names_and_types_by_node(
     node: *const rmw_node_t,
     allocator: *mut rcutils_allocator_t,
-    node_name: *const ::std::os::raw::c_char
-    node_namespace: *const ::std::os::raw::c_char
+    node_name: *const ::std::os::raw::c_char,
+    node_namespace: *const ::std::os::raw::c_char,
     no_demangle: bool,
     topic_names_and_types: *mut rmw_names_and_types_t,
 ) -> rmw_ret_t {

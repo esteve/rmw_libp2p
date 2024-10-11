@@ -15,6 +15,9 @@
 #ifndef IMPL__IDENTIFIER_HPP_
 #define IMPL__IDENTIFIER_HPP_
 
+extern "C"
+{
 extern const char * const libp2p_identifier;
+}  // extern "C"
 
 #endif  // IMPL__IDENTIFIER_HPP_

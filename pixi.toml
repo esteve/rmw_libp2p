@@ -11,8 +11,8 @@ scripts = ["install/setup.sh"]
 
 [tasks]
 build = "colcon build --symlink-install"
-publisher = { cmd = "ros2 run examples_rclpy_minimal_publisher publisher_old_school", env={ RMW_IMPLEMENTATION="rmw_libp2p_cpp" }, depends-on="build" }
-subscriber = { cmd = "ros2 run examples_rclpy_minimal_subscriber subscriber_old_school", env={ RMW_IMPLEMENTATION="rmw_libp2p_cpp" }, depends-on="build" }
+publisher = { cmd = "ros2 run examples_rclpy_minimal_publisher publisher_old_school", env={ RMW_IMPLEMENTATION="rmw_libp2p_rs" } }
+subscriber = { cmd = "ros2 run examples_rclpy_minimal_subscriber subscriber_old_school", env={ RMW_IMPLEMENTATION="rmw_libp2p_rs" } }
 
 [dependencies]
 rust = ">=1.81.0,<2"

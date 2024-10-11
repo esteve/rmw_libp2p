@@ -20,8 +20,9 @@
 
 extern "C"
 {
+RMW_PUBLIC
 const char *
-rmw_get_implementation_identifier()
+libp2p_c__rmw_get_implementation_identifier()
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

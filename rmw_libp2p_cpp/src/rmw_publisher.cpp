@@ -36,9 +36,12 @@
 
 #include "type_support_common.hpp"
 
+extern "C"
+{
 // Create and return an rmw publisher.
+RMW_PUBLIC
 rmw_publisher_t *
-rmw_create_publisher(
+libp2p_c__rmw_create_publisher(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
@@ -171,8 +174,9 @@ fail:
 }
 
 // Destroy and deallocate an rmw publisher.
+RMW_PUBLIC
 rmw_ret_t
-rmw_destroy_publisher(
+libp2p_c__rmw_destroy_publisher(
   rmw_node_t * node,
   rmw_publisher_t * publisher)
 {
@@ -186,8 +190,9 @@ rmw_destroy_publisher(
   return RMW_RET_ERROR;
 }
 
+RMW_PUBLIC
 rmw_ret_t
-rmw_publisher_get_actual_qos(
+libp2p_c__rmw_publisher_get_actual_qos(
   const rmw_publisher_t * publisher,
   rmw_qos_profile_t * qos)
 {
@@ -202,3 +207,4 @@ rmw_publisher_get_actual_qos(
   *qos = info->qos_;
   return RMW_RET_OK;
 }
+}  // extern "C"

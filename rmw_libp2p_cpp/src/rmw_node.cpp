@@ -32,7 +32,6 @@
 
 extern "C"
 {
-
 // TODO(esteve): cleanup
 rmw_guard_condition_t *
 libp2p_c__rmw_create_guard_condition(rmw_context_t * context);

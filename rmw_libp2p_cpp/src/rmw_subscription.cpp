@@ -205,4 +205,4 @@ libp2p_c__rmw_subscription_get_actual_qos(
   *qos = info->qos_;
   return RMW_RET_OK;
 }
-} // extern "C"
+}  // extern "C"

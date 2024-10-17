@@ -150,7 +150,7 @@ void serialize_field<std::string>(
     if (member->string_upper_bound_ && str.length() > member->string_upper_bound_ + 1) {
       throw std::runtime_error("string overcomes the maximum length");
     }
-    // ser << str;
+    ser << str;
   } else {
     // First, cast field to rosidl_runtime_c
     // Then convert to a std::string using StringHelper and serialize the std::string
@@ -309,7 +309,7 @@ bool TypeSupport<MembersType>::serializeROSmessage(
         serialize_field<uint64_t>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
-        // serialize_field<std::string>(member, field, ser);
+        serialize_field<std::string>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
         // serialize_field<std::u16string>(member, field, ser);

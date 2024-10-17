@@ -412,6 +412,7 @@ pub extern "C" fn rs_libp2p_cdr_buffer_read_string(
         assert!(!ptr.is_null());
         &mut *ptr
     };
+    println!("CDR BUF STR: {:?}", libp2p2_cdr_buffer);
     let cs = cdr::deserialize_from::<_, CString, _>(libp2p2_cdr_buffer, cdr::Infinite).unwrap();
     unsafe {
         *size = cs.as_bytes().len();
@@ -831,4 +832,32 @@ pub extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8>>, n: 
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p2_cdr_buffer, &n, cdr::Infinite).unwrap();
+}
+
+/// Writes a `CString` to a `Cursor<Vec<u8>>`.
+///
+/// This function serializes a `CString` into a `Cursor<Vec<u8>>` using the `cdr::serialize_into` function.
+/// The serialization is done in Big Endian format (`cdr::CdrBe`).
+///
+/// # Safety
+///
+/// This function is unsafe because it uses raw pointers.
+///
+/// # Arguments
+///
+/// * `ptr` - A raw pointer to a `Cursor<Vec<u8>>`.
+/// * `s` - A raw pointer with the contents of the string.
+/// * `size` - The length of the string.
+///
+/// # Panics
+///
+/// This function will panic if the provided pointer is null.
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_write_string(ptr: *mut Cursor<Vec<u8>>, s: CString, size: usize) {
+    println!("CDR BUF STR: {:?}", size);
+    // let libp2p2_cdr_buffer = unsafe {
+    //     assert!(!ptr.is_null());
+    //     &mut *ptr
+    // };
+    // cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p2_cdr_buffer, &s, cdr::Infinite).unwrap();
 }

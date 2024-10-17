@@ -168,6 +168,9 @@ rs_libp2p_cdr_buffer_write_float(rs_libp2p_cdr_buffer_t *, float);
 extern void
 rs_libp2p_cdr_buffer_write_double(rs_libp2p_cdr_buffer_t *, double);
 
+extern void
+rs_libp2p_cdr_buffer_write_string(rs_libp2p_cdr_buffer_t *, const char *, size_t);
+
 #ifdef __cplusplus
 }
 #endif

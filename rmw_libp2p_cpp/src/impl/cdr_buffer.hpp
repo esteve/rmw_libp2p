@@ -105,6 +105,13 @@ public:
     rs_libp2p_cdr_buffer_write_double(buffer_, d);
     return *this;
   }
+  inline WriteCDRBuffer & operator<<(const std::string & s)
+  {
+    const char * data = s.c_str();
+    size_t size = s.length();
+    rs_libp2p_cdr_buffer_write_string(buffer_, data, size);
+    return *this;
+  }
 
 private:
   rs_libp2p_cdr_buffer * buffer_;

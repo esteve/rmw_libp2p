@@ -37,6 +37,9 @@ extern "C"
 rmw_guard_condition_t *
 libp2p_c__rmw_create_guard_condition(rmw_context_t * context);
 
+rmw_ret_t
+libp2p_c__rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition);
+
 RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_destroy_node(
@@ -161,7 +164,7 @@ libp2p_c__rmw_destroy_node(
       rs_libp2p_custom_node_free(impl->node_handle_);
     }
     if (impl->graph_guard_condition_) {
-      rmw_ret_t ret = rmw_destroy_guard_condition(impl->graph_guard_condition_);
+      rmw_ret_t ret = libp2p_c__rmw_destroy_guard_condition(impl->graph_guard_condition_);
       if (ret != RMW_RET_OK) {
         RCUTILS_LOG_ERROR_NAMED(
           "rmw_libp2p_cpp",

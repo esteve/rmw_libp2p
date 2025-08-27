@@ -1113,18 +1113,4 @@ libp2p_c__rmw_take(
   return RMW_RET_ERROR;
 }
 
-RMW_PUBLIC
-rmw_ret_t
-libp2p_c__rmw_destroy_guard_condition(
-  rmw_guard_condition_t * guard_condition)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)guard_condition;
-
-  return RMW_RET_ERROR;
-}
-
 }  // extern "C"

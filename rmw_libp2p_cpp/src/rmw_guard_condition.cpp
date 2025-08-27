@@ -41,8 +41,9 @@ libp2p_c__rmw_create_guard_condition(rmw_context_t * context)
   return guard_condition_handle;
 }
 
+RMW_PUBLIC
 rmw_ret_t
-rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
+libp2p_c__rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
   if (guard_condition) {
     delete static_cast<GuardCondition *>(guard_condition->data);

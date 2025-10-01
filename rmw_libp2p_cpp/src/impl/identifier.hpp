@@ -18,6 +18,6 @@
 extern "C"
 {
 extern const char * const libp2p_identifier;
-} // extern "C"
+}  // extern "C"
 
-#endif // IMPL__IDENTIFIER_HPP_
+#endif  // IMPL__IDENTIFIER_HPP_

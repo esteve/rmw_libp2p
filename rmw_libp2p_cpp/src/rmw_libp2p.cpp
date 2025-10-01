@@ -1112,5 +1112,4 @@ libp2p_c__rmw_take(
 
   return RMW_RET_ERROR;
 }
-
 }  // extern "C"

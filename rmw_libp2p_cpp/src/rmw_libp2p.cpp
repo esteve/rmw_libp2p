@@ -1096,10 +1096,10 @@ libp2p_c__rmw_node_assert_liveliness(const rmw_node_t * node)
 RMW_PUBLIC
 rmw_ret_t
 libp2p_c__rmw_take(
-        const rmw_subscription_t * subscription,
-        void * ros_message,
-        bool * taken,
-        rmw_subscription_allocation_t * allocation)
+  const rmw_subscription_t * subscription,
+  void * ros_message,
+  bool * taken,
+  rmw_subscription_allocation_t * allocation)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

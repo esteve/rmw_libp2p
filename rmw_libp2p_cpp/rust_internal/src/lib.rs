@@ -1,4 +1,4 @@
-// Copyright 2022 Esteve Fernandez All rights reserved.
+// Copyright 2024 Esteve Fernandez
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcutils/logging_macros.h"
+mod cdr_buffer;
+mod node;
+mod publisher;
+mod subscription;
 
-#include "rmw/rmw.h"
+pub use cdr_buffer::*;
+pub use node::*;
+pub use publisher::*;
+pub use subscription::*;
 
-#include "impl/serialization_format.hpp"
+#[no_mangle]
+pub static mut libp2p_identifier: *const ::std::os::raw::c_char = b"rmw_libp2p_rs\0".as_ptr() as *const ::std::os::raw::c_char;
 
-extern "C"
-{
-const char *
-rmw_get_serialization_format()
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  return libp2p_serialization_format;
-}
-}  // extern "C"
+#[no_mangle]
+pub static mut libp2p_serialization_format: *const ::std::os::raw::c_char = b"cdr\0".as_ptr() as *const ::std::os::raw::c_char;

@@ -164,25 +164,6 @@ rmw_send_response(
 }
 
 rmw_ret_t
-rmw_take_request(
-  const rmw_service_t * service,
-  rmw_service_info_t * request_header,
-  void * ros_request,
-  bool * taken)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)service;
-  (void)request_header;
-  (void)ros_request;
-  (void)taken;
-
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
 rmw_destroy_service(
   rmw_node_t * node,
   rmw_service_t * service)

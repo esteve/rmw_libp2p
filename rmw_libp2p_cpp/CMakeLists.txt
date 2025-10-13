@@ -37,6 +37,7 @@ find_package(rosidl_typesupport_introspection_c REQUIRED)
 find_package(rosidl_typesupport_introspection_cpp REQUIRED)
 
 add_library(rmw_libp2p_cpp
+  src/client_service_common.cpp
   src/identifier.cpp
   src/rmw_guard_condition.cpp
   src/rmw_get_gid_for_publisher.cpp
@@ -48,7 +49,7 @@ add_library(rmw_libp2p_cpp
   src/rmw_node.cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
-  src/rmw_request.cpp
+  # src/rmw_request.cpp
   src/rmw_service.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp

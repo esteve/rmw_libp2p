@@ -29,6 +29,7 @@
 #include "impl/identifier.hpp"
 #include "impl/custom_node_info.hpp"
 #include "impl/custom_service_info.hpp"
+#include "impl/custom_subscription_info.hpp"
 #include "impl/listener.hpp"
 
 #include "client_service_common.hpp"
@@ -97,6 +98,10 @@ rmw_create_service(
   info = new rmw_libp2p_cpp::CustomServiceInfo();
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
+  info->request_info_ = new rmw_libp2p_cpp::CustomSubscriptionInfo;
+  info->request_info_->node_ = node;
+  info->request_info_->typesupport_identifier_ = type_support->typesupport_identifier;
+  info->request_info_->qos_ = *qos_policies;
 
   const void * untyped_request_members;
   const void * untyped_response_members;
@@ -111,10 +116,10 @@ rmw_create_service(
   std::string response_type_name = _create_type_name(untyped_response_members,
       info->typesupport_identifier_);
 
-  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_type_support_)) {
-    info->request_type_support_ = _create_request_type_support(type_support->data,
+  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_info_->type_support_)) {
+    info->request_info_->type_support_ = _create_request_type_support(type_support->data,
         info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->request_type_support_, info->typesupport_identifier_);
+    _register_type(node_data->node_handle_, info->request_info_->type_support_, info->typesupport_identifier_);
   }
 
   if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_type_support_)) {
@@ -125,11 +130,12 @@ rmw_create_service(
 
   // TODO(esteve): delete Listener in the destructor
   info->listener_ = new rmw_libp2p_cpp::Listener;
+  info->request_info_->listener_ = info->listener_;
 
-  info->request_subscription_handle_ = rs_libp2p_custom_subscription_new(
+  info->request_info_->subscription_handle_ = rs_libp2p_custom_subscription_new(
     node_data->node_handle_, service_name,
-    info, rmw_libp2p_cpp::Listener::on_publication);
-  if (!info->request_subscription_handle_) {
+    info->request_info_, rmw_libp2p_cpp::Listener::on_publication);
+  if (!info->request_info_->subscription_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p subscription for service");
     goto fail;
   }
@@ -162,9 +168,9 @@ rmw_create_service(
   return rmw_service;
 
 fail:
-  _delete_typesupport(info->request_type_support_, info->typesupport_identifier_);
-  if (info->request_subscription_handle_) {
-    rs_libp2p_custom_subscription_free(info->request_subscription_handle_);
+  _delete_typesupport(info->request_info_->type_support_, info->typesupport_identifier_);
+  if (info->request_info_->subscription_handle_) {
+    rs_libp2p_custom_subscription_free(info->request_info_->subscription_handle_);
   }
   // if (info->request_type_support_handle_) {
   //   _unregister_type(impl->node_, info->request_type_support_handle_, info->typesupport_identifier_);

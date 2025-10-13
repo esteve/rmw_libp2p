@@ -12,9 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IMPL__IDENTIFIER_HPP_
-#define IMPL__IDENTIFIER_HPP_
+#include "rcutils/logging_macros.h"
 
-extern const char * const libp2p_identifier;
+#include "rmw/rmw.h"
 
-#endif  // IMPL__IDENTIFIER_HPP_
+#include "impl/identifier.hpp"
+
+extern "C"
+{
+const char *
+rmw_get_implementation_identifier()
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  return libp2p_identifier;
+}
+}  // extern "C"

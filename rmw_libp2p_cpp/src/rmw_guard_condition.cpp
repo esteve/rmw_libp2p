@@ -24,9 +24,8 @@
 
 extern "C"
 {
-RMW_PUBLIC
 rmw_guard_condition_t *
-libp2p_c__rmw_create_guard_condition(rmw_context_t * context)
+rmw_create_guard_condition(rmw_context_t * context)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -41,9 +40,8 @@ libp2p_c__rmw_create_guard_condition(rmw_context_t * context)
   return guard_condition_handle;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
+rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
   if (guard_condition) {
     delete static_cast<GuardCondition *>(guard_condition->data);

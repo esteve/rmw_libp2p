@@ -32,25 +32,11 @@
 
 extern "C"
 {
-// TODO(esteve): cleanup
-rmw_guard_condition_t *
-libp2p_c__rmw_create_guard_condition(rmw_context_t * context);
-
-rmw_ret_t
-libp2p_c__rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition);
-
-RMW_PUBLIC
-rmw_ret_t
-libp2p_c__rmw_destroy_node(
-  rmw_node_t * node);
-
-
 // Create a node and return a handle to that node.
 //
 // rmw_node_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__node__t.html
-RMW_PUBLIC
 rmw_node_t *
-libp2p_c__rmw_create_node(
+rmw_create_node(
   rmw_context_t * context,
   const char * name,
   const char * namespace_)
@@ -110,7 +96,7 @@ libp2p_c__rmw_create_node(
   }
   node_handle->data = node_impl;
 
-  node_impl->graph_guard_condition_ = libp2p_c__rmw_create_guard_condition(context);
+  node_impl->graph_guard_condition_ = rmw_create_guard_condition(context);
   if (!node_impl->graph_guard_condition_) {
     // error already set
     goto fail;
@@ -128,7 +114,7 @@ libp2p_c__rmw_create_node(
   return node_handle;
 
 fail:
-  rmw_ret_t ret = libp2p_c__rmw_destroy_node(node_handle);
+  rmw_ret_t ret = rmw_destroy_node(node_handle);
   if (ret != RMW_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_libp2p_cpp",
@@ -138,9 +124,8 @@ fail:
 }
 
 // Finalize a given node handle, reclaim the resources, and deallocate the node handle.
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_destroy_node(
+rmw_destroy_node(
   rmw_node_t * node)
 {
   RCUTILS_LOG_DEBUG_NAMED(
@@ -163,7 +148,7 @@ libp2p_c__rmw_destroy_node(
       rs_libp2p_custom_node_free(impl->node_handle_);
     }
     if (impl->graph_guard_condition_) {
-      rmw_ret_t ret = libp2p_c__rmw_destroy_guard_condition(impl->graph_guard_condition_);
+      rmw_ret_t ret = rmw_destroy_guard_condition(impl->graph_guard_condition_);
       if (ret != RMW_RET_OK) {
         RCUTILS_LOG_ERROR_NAMED(
           "rmw_libp2p_cpp",
@@ -183,9 +168,8 @@ libp2p_c__rmw_destroy_node(
   return RMW_RET_OK;
 }
 
-RMW_PUBLIC
 const rmw_guard_condition_t *
-libp2p_c__rmw_node_get_graph_guard_condition(const rmw_node_t * node)
+rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

@@ -23,8 +23,6 @@
 #include "impl/listener.hpp"
 #include "ros_message_serialization.hpp"
 
-extern "C"
-{
 rmw_ret_t
 _take(
   const rmw_subscription_t * subscription,
@@ -57,9 +55,8 @@ _take(
   return RMW_RET_OK;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_take_with_info(
+rmw_take_with_info(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
@@ -82,4 +79,3 @@ libp2p_c__rmw_take_with_info(
 
   return _take(subscription, ros_message, taken, message_info);
 }
-}  // extern "C"

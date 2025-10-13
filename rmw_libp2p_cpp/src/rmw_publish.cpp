@@ -28,9 +28,8 @@
 
 extern "C"
 {
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_publish(
+rmw_publish(
   const rmw_publisher_t * publisher,
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
@@ -72,9 +71,8 @@ libp2p_c__rmw_publish(
   return returnedValue;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_publish_loaned_message(
+rmw_publish_loaned_message(
   const rmw_publisher_t * publisher,
   void * ros_message,
   rmw_publisher_allocation_t * allocation)

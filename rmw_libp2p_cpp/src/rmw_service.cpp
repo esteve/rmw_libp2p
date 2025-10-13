@@ -29,11 +29,8 @@
 #include "impl/identifier.hpp"
 #include "impl/custom_node_info.hpp"
 
-extern "C"
-{
-RMW_PUBLIC
 rmw_service_t *
-libp2p_c__rmw_create_service(
+rmw_create_service(
   const rmw_node_t * node,
   const rosidl_service_type_support_t * type_supports,
   const char * service_name,
@@ -98,9 +95,8 @@ libp2p_c__rmw_create_service(
   return rmw_service;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_service_response_publisher_get_actual_qos(
+rmw_service_response_publisher_get_actual_qos(
   const rmw_service_t * service,
   rmw_qos_profile_t * qos_policies)
 {
@@ -114,9 +110,8 @@ libp2p_c__rmw_service_response_publisher_get_actual_qos(
   return RMW_RET_OK;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_service_request_subscription_get_actual_qos(
+rmw_service_request_subscription_get_actual_qos(
   const rmw_service_t * service,
   rmw_qos_profile_t * qos_policies)
 {
@@ -129,4 +124,3 @@ libp2p_c__rmw_service_request_subscription_get_actual_qos(
 
   return RMW_RET_OK;
 }
-}  // extern "C"

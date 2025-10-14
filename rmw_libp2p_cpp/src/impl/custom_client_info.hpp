@@ -28,6 +28,7 @@ typedef struct CustomClientInfo
   void * request_type_support_;
   void * response_type_support_;
   rmw_libp2p_cpp::Listener * listener_;
+  rmw_libp2p_cpp::CustomPublisherInfo * request_publisher_;
   const rmw_node_t * node_;
   const char * typesupport_identifier_;
   std::string discovery_name_;

@@ -110,25 +110,6 @@ rmw_take_loaned_message_with_info(
   return RMW_RET_ERROR;
 }
 
-rmw_client_t *
-rmw_create_client(
-  const rmw_node_t * node,
-  const rosidl_service_type_support_t * type_support,
-  const char * service_name,
-  const rmw_qos_profile_t * qos_policies)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)node;
-  (void)type_support;
-  (void)service_name;
-  (void)qos_policies;
-
-  return nullptr;
-}
-
 rmw_ret_t
 rmw_service_server_is_available(
   const rmw_node_t * node,

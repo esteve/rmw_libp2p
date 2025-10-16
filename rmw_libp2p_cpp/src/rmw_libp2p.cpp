@@ -120,11 +120,12 @@ rmw_service_server_is_available(
     "rmw_libp2p_cpp",
     "%s()", __FUNCTION__);
 
-  (void)node;
-  (void)client;
-  (void)is_available;
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
 
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  *is_available = true;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
@@ -240,36 +241,6 @@ rmw_borrow_loaned_message(
   (void)publisher;
   (void)type_support;
   (void)ros_message;
-
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
-rmw_client_request_publisher_get_actual_qos(
-  const rmw_client_t * client,
-  rmw_qos_profile_t * qos)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)client;
-  (void)qos;
-
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
-rmw_client_response_subscription_get_actual_qos(
-  const rmw_client_t * client,
-  rmw_qos_profile_t * qos)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)client;
-  (void)qos;
 
   return RMW_RET_ERROR;
 }

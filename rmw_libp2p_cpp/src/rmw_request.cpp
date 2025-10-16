@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
@@ -19,9 +21,7 @@
 
 #include "impl/cdr_buffer.hpp"
 #include "impl/identifier.hpp"
-#include "impl/custom_service_info.hpp"
-#include "impl/custom_subscription_info.hpp"
-#include "impl/listener.hpp"
+#include "impl/custom_client_info.hpp"
 #include "ros_message_serialization.hpp"
 
 extern "C"
@@ -83,7 +83,7 @@ extern "C"
 //   return RMW_RET_OK;
 // }
 
-
+RMW_PUBLIC
 rmw_ret_t
 rmw_send_request(
   const rmw_client_t * client,
@@ -99,29 +99,30 @@ rmw_send_request(
     "%s(client=%p,ros_request=%p,sequence_id=%p)", __FUNCTION__, (void *)client, ros_request,
     (void *)sequence_id);
 
-  assert(client);
-  assert(ros_request);
-  assert(sequence_id);
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(ros_request, RMW_RET_INVALID_ARGUMENT);
 
-  rmw_ret_t returnedValue = RMW_RET_ERROR;
+  rmw_ret_t returned_value = RMW_RET_ERROR;
 
   if (client->implementation_identifier != libp2p_identifier) {
     RMW_SET_ERROR_MSG("node handle not from this implementation");
     return RMW_RET_ERROR;
   }
 
-  auto info = static_cast<CustomClientInfo *>(client->data);
+  auto info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(client->data);
   assert(info);
 
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
-  if (_serialize_ros_message(ros_request, ser, info->request_type_support_,
+  if (_serialize_ros_message(ros_request, ser, info->request_publisher_->type_support_,
     info->typesupport_identifier_))
   {
-    uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
+    std::cout << "rmw_send_request: serialized message size " << std::endl;
+    uint32_t status = rs_libp2p_custom_publisher_publish(info->request_publisher_->publisher_handle_, ser.data());
+    std::cout << "rmw_send_request: publish status " << status << std::endl;
     if (status == 0) {  // TODO(esteve): replace with proper error codes
-      *sequence_id = rs_libp2p_custom_publisher_get_sequence_number(info->publisher_handle_);
-      returnedValue = RMW_RET_OK;
+      *sequence_id = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);
+      returned_value = RMW_RET_OK;
     } else {
       RMW_SET_ERROR_MSG("cannot publish data");
     }
@@ -129,6 +130,6 @@ rmw_send_request(
     RMW_SET_ERROR_MSG("cannot serialize data");
   }
 
-  return returnedValue;
+  return returned_value;
 }
 }  // extern "C"

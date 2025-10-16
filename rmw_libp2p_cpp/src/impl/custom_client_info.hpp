@@ -20,19 +20,20 @@
 #include "rmw/rmw.h"
 
 #include "impl/rmw_libp2p_rs.hpp"
+#include "impl/custom_publisher_info.hpp"
+#include "impl/custom_subscription_info.hpp"
+#include "impl/listener.hpp"
 
 namespace rmw_libp2p_cpp
 {
 typedef struct CustomClientInfo
 {
-  void * request_type_support_;
-  void * response_type_support_;
   rmw_libp2p_cpp::Listener * listener_;
   rmw_libp2p_cpp::CustomPublisherInfo * request_publisher_;
+  rmw_libp2p_cpp::CustomSubscriptionInfo * response_subscription_;
   const rmw_node_t * node_;
   const char * typesupport_identifier_;
   std::string discovery_name_;
-  rs_libp2p_custom_publisher_t * publisher_handle_;
 } CustomClientInfo;
 }  // namespace rmw_libp2p_cpp
 

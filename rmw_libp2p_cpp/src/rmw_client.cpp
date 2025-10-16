@@ -77,67 +77,95 @@ rmw_create_client(
     return nullptr;
   }
 
+  std::cout << "FOOOBAR" << std::endl;
+
   const rosidl_service_type_support_t * type_support = get_service_typesupport_handle(
   type_supports, rosidl_typesupport_introspection_c__identifier);
   if (!type_support) {
+    std::cout << "NO TS 1" << std::endl;
     type_support = get_service_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
+      std::cout << "NO TS 2" << std::endl;
+
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
+
+  std::cout << "YES TS 1 ???" << std::endl;
 
   rmw_libp2p_cpp::CustomClientInfo * info = nullptr;
   rmw_client_t * rmw_client = nullptr;
 
   info = new rmw_libp2p_cpp::CustomClientInfo();
   info->node_ = node;
+
   info->typesupport_identifier_ = type_support->typesupport_identifier;
-  info->request_publisher_ = new rmw_libp2p_cpp::CustomPublisherInfo;
+  info->request_publisher_ = new rmw_libp2p_cpp::CustomPublisherInfo();
   info->request_publisher_->node_ = node;
   info->request_publisher_->typesupport_identifier_ = type_support->typesupport_identifier;
   info->request_publisher_->qos_ = *qos_policies;
 
+  info->response_subscription_ = new rmw_libp2p_cpp::CustomSubscriptionInfo();
+  info->response_subscription_->node_ = node;
+  info->response_subscription_->typesupport_identifier_ = type_support->typesupport_identifier;
+  info->response_subscription_->qos_ = *qos_policies;
+
   const void * untyped_request_members;
   const void * untyped_response_members;
 
+  std::cout << "YES TS 2 ???" << std::endl;
+
   untyped_request_members =
     get_request_ptr(type_support->data, info->typesupport_identifier_);
+  std::cout << "YES TS 3 ???" << std::endl;
   untyped_response_members = get_response_ptr(type_support->data,
       info->typesupport_identifier_);
+  std::cout << "YES TS 4 ???" << std::endl;
 
   std::string request_type_name = _create_type_name(untyped_request_members,
       info->typesupport_identifier_);
+  std::cout << "YES TS 5 ???" << std::endl;
+
   std::string response_type_name = _create_type_name(untyped_response_members,
       info->typesupport_identifier_);
+  std::cout << "YES TS 6 ???" << std::endl;
 
-  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_type_support_)) {
-    info->request_type_support_ = _create_request_type_support(type_support->data,
+  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_publisher_->type_support_)) {
+    std::cout << "YES TS 6A ???" << std::endl;
+
+    info->request_publisher_->type_support_ = _create_request_type_support(type_support->data,
         info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->request_type_support_, info->typesupport_identifier_);
+    std::cout << "YES TS 6B ???" << std::endl;
+    _register_type(node_data->node_handle_, info->request_publisher_->type_support_, info->typesupport_identifier_);
+    std::cout << "YES TS 6C ???" << std::endl;
   }
 
-  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_type_support_)) {
-    info->response_type_support_ = _create_response_type_support(type_support->data,
+  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_subscription_->type_support_)) {
+    info->response_subscription_->type_support_ = _create_response_type_support(type_support->data,
         info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->response_type_support_, info->typesupport_identifier_);
+    _register_type(node_data->node_handle_, info->response_subscription_->type_support_, info->typesupport_identifier_);
   }
 
   // TODO(esteve): delete Listener in the destructor
   info->listener_ = new rmw_libp2p_cpp::Listener;
 
+  std::cout << "YES TS 7 ???" << std::endl;
   info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, service_name);
   if (!info->request_publisher_->publisher_handle_) {
+    std::cout << "YES TS 7A ???" << std::endl;
     RMW_SET_ERROR_MSG("failed to create libp2p publisher for service");
     goto fail;
   }
 
+  std::cout << "YES TS 8 ???" << std::endl;
   rmw_client = rmw_client_allocate();
   if (!rmw_client) {
     RMW_SET_ERROR_MSG("failed to allocate memory for client");
     goto fail;
   }
+  std::cout << "YES TS 9 ???" << std::endl;
   rmw_client->implementation_identifier = libp2p_identifier;
   rmw_client->data = info;
   rmw_client->service_name = reinterpret_cast<const char *>(
@@ -148,15 +176,21 @@ rmw_create_client(
   }
   memcpy(const_cast<char *>(rmw_client->service_name), service_name, strlen(service_name) + 1);
 
+  std::cout << "YES TS 10 ???" << std::endl;
+
+  {
+    std::lock_guard<std::mutex> lock(node_data->clients_mutex_);
+    node_data->clients_[service_name].insert(info);
+  }
   return rmw_client;
 
 fail:
   if (node_data) {
-    if (info->request_type_support_) {
+    if (info->request_publisher_->type_support_) {
     //   _unregister_type(node_data->node_, info->request_type_support_, info->typesupport_identifier_);
     }
 
-    if (info->response_type_support_) {
+    if (info->response_subscription_->type_support_) {
     //   _unregister_type(node_data->node_, info->response_type_support_, info->typesupport_identifier_);
     }
   } else {
@@ -168,6 +202,10 @@ fail:
   if (info->request_publisher_->publisher_handle_) {
     rs_libp2p_custom_publisher_free(info->request_publisher_->publisher_handle_);
   }
+  if (info->response_subscription_->subscription_handle_) {
+    rs_libp2p_custom_subscription_free(info->response_subscription_->subscription_handle_);
+  }
+
   delete info;
 
   if (rmw_client) {
@@ -178,4 +216,38 @@ fail:
   }
 
   return nullptr;
+}
+
+rmw_ret_t
+rmw_client_request_publisher_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(client->data);
+  *qos = info->request_publisher_->qos_;
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_client_response_subscription_get_actual_qos(
+  const rmw_client_t * client,
+  rmw_qos_profile_t * qos)
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(qos, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(client->data);
+  *qos = info->response_subscription_->qos_;
+  return RMW_RET_OK;
 }

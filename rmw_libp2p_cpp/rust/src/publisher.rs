@@ -59,12 +59,18 @@ impl Libp2pCustomPublisher {
     ///
     /// * `buffer` - The buffer containing the message to be published.
     fn publish(&mut self, buffer: Vec<u8>) -> () {
+        println!(
+            "Libp2pCustomPublisher::publish: publishing message of size {} on topic {:?}",
+            buffer.len(),
+            self.topic
+        );
         let libp2p2_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
         };
-
+        println!("Libp2pCustomPublisher::publish: got node");
         libp2p2_custom_node.publish_message(self.topic.clone(), buffer);
+        println!("Libp2pCustomPublisher::publish: message published");
         self.sequence_number += 1;
     }
 }
@@ -100,6 +106,10 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
         CStr::from_ptr(topic_str_ptr)
     };
 
+    println!(
+        "rs_libp2p_custom_publisher_new: creating publisher on topic {}",
+        topic_str.to_str().unwrap()
+    );
     let libp2p2_custom_publisher =
         Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
     Box::into_raw(Box::new(libp2p2_custom_publisher))
@@ -189,15 +199,25 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
     ptr_buffer: *const Cursor<Vec<u8>>,
 ) -> usize {
+    println!("rs_libp2p_custom_publisher_publish: publishing message");
     let libp2p2_custom_publisher = unsafe {
         assert!(!ptr_publisher.is_null());
         &mut *ptr_publisher
     };
+    println!(
+        "rs_libp2p_custom_publisher_publish: publishing message on topic {:?}",
+        libp2p2_custom_publisher.topic
+    );
     let buffer = unsafe {
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
+    println!(
+        "rs_libp2p_custom_publisher_publish: publishing message of size {}",
+        buffer.get_ref().len()
+    );
     libp2p2_custom_publisher.publish(buffer.get_ref().to_vec());
+    println!("rs_libp2p_custom_publisher_publish: message published");
     // TODO(esteve): return the number of bytes published
     0
 }

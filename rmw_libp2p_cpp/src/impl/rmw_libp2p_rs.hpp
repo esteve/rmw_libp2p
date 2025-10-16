@@ -75,6 +75,9 @@ extern uint32_t rs_libp2p_custom_publisher_publish(
   rs_libp2p_custom_publisher_t *,
   const rs_libp2p_cdr_buffer *);
 
+extern uint32_t rs_libp2p_custom_publisher_get_sequence_number(
+  rs_libp2p_custom_publisher_t *);
+
 struct rmw_context_impl_s
 {
   void * rs_event_loop_thread;

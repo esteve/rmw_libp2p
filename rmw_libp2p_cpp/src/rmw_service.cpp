@@ -157,8 +157,7 @@ rmw_create_service(
     return nullptr;
   }
   memcpy(
-    const_cast<char *>(rmw_service->service_name), service_name,
-    strlen(service_name) + 1);
+    const_cast<char *>(rmw_service->service_name), service_name, strlen(service_name) + 1);
 
   {
     std::lock_guard<std::mutex> lock(node_data->services_mutex_);

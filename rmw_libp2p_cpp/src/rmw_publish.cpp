@@ -39,7 +39,7 @@ rmw_publish(
     "%s(publisher=%p,ros_message=%p,allocation=%p)",
     __FUNCTION__, (void *)publisher, (void *)ros_message, (void *)allocation);
 
-  rmw_ret_t returnedValue = RMW_RET_ERROR;
+  rmw_ret_t returned_value = RMW_RET_ERROR;
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(publisher, "publisher pointer is null", return RMW_RET_ERROR);
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(
     ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
@@ -60,7 +60,7 @@ rmw_publish(
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
     if (status == 0) {  // TODO(esteve): replace with proper error codes
-      returnedValue = RMW_RET_OK;
+      returned_value = RMW_RET_OK;
     } else {
       RMW_SET_ERROR_MSG("cannot publish data");
     }
@@ -68,7 +68,7 @@ rmw_publish(
     RMW_SET_ERROR_MSG("cannot serialize data");
   }
 
-  return returnedValue;
+  return returned_value;
 }
 
 rmw_ret_t

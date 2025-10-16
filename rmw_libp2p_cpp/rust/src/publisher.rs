@@ -27,6 +27,7 @@ pub struct Libp2pCustomPublisher {
     gid: Uuid,
     node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
     topic: gossipsub::IdentTopic,
+    sequence_number: u64,
 }
 
 /// Represents a custom publisher for the Libp2p network.
@@ -48,6 +49,7 @@ impl Libp2pCustomPublisher {
             gid: Uuid::new_v4(),
             node: libp2p2_custom_node,
             topic: gossipsub::IdentTopic::new(topic_str),
+            sequence_number: 0,
         }
     }
 
@@ -56,13 +58,14 @@ impl Libp2pCustomPublisher {
     /// # Arguments
     ///
     /// * `buffer` - The buffer containing the message to be published.
-    fn publish(&self, buffer: Vec<u8>) -> () {
+    fn publish(&mut self, buffer: Vec<u8>) -> () {
         let libp2p2_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
         };
 
         libp2p2_custom_node.publish_message(self.topic.clone(), buffer);
+        self.sequence_number += 1;
     }
 }
 
@@ -198,3 +201,15 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
     // TODO(esteve): return the number of bytes published
     0
 }
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
+    ptr: *mut Libp2pCustomPublisher,
+) -> u64 {
+    let libp2p2_custom_publisher = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    libp2p2_custom_publisher.sequence_number
+}
+

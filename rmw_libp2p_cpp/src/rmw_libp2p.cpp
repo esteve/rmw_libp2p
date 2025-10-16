@@ -198,23 +198,6 @@ rmw_take_response(
 }
 
 rmw_ret_t
-rmw_send_request(
-  const rmw_client_t * client,
-  const void * ros_request,
-  int64_t * sequence_id)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)client;
-  (void)ros_request;
-  (void)sequence_id;
-
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
 rmw_destroy_client(
   rmw_node_t * node,
   rmw_client_t * client)

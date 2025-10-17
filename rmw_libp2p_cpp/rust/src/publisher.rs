@@ -60,9 +60,10 @@ impl Libp2pCustomPublisher {
     /// * `buffer` - The buffer containing the message to be published.
     fn publish(&mut self, buffer: Vec<u8>) -> () {
         println!(
-            "Libp2pCustomPublisher::publish: publishing message of size {} on topic {:?}",
+            "Libp2pCustomPublisher::publish: publishing message of size {} on topic {:?} data {:?}",
             buffer.len(),
-            self.topic
+            self.topic,
+            buffer
         );
         let libp2p2_custom_node = unsafe {
             assert!(!self.node.is_null());

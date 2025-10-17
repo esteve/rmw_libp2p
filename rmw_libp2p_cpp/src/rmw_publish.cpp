@@ -14,8 +14,6 @@
 
 #include <cassert>
 
-#include <iostream>
-
 #include "rcutils/logging_macros.h"
 
 #include "rmw/error_handling.h"

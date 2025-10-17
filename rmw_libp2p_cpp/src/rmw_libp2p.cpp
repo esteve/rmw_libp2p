@@ -161,6 +161,7 @@ rmw_take_request(
   (void)ros_request;
   (void)taken;
 
+  std::cout<< "================ RMW_TAKE_REQUEST rmw_take_request called" << std::endl;
   return RMW_RET_ERROR;
 }
 

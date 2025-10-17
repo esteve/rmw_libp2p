@@ -91,23 +91,16 @@ rmw_create_publisher(
     return nullptr;
   }
 
-  std::cout << "PUB FOOOBAR" << std::endl;
-
   const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
     type_supports, rosidl_typesupport_introspection_c__identifier);
   if (!type_support) {
-    std::cout << "PUB NO TS 1" << std::endl;
     type_support = get_message_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
-      std::cout << "PUB NO TS 2" << std::endl;
-
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
-
-  std::cout << "PUB YES TS 1 ???" << std::endl;
 
   rmw_libp2p_cpp::CustomPublisherInfo * info = nullptr;
   rmw_publisher_t * rmw_publisher = nullptr;

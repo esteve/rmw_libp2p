@@ -222,6 +222,7 @@ impl Libp2pCustomNode {
                         SwarmEvent::Behaviour(OutEvent::Mdns(
                             mdns::Event::Discovered(list)
                         )) => {
+                            println!("Discovered peers: {:?}", list);
                             for (peer, _) in list {
                                 swarm
                                     .behaviour_mut()

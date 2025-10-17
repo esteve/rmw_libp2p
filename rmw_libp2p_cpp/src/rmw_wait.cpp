@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+
 #include <condition_variable>
 #include <mutex>
 
@@ -20,6 +22,8 @@
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
+#include "impl/custom_client_info.hpp"
+#include "impl/custom_service_info.hpp"
 #include "impl/custom_subscription_info.hpp"
 #include "impl/custom_wait_set_info.hpp"
 #include "impl/listener.hpp"
@@ -32,11 +36,38 @@ check_wait_set_for_data(
   const rmw_services_t * services,
   const rmw_clients_t * clients)
 {
+  std::cout << "Checking subscriptions for data..." << std::endl;
   if (subscriptions) {
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
       void * data = subscriptions->subscribers[i];
       auto custom_subscriber_info = static_cast<rmw_libp2p_cpp::CustomSubscriptionInfo *>(data);
       if (custom_subscriber_info && custom_subscriber_info->listener_->has_data()) {
+        return true;
+      }
+    }
+  }
+
+  std::cout << "Checking clients for data..." << std::endl;
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      void * data = clients->clients[i];
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      if (custom_client_info && custom_client_info->response_subscription_->listener_->has_data()) {
+        return true;
+      }
+    }
+  }
+
+  std::cout << "1 Checking services for data..." << std::endl;
+  if (services) {
+    std::cout << "1 Service count: " << services->service_count << std::endl;
+    for (size_t i = 0; i < services->service_count; ++i) {
+      std::cout << "1 Checking service " << i << std::endl;
+      void * data = services->services[i];
+      std::cout << "1 Service data pointer: " << data << std::endl;
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      std::cout << "1 Service listener pointer: " << custom_service_info->listener_ << std::endl;
+      if (custom_service_info && custom_service_info->listener_->has_data()) {
         return true;
       }
     }
@@ -84,11 +115,39 @@ rmw_wait(
     return RMW_RET_ERROR;
   }
 
+  std::cout << "Attaching wait set condition variable to listeners..." << std::endl;
   if (subscriptions) {
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
       void * data = subscriptions->subscribers[i];
       auto custom_subscriber_info = static_cast<rmw_libp2p_cpp::CustomSubscriptionInfo *>(data);
       custom_subscriber_info->listener_->attach_condition(condition_mutex, condition_variable);
+    }
+  }
+
+  std::cout << "Attaching wait set condition variable to clients..." << std::endl;
+  if (clients) {
+    std::cout << "Client count: " << clients->client_count << std::endl;
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      std::cout << "Attaching to client " << i << std::endl;
+      void * data = clients->clients[i];
+      std::cout << "Client data pointer: " << data << std::endl;
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      std::cout << "Client listener pointer: " << custom_client_info->response_subscription_->listener_ << std::endl;
+      custom_client_info->response_subscription_->listener_->attach_condition(
+        condition_mutex, condition_variable);
+    }
+  }
+
+  std::cout << "2 Attaching wait set condition variable to services..." << std::endl;
+  if (services) {
+    std::cout << "2 Service count: " << services->service_count << std::endl;
+    for (size_t i = 0; i < services->service_count; ++i) {
+      std::cout << "2 Attaching to service " << i << std::endl;
+      void * data = services->services[i];
+      std::cout << "2 Service data pointer: " << data << std::endl;
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      std::cout << "2 Service listener pointer: " << custom_service_info->listener_ << std::endl;
+      custom_service_info->listener_->attach_condition(condition_mutex, condition_variable);
     }
   }
 
@@ -125,6 +184,7 @@ rmw_wait(
   // after we check, it will be caught on the next call to this function).
   lock.unlock();
 
+  std::cout << "Detaching wait set condition variable from listeners..." << std::endl;
   if (subscriptions) {
     for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
       void * data = subscriptions->subscribers[i];
@@ -132,6 +192,30 @@ rmw_wait(
       custom_subscriber_info->listener_->detach_condition();
       if (!custom_subscriber_info->listener_->has_data()) {
         subscriptions->subscribers[i] = 0;
+      }
+    }
+  }
+
+  std::cout << "Detaching wait set condition variable from clients..." << std::endl;
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      void * data = clients->clients[i];
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      custom_client_info->response_subscription_->listener_->detach_condition();
+      if (!custom_client_info->response_subscription_->listener_->has_data()) {
+        clients->clients[i] = 0;
+      }
+    }
+  }
+
+  std::cout << "Detaching wait set condition variable from services..." << std::endl;
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      void * data = services->services[i];
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      custom_service_info->listener_->detach_condition();
+      if (!custom_service_info->listener_->has_data()) {
+        services->services[i] = 0;
       }
     }
   }

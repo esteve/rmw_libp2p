@@ -14,8 +14,6 @@
 
 #include <mutex>
 
-#include <iostream>
-
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
@@ -77,23 +75,16 @@ rmw_create_client(
     return nullptr;
   }
 
-  std::cout << "FOOOBAR" << std::endl;
-
   const rosidl_service_type_support_t * type_support = get_service_typesupport_handle(
   type_supports, rosidl_typesupport_introspection_c__identifier);
   if (!type_support) {
-    std::cout << "NO TS 1" << std::endl;
     type_support = get_service_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
     if (!type_support) {
-      std::cout << "NO TS 2" << std::endl;
-
       RMW_SET_ERROR_MSG("type support not from this implementation");
       return nullptr;
     }
   }
-
-  std::cout << "YES TS 1 ???" << std::endl;
 
   rmw_libp2p_cpp::CustomClientInfo * info = nullptr;
   rmw_client_t * rmw_client = nullptr;
@@ -115,31 +106,21 @@ rmw_create_client(
   const void * untyped_request_members;
   const void * untyped_response_members;
 
-  std::cout << "YES TS 2 ???" << std::endl;
-
   untyped_request_members =
     get_request_ptr(type_support->data, info->typesupport_identifier_);
-  std::cout << "YES TS 3 ???" << std::endl;
   untyped_response_members = get_response_ptr(type_support->data,
       info->typesupport_identifier_);
-  std::cout << "YES TS 4 ???" << std::endl;
 
   std::string request_type_name = _create_type_name(untyped_request_members,
       info->typesupport_identifier_);
-  std::cout << "YES TS 5 ???" << std::endl;
 
   std::string response_type_name = _create_type_name(untyped_response_members,
       info->typesupport_identifier_);
-  std::cout << "YES TS 6 ???" << std::endl;
 
   if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_publisher_->type_support_)) {
-    std::cout << "YES TS 6A ???" << std::endl;
-
     info->request_publisher_->type_support_ = _create_request_type_support(type_support->data,
         info->typesupport_identifier_);
-    std::cout << "YES TS 6B ???" << std::endl;
     _register_type(node_data->node_handle_, info->request_publisher_->type_support_, info->typesupport_identifier_);
-    std::cout << "YES TS 6C ???" << std::endl;
   }
 
   if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_subscription_->type_support_)) {
@@ -150,22 +131,19 @@ rmw_create_client(
 
   // TODO(esteve): delete Listener in the destructor
   info->listener_ = new rmw_libp2p_cpp::Listener;
+  info->response_subscription_->listener_ = info->listener_;
 
-  std::cout << "YES TS 7 ???" << std::endl;
   info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, service_name);
   if (!info->request_publisher_->publisher_handle_) {
-    std::cout << "YES TS 7A ???" << std::endl;
     RMW_SET_ERROR_MSG("failed to create libp2p publisher for service");
     goto fail;
   }
 
-  std::cout << "YES TS 8 ???" << std::endl;
   rmw_client = rmw_client_allocate();
   if (!rmw_client) {
     RMW_SET_ERROR_MSG("failed to allocate memory for client");
     goto fail;
   }
-  std::cout << "YES TS 9 ???" << std::endl;
   rmw_client->implementation_identifier = libp2p_identifier;
   rmw_client->data = info;
   rmw_client->service_name = reinterpret_cast<const char *>(
@@ -175,8 +153,6 @@ rmw_create_client(
     goto fail;
   }
   memcpy(const_cast<char *>(rmw_client->service_name), service_name, strlen(service_name) + 1);
-
-  std::cout << "YES TS 10 ???" << std::endl;
 
   {
     std::lock_guard<std::mutex> lock(node_data->clients_mutex_);

@@ -88,12 +88,12 @@ impl Libp2pCustomSubscription {
         obj: CustomSubscriptionHandle,
         callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
     ) -> Self {
-        let libp2p2_custom_node = unsafe {
+        let libp2p_custom_node = unsafe {
             assert!(!ptr_node.is_null());
             &mut *ptr_node
         };
 
-        libp2p2_custom_node.notify_new_subscriber(
+        libp2p_custom_node.notify_new_subscriber(
             gossipsub::IdentTopic::new(topic_str),
             obj,
             callback,
@@ -147,9 +147,9 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
         "rs_libp2p_custom_subscription_new: creating subscription on topic {}",
         topic_str.to_str().unwrap()
     );
-    let libp2p2_custom_subscription =
+    let libp2p_custom_subscription =
         Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
-    Box::into_raw(Box::new(libp2p2_custom_subscription))
+    Box::into_raw(Box::new(libp2p_custom_subscription))
 }
 
 /// Frees a `Libp2pCustomSubscription` from memory.
@@ -204,11 +204,11 @@ pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
     ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
-    let libp2p2_custom_subscription = unsafe {
+    let libp2p_custom_subscription = unsafe {
         assert!(!ptr_subscription.is_null());
         &mut *ptr_subscription
     };
-    let gid_bytes = libp2p2_custom_subscription.gid.as_bytes();
+    let gid_bytes = libp2p_custom_subscription.gid.as_bytes();
     let count = gid_bytes.len();
     unsafe {
         std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);

@@ -38,16 +38,16 @@ impl Libp2pCustomPublisher {
     ///
     /// # Arguments
     ///
-    /// * `libp2p2_custom_node` - A pointer to the Libp2p custom node.
+    /// * `libp2p_custom_node` - A pointer to the Libp2p custom node.
     /// * `topic_str` - The string representation of the topic to publish to.
     ///
     /// # Returns
     ///
     /// A new instance of `Libp2pCustomPublisher`.
-    fn new(libp2p2_custom_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
+    fn new(libp2p_custom_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
         Self {
             gid: Uuid::new_v4(),
-            node: libp2p2_custom_node,
+            node: libp2p_custom_node,
             topic: gossipsub::IdentTopic::new(topic_str),
             sequence_number: 0,
         }
@@ -65,12 +65,12 @@ impl Libp2pCustomPublisher {
             self.topic,
             buffer
         );
-        let libp2p2_custom_node = unsafe {
+        let libp2p_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
         };
         println!("Libp2pCustomPublisher::publish: got node");
-        libp2p2_custom_node.publish_message(self.topic.clone(), buffer);
+        libp2p_custom_node.publish_message(self.topic.clone(), buffer);
         println!("Libp2pCustomPublisher::publish: message published");
         self.sequence_number += 1;
     }
@@ -111,9 +111,9 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
         "rs_libp2p_custom_publisher_new: creating publisher on topic {}",
         topic_str.to_str().unwrap()
     );
-    let libp2p2_custom_publisher =
+    let libp2p_custom_publisher =
         Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
-    Box::into_raw(Box::new(libp2p2_custom_publisher))
+    Box::into_raw(Box::new(libp2p_custom_publisher))
 }
 
 /// Frees a `Libp2pCustomPublisher` from memory.
@@ -162,11 +162,11 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
     ptr: *mut Libp2pCustomPublisher,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
-    let libp2p2_custom_publisher = unsafe {
+    let libp2p_custom_publisher = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
-    let gid_bytes = libp2p2_custom_publisher.gid.as_bytes();
+    let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
     let count = gid_bytes.len();
     unsafe {
         std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
@@ -201,23 +201,24 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_buffer: *const Cursor<Vec<u8>>,
 ) -> usize {
     println!("rs_libp2p_custom_publisher_publish: publishing message");
-    let libp2p2_custom_publisher = unsafe {
+    let libp2p_custom_publisher = unsafe {
         assert!(!ptr_publisher.is_null());
         &mut *ptr_publisher
     };
     println!(
         "rs_libp2p_custom_publisher_publish: publishing message on topic {:?}",
-        libp2p2_custom_publisher.topic
+        libp2p_custom_publisher.topic
     );
     let buffer = unsafe {
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
     println!(
-        "rs_libp2p_custom_publisher_publish: publishing message of size {}",
+        "rs_libp2p_custom_publisher_publish: publishing message of size {:?} {}",
+        buffer,
         buffer.get_ref().len()
     );
-    libp2p2_custom_publisher.publish(buffer.get_ref().to_vec());
+    libp2p_custom_publisher.publish(buffer.get_ref().to_vec());
     println!("rs_libp2p_custom_publisher_publish: message published");
     // TODO(esteve): return the number of bytes published
     0
@@ -227,10 +228,10 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
 pub extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
     ptr: *mut Libp2pCustomPublisher,
 ) -> u64 {
-    let libp2p2_custom_publisher = unsafe {
+    let libp2p_custom_publisher = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
-    libp2p2_custom_publisher.sequence_number
+    libp2p_custom_publisher.sequence_number
 }
 

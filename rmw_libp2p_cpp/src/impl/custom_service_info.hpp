@@ -40,6 +40,7 @@ typedef struct CustomServiceInfo
   std::map<rmw_request_id_t, rs_libp2p_custom_publisher_t *> requests_;
   const rmw_node_t * node_;
   const char * typesupport_identifier_;
+  std::string service_name_;
   std::string discovery_name_;
 } CustomServiceInfo;
 }  // namespace rmw_libp2p_cpp

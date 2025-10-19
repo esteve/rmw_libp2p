@@ -22,66 +22,92 @@
 #include "impl/cdr_buffer.hpp"
 #include "impl/identifier.hpp"
 #include "impl/custom_client_info.hpp"
+#include "impl/custom_node_info.hpp"
+#include "impl/custom_service_info.hpp"
 #include "ros_message_serialization.hpp"
 
 extern "C"
 {
-// RMW_PUBLIC
-// rmw_ret_t
-// rmw_take_request(
-//   const rmw_service_t * service,
-//   rmw_service_info_t  * request_header,
-//   void * ros_request,
-//   bool * taken)
-// {
-//   RCUTILS_LOG_DEBUG_NAMED(
-//     "rmw_libp2p_cpp",
-//     "%s(service=%p,request_header=%p,ros_request=%p,taken=%p)", __FUNCTION__, (void *)service,
-//     (void *)request_header, ros_request, (void *)taken);
+RMW_PUBLIC
+rmw_ret_t
+rmw_take_request(
+  const rmw_service_t * service,
+  rmw_service_info_t  * request_header,
+  void * ros_request,
+  bool * taken)
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s(service=%p,request_header=%p,ros_request=%p,taken=%p)", __FUNCTION__, (void *)service,
+    (void *)request_header, ros_request, (void *)taken);
 
-//   assert(service);
-//   assert(request_header);
-//   assert(ros_request);
-//   assert(taken);
+  assert(service);
+  assert(request_header);
+  assert(ros_request);
+  assert(taken);
 
-//   *taken = false;
+  *taken = false;
 
-//   if (service->implementation_identifier != libp2p_identifier) {
-//     RMW_SET_ERROR_MSG("publisher handle not from this implementation");
-//     return RMW_RET_ERROR;
-//   }
+  if (service->implementation_identifier != libp2p_identifier) {
+    RMW_SET_ERROR_MSG("publisher handle not from this implementation");
+    return RMW_RET_ERROR;
+  }
 
-//   rmw_libp2p_cpp::CustomServiceInfo * info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(service->data);
-//   RCUTILS_CHECK_FOR_NULL_WITH_MSG(info, "custom service info is null",
-//     return RMW_RET_ERROR);
+  rmw_libp2p_cpp::CustomServiceInfo * info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(service->data);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(info, "custom service info is null",
+    return RMW_RET_ERROR);
+  rmw_libp2p_cpp::CustomNodeInfo * node_data = static_cast<rmw_libp2p_cpp::CustomNodeInfo *>(info->node_->data);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(node_data, "custom node info is null",
+    return RMW_RET_ERROR);
 
-//   uint8_t * message = nullptr;
-//   uintptr_t length = 0;
+  uint8_t * message = nullptr;
+  uintptr_t length = 0;
 
-//   pub = CREATE_PUBLISHER();
+  if (info->listener_->take_next_data(&message, length)) {
+    rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
 
-//   if (info->listener_->take_next_data(&message, length)) {
-//     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
+    std::cout << "rmw_take_request: received message of length " << length << std::endl;
+    std::cout << "rmw_take_request: deserializing request" << std::endl;
+    uint64_t secs = 0;
+    uint32_t usecs = 0;
+    buffer >> secs;
+    buffer >> usecs;
+    request_header->source_timestamp = secs * 1000000000ull + usecs * 1000ull;
+    std::cout << "rmw_take_request: timestamp " << request_header->source_timestamp << std::endl;
 
-//     _deserialize_ros_message(
-//       buffer, ros_request, info->request_type_support_,
-//       info->typesupport_identifier_);
+    // Get header
+    memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
+    for(int i = 0; i < 16; ++i) {
+      buffer >> request_header->request_id.writer_guid[i];
+    }
+    buffer >> request_header->request_id.sequence_number;
+    char uuid_str[37] = {};
+    unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
+    unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
+    unsigned short uuid_data3 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 6);
+    sprintf(uuid_str, 
+    "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", 
+        uuid_data1, uuid_data2, uuid_data3,
+        request_header->request_id.writer_guid[8], request_header->request_id.writer_guid[9], request_header->request_id.writer_guid[10], request_header->request_id.writer_guid[11], request_header->request_id.writer_guid[12], request_header->request_id.writer_guid[13], request_header->request_id.writer_guid[14], request_header->request_id.writer_guid[15]
+    );
+    std::string topic_name(info->service_name_ + std::string("/response/") + uuid_str);
 
-//     // Get header
-//     memset(request_header->request_id.writer_guid, 0, sizeof(
-//       request_header->request_id.writer_guid));
-//     const size_t ret = GET_GID_FROM_PUBLISHER(pub);
-//     COPY_GID_TO_WRITER_GUID(
-//       request_header->request_id.writer_guid, ret);
-//     request_header->request_id.sequence_number = GET_SEQUENCE_NUMBER_FROM_ROS_REQUEST(ros_request);
+    rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name.c_str());
 
-//     *taken = true;
+    // const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_header->request_id.writer_guid);
+    // request_header->request_id.sequence_number = rs_libp2p_custom_publisher_get_sequence_number(pub);
 
-//     info->requests_.emplace(std::make_pair(request_header->request_id, std::move(pub)));
-//   }
+    _deserialize_ros_message(
+      buffer, ros_request, info->request_subscription_->type_support_,
+      info->typesupport_identifier_);
 
-//   return RMW_RET_OK;
-// }
+    *taken = true;
+
+    info->requests_.emplace(std::make_pair(request_header->request_id, std::move(pub)));
+  }
+
+  return RMW_RET_OK;
+}
 
 RMW_PUBLIC
 rmw_ret_t
@@ -113,6 +139,25 @@ rmw_send_request(
   assert(info);
 
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
+
+  // Get header
+  rmw_gid_t request_guid;
+  memset(request_guid.data, 0, RMW_GID_STORAGE_SIZE);
+  const size_t ret = rs_libp2p_custom_publisher_get_gid(
+    info->request_publisher_->publisher_handle_, request_guid.data);
+  if (ret == 0) {
+    RMW_SET_ERROR_MSG("no guid found for publisher");
+    return RMW_RET_ERROR;
+  }
+
+  for(int i = 0; i < 16; ++i) {
+    std::cout << "rmw_send_request: writing guid byte " << i << ": " << static_cast<int>(request_guid.data[i]) << std::endl;
+    ser << request_guid.data[i];
+  }
+
+  int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);
+  std::cout << "rmw_send_request: writing sequence number: " << seq_num << std::endl;
+  ser << seq_num;
 
   if (_serialize_ros_message(ros_request, ser, info->request_publisher_->type_support_,
     info->typesupport_identifier_))

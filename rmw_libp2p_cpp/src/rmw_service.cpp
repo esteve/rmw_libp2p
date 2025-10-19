@@ -93,12 +93,18 @@ rmw_create_service(
     }
   }
 
+  std::cout << "Creating service subscription for service " << service_name << std::endl;
+  std::string topic_name = service_name + std::string("/request");
+  std::cout << "Creating subscription on topic " << topic_name << std::endl;
+
   rmw_libp2p_cpp::CustomServiceInfo * info = nullptr;
   rmw_service_t * rmw_service = nullptr;
 
   info = new rmw_libp2p_cpp::CustomServiceInfo();
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
+  info->service_name_ = service_name;
+  info->discovery_name_ = topic_name;
 
   info->request_subscription_ = new rmw_libp2p_cpp::CustomSubscriptionInfo;
   info->request_subscription_->node_ = node;
@@ -139,9 +145,8 @@ rmw_create_service(
   info->listener_ = new rmw_libp2p_cpp::Listener;
   info->request_subscription_->listener_ = info->listener_;
 
-  std::cout << "Creating service subscription for service " << service_name << std::endl;
   info->request_subscription_->subscription_handle_ = rs_libp2p_custom_subscription_new(
-    node_data->node_handle_, service_name,
+    node_data->node_handle_, info->discovery_name_.c_str(),
     info->request_subscription_, rmw_libp2p_cpp::Listener::on_publication);
   if (!info->request_subscription_->subscription_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p subscription for service");

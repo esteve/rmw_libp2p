@@ -31,7 +31,7 @@ typedef struct CustomPublisherInfo
   void * type_support_;
   const char * typesupport_identifier_;
   rmw_qos_profile_t qos_;
-  std::string discovery_name_;
+  std::string topic_name_;
   std::set<std::string> subscriptions_;
   std::atomic_size_t subscriptions_matched_count_;
   rs_libp2p_custom_publisher_t * publisher_handle_;

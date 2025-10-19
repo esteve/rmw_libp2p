@@ -181,7 +181,7 @@ rmw_init(
     return ret;
   }
 
-  ret = rcutils_logging_set_logger_level("rmw_libp2p2_cpp", RCUTILS_LOG_SEVERITY_INFO);
+  ret = rcutils_logging_set_logger_level("rmw_libp2p_cpp", RCUTILS_LOG_SEVERITY_INFO);
   if (RMW_RET_OK != ret) {
     return ret;
   }

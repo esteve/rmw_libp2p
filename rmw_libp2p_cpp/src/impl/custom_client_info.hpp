@@ -34,6 +34,7 @@ typedef struct CustomClientInfo
   const rmw_node_t * node_;
   const char * typesupport_identifier_;
   std::string discovery_name_;
+  std::string service_name_;
 } CustomClientInfo;
 }  // namespace rmw_libp2p_cpp
 

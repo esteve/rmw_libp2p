@@ -624,11 +624,11 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
   assert(ros_message);
   if (members_->member_count_ != 0) {
     // Skip the first uint64_t and uint32_t, they correspond to the timestamp
-    uint64_t secs = 0;
-    deser >> secs;
+    // uint64_t secs = 0;
+    // deser >> secs;
 
-    uint32_t usecs = 0;
-    deser >> usecs;
+    // uint32_t usecs = 0;
+    // deser >> usecs;
 
     TypeSupport::deserializeROSmessage(deser, members_, ros_message, false);
   }

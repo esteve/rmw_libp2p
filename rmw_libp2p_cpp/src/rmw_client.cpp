@@ -132,8 +132,10 @@ rmw_create_client(
   // TODO(esteve): delete Listener in the destructor
   info->listener_ = new rmw_libp2p_cpp::Listener;
   info->response_subscription_->listener_ = info->listener_;
+  info->service_name_ = service_name;
+  info->request_publisher_->topic_name_ = std::string(service_name) + "/request";
 
-  info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, service_name);
+  info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, info->request_publisher_->topic_name_.c_str());
   if (!info->request_publisher_->publisher_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p publisher for service");
     goto fail;

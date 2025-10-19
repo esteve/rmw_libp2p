@@ -166,6 +166,10 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
         assert!(!ptr.is_null());
         &mut *ptr
     };
+    println!(
+        "rs_libp2p_custom_publisher_get_gid: getting gid {:?}",
+        libp2p_custom_publisher.gid
+    );
     let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
     let count = gid_bytes.len();
     unsafe {

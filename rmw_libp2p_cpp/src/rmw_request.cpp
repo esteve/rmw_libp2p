@@ -78,22 +78,56 @@ rmw_take_request(
     // Get header
     memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
     for(int i = 0; i < 16; ++i) {
-      buffer >> request_header->request_id.writer_guid[i];
+      std::cout << "PRE rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
+      int8_t value = 0;
+      buffer >> value;
+      std::cout << "POST 1 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(value) << std::endl;
+      request_header->request_id.writer_guid[i] = value;
+      std::cout << "POST 2 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
     }
     buffer >> request_header->request_id.sequence_number;
+
+    // char uuid_str[37] = {};
+    // unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
+    // unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
+    // unsigned short uuid_data3 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 6);
+    // sprintf(uuid_str, 
+    // "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+    //     uuid_data1, uuid_data2, uuid_data3,
+    //     request_header->request_id.writer_guid[8], request_header->request_id.writer_guid[9], request_header->request_id.writer_guid[10], request_header->request_id.writer_guid[11], request_header->request_id.writer_guid[12], request_header->request_id.writer_guid[13], request_header->request_id.writer_guid[14], request_header->request_id.writer_guid[15]
+    // );
+
     char uuid_str[37] = {};
-    unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
-    unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
-    unsigned short uuid_data3 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 6);
-    sprintf(uuid_str, 
-    "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", 
-        uuid_data1, uuid_data2, uuid_data3,
-        request_header->request_id.writer_guid[8], request_header->request_id.writer_guid[9], request_header->request_id.writer_guid[10], request_header->request_id.writer_guid[11], request_header->request_id.writer_guid[12], request_header->request_id.writer_guid[13], request_header->request_id.writer_guid[14], request_header->request_id.writer_guid[15]
+    sprintf(uuid_str,
+      "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+      static_cast<uint8_t>(request_header->request_id.writer_guid[0]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[1]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[2]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[3]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[4]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[5]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[6]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[7]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[8]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[9]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[10]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[11]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[12]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[13]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[14]),
+      static_cast<uint8_t>(request_header->request_id.writer_guid[15])
     );
+
+    std::cout << "rmw_take_request: received request from guid: " << uuid_str
+              << " with sequence number: " << request_header->request_id.sequence_number << std::endl;
+
+
     std::string topic_name(info->service_name_ + std::string("/response/") + uuid_str);
 
     rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name.c_str());
 
+    std::cout << "rmw_take_request: received request from guid: " << uuid_str
+              << " with sequence number: " << request_header->request_id.sequence_number << std::endl;
     // const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_header->request_id.writer_guid);
     // request_header->request_id.sequence_number = rs_libp2p_custom_publisher_get_sequence_number(pub);
 
@@ -151,8 +185,8 @@ rmw_send_request(
   }
 
   for(int i = 0; i < 16; ++i) {
-    std::cout << "rmw_send_request: writing guid byte " << i << ": " << static_cast<int>(request_guid.data[i]) << std::endl;
-    ser << request_guid.data[i];
+    std::cout << "rmw_send_request: writing guid byte " << i << ": " << +static_cast<int8_t>(request_guid.data[i]) << std::endl;
+    ser << static_cast<int8_t>(request_guid.data[i]);
   }
 
   int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);

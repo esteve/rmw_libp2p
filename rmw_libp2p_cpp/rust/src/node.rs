@@ -186,7 +186,7 @@ impl Libp2pCustomNode {
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
                         // TODO(esteve): use some sort of debug log
-                        println!("============= Publishing message on topic {} : {:?}", topic, buffer);
+                        // println!("Publishing message on topic {} : {:?}", topic, buffer);
                         if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
                             println!("Publish error: {e:?}");
                         }
@@ -199,13 +199,13 @@ impl Libp2pCustomNode {
                             message,
                         })) => {
                             // TODO(esteve): use some sort of debug log
-                            println!(
-                                "Got message: {:?} with id: {} from peer: {:?} topic: {}",
-                                message.data,
-                                id,
-                                peer_id,
-                                message.topic.as_str(),
-                            );
+                            // println!(
+                            //     "Got message: {:?} with id: {} from peer: {:?} topic: {}",
+                            //     message.data,
+                            //     id,
+                            //     peer_id,
+                            //     message.topic.as_str(),
+                            // );
                             let mut vec = message.data;
                             vec.shrink_to_fit();
                             let ptr: *mut u8 = vec.as_mut_ptr();
@@ -222,7 +222,7 @@ impl Libp2pCustomNode {
                         SwarmEvent::Behaviour(OutEvent::Mdns(
                             mdns::Event::Discovered(list)
                         )) => {
-                            println!("Discovered peers: {:?}", list);
+                            // println!("Discovered peers: {:?}", list);
                             for (peer, _) in list {
                                 swarm
                                     .behaviour_mut()

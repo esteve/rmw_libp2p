@@ -143,10 +143,6 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
         CStr::from_ptr(topic_str_ptr)
     };
 
-    println!(
-        "rs_libp2p_custom_subscription_new: creating subscription on topic {}",
-        topic_str.to_str().unwrap()
-    );
     let libp2p_custom_subscription =
         Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
     Box::into_raw(Box::new(libp2p_custom_subscription))

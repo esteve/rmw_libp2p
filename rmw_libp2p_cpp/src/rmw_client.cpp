@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
 #include <mutex>
 
 #include "rmw/allocators.h"
@@ -174,7 +172,6 @@ rmw_create_client(
     static_cast<uint8_t>(request_guid.data[15])
   );
 
-  std::cout << "rmw_client. publisher guid: " << uuid_str << std::endl;
   std::string topic_name = service_name + std::string("/response/") + uuid_str;
   info->discovery_name_ = topic_name;
 

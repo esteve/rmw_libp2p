@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
@@ -66,28 +64,21 @@ rmw_take_request(
   if (info->listener_->take_next_data(&message, length)) {
     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
 
-    std::cout << "rmw_take_request: received message of length " << length << std::endl;
-    std::cout << "rmw_take_request: deserializing request" << std::endl;
     uint64_t secs = 0;
     uint32_t usecs = 0;
     buffer >> secs;
     buffer >> usecs;
     request_header->source_timestamp = secs * 1000000000ull + usecs * 1000ull;
-    std::cout << "rmw_take_request: timestamp " << request_header->source_timestamp << std::endl;
 
     // Get header
     memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
     for(int i = 0; i < 16; ++i) {
-      std::cout << "PRE rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
       int8_t value = 0;
       buffer >> value;
-      std::cout << "POST 1 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(value) << std::endl;
       request_header->request_id.writer_guid[i] = value;
-      std::cout << "POST 2 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
     }
     buffer >> request_header->request_id.sequence_number;
 
-    std::cout << "RECEIVED SEQUENCE NUMBER TAKE REQUEST: " << request_header->request_id.sequence_number << std::endl;
 
     // char uuid_str[37] = {};
     // unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
@@ -120,16 +111,12 @@ rmw_take_request(
       static_cast<uint8_t>(request_header->request_id.writer_guid[15])
     );
 
-    std::cout << "rmw_take_request: received request from guid: " << uuid_str
-              << " with sequence number: " << request_header->request_id.sequence_number << std::endl;
 
 
     std::string topic_name(info->service_name_ + std::string("/response/") + uuid_str);
 
     rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name.c_str());
 
-    std::cout << "rmw_take_request: received request from guid: " << uuid_str
-              << " with sequence number: " << request_header->request_id.sequence_number << std::endl;
     // const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_header->request_id.writer_guid);
     // request_header->request_id.sequence_number = rs_libp2p_custom_publisher_get_sequence_number(pub);
 
@@ -187,20 +174,16 @@ rmw_send_request(
   }
 
   for(int i = 0; i < 16; ++i) {
-    std::cout << "rmw_send_request: writing guid byte " << i << ": " << +static_cast<int8_t>(request_guid.data[i]) << std::endl;
     ser << static_cast<int8_t>(request_guid.data[i]);
   }
 
   int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);
-  std::cout << "rmw_send_request: writing sequence number: " << seq_num << std::endl;
   ser << seq_num;
 
   if (_serialize_ros_message(ros_request, ser, info->request_publisher_->type_support_,
     info->typesupport_identifier_))
   {
-    std::cout << "rmw_send_request: serialized message size " << std::endl;
     uint32_t status = rs_libp2p_custom_publisher_publish(info->request_publisher_->publisher_handle_, ser.data());
-    std::cout << "rmw_send_request: publish status " << status << std::endl;
     if (status == 0) {  // TODO(esteve): replace with proper error codes
       *sequence_id = seq_num;
       returned_value = RMW_RET_OK;

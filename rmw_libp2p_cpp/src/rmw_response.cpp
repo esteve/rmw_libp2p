@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
@@ -76,19 +74,16 @@ rmw_send_response(
   }
 
   for(int i = 0; i < 16; ++i) {
-    std::cout << "rmw_send_response: writing guid byte " << i << ": " << +static_cast<int8_t>(request_guid.data[i]) << std::endl;
     ser << static_cast<int8_t>(request_guid.data[i]);
   }
 
   int64_t seq_num = request_header->sequence_number;
-  std::cout << "rmw_send_response: writing sequence number: " << seq_num << std::endl;
   ser << seq_num;
 
   if (_serialize_ros_message(ros_response, ser, info->response_type_support_,
     info->typesupport_identifier_))
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(pub, ser.data());
-    std::cout << "rmw_send_response: publish status " << status << std::endl;
     if (status == 0) {
       returned_value = RMW_RET_OK;
     } else {
@@ -109,7 +104,6 @@ rmw_take_response(
   void * ros_response,
   bool * taken)
 {
-  std::cout << "======= TAKE RESPONSE" << std::endl;
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_dps_cpp",
     "%s(client=%p,request_header=%p,ros_request=%p,taken=%p)", __FUNCTION__, (void *)client,
@@ -133,38 +127,27 @@ rmw_take_response(
   uint8_t * message = nullptr;
   uintptr_t length = 0;
 
-  std::cout << "PRE TAKE NEXT DATA" << std::endl;
   if (info->listener_->take_next_data(&message, length)) {
-    std::cout << "POST TAKE NEXT DATA" << std::endl;
     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
 
-    std::cout << "rmw_take_response: received message of length " << length << std::endl;
-    std::cout << "rmw_take_response: deserializing response" << std::endl;
     uint64_t secs = 0;
     uint32_t usecs = 0;
     buffer >> secs;
     buffer >> usecs;
     request_header->source_timestamp = secs * 1000000000ull + usecs * 1000ull;
-    std::cout << "rmw_take_response: timestamp " << request_header->source_timestamp << std::endl;
 
     // Get header
     memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
     for(int i = 0; i < 16; ++i) {
-      std::cout << "PRE rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
       int8_t value = 0;
       buffer >> value;
-      std::cout << "POST 1 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(value) << std::endl;
       request_header->request_id.writer_guid[i] = value;
-      std::cout << "POST 2 rmw_take_request: read guid byte " << i << " value " << static_cast<int16_t>(request_header->request_id.writer_guid[i]) << std::endl;
     }
     buffer >> request_header->request_id.sequence_number;
 
-    std::cout << "RECEIVED SEQUENCE NUMBER: " << request_header->request_id.sequence_number << std::endl;
 
-    std::cout << "PRE DESER" << std::endl;
     _deserialize_ros_message(buffer, ros_response, info->response_subscription_->type_support_,
       info->typesupport_identifier_);
-    std::cout << "POST DESER" << std::endl;
 
     *taken = true;
   }

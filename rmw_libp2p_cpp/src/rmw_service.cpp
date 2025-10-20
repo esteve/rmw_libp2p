@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
 #include <mutex>
 
 #include "rmw/allocators.h"
@@ -49,7 +47,6 @@ rmw_create_service(
     __FUNCTION__, (void *)node, (void *)type_supports, service_name, qos_policies->history,
     qos_policies->depth, qos_policies->reliability, qos_policies->durability);
 
-  std::cout << "Creating service subscription for service " << service_name << std::endl;
   // TODO(esteve): just boilerplate, services are not supported yet
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -93,9 +90,7 @@ rmw_create_service(
     }
   }
 
-  std::cout << "Creating service subscription for service " << service_name << std::endl;
   std::string topic_name = service_name + std::string("/request");
-  std::cout << "Creating subscription on topic " << topic_name << std::endl;
 
   rmw_libp2p_cpp::CustomServiceInfo * info = nullptr;
   rmw_service_t * rmw_service = nullptr;

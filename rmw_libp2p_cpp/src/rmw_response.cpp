@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rmw/rmw.h"
+#include "rmw/error_handling.h"
+
+#include "rcutils/logging_macros.h"
+
 extern "C"
 {
 

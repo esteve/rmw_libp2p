@@ -111,11 +111,6 @@ rmw_create_service(
   info->request_subscription_->typesupport_identifier_ = type_support->typesupport_identifier;
   info->request_subscription_->qos_ = *qos_policies;
 
-  info->response_publisher_ = new rmw_libp2p_cpp::CustomPublisherInfo;
-  info->response_publisher_->node_ = node;
-  info->response_publisher_->typesupport_identifier_ = type_support->typesupport_identifier;
-  info->response_publisher_->qos_ = *qos_policies;
-
   const void * untyped_request_members;
   const void * untyped_response_members;
 
@@ -135,10 +130,10 @@ rmw_create_service(
     _register_type(node_data->node_handle_, info->request_subscription_->type_support_, info->typesupport_identifier_);
   }
 
-  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_publisher_->type_support_)) {
-    info->response_publisher_->type_support_ = _create_response_type_support(type_support->data,
+  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_type_support_)) {
+    info->response_type_support_ = _create_response_type_support(type_support->data,
         info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->response_publisher_->type_support_, info->typesupport_identifier_);
+    _register_type(node_data->node_handle_, info->response_type_support_, info->typesupport_identifier_);
   }
 
   // TODO(esteve): delete Listener in the destructor
@@ -188,7 +183,7 @@ fail:
   //   _unregister_type(impl->node_, info->request_type_support_handle_, info->typesupport_identifier_);
   // }
 
-  _delete_typesupport(info->response_publisher_->type_support_, info->typesupport_identifier_);
+  _delete_typesupport(info->response_type_support_, info->typesupport_identifier_);
   // if (info->response_type_support_) {
   //   _unregister_type(impl->node_, info->response_type_support_handle_, info->typesupport_identifier_);
   // }

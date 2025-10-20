@@ -34,9 +34,9 @@ namespace rmw_libp2p_cpp
 
 typedef struct CustomServiceInfo
 {
+  void * response_type_support_;
   rmw_libp2p_cpp::Listener * listener_;
   rmw_libp2p_cpp::CustomSubscriptionInfo * request_subscription_;
-  rmw_libp2p_cpp::CustomPublisherInfo * response_publisher_;
   std::map<rmw_request_id_t, rs_libp2p_custom_publisher_t *> requests_;
   const rmw_node_t * node_;
   const char * typesupport_identifier_;

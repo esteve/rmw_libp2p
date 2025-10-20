@@ -159,6 +159,7 @@ rmw_take_response(
   (void)ros_response;
   (void)taken;
 
+  exit(0);
   return RMW_RET_ERROR;
 }
 

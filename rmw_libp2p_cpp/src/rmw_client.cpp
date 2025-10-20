@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+
 #include <mutex>
 
 #include "rmw/allocators.h"
@@ -138,8 +140,47 @@ rmw_create_client(
   info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, info->request_publisher_->topic_name_.c_str());
   if (!info->request_publisher_->publisher_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p publisher for service");
-    goto fail;
+    // goto fail;
   }
+
+  // Get header
+  rmw_gid_t request_guid;
+  memset(request_guid.data, 0, RMW_GID_STORAGE_SIZE);
+  const size_t ret = rs_libp2p_custom_publisher_get_gid(
+    info->request_publisher_->publisher_handle_, request_guid.data);
+  // if (ret == 0) {
+  //   RMW_SET_ERROR_MSG("no guid found for publisher");
+  //   goto fail;
+  // }
+
+  char uuid_str[37] = {};
+  sprintf(uuid_str,
+    "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+    static_cast<uint8_t>(request_guid.data[0]),
+    static_cast<uint8_t>(request_guid.data[1]),
+    static_cast<uint8_t>(request_guid.data[2]),
+    static_cast<uint8_t>(request_guid.data[3]),
+    static_cast<uint8_t>(request_guid.data[4]),
+    static_cast<uint8_t>(request_guid.data[5]),
+    static_cast<uint8_t>(request_guid.data[6]),
+    static_cast<uint8_t>(request_guid.data[7]),
+    static_cast<uint8_t>(request_guid.data[8]),
+    static_cast<uint8_t>(request_guid.data[9]),
+    static_cast<uint8_t>(request_guid.data[10]),
+    static_cast<uint8_t>(request_guid.data[11]),
+    static_cast<uint8_t>(request_guid.data[12]),
+    static_cast<uint8_t>(request_guid.data[13]),
+    static_cast<uint8_t>(request_guid.data[14]),
+    static_cast<uint8_t>(request_guid.data[15])
+  );
+
+  std::cout << "rmw_client. publisher guid: " << uuid_str << std::endl;
+  std::string topic_name = service_name + std::string("/response/") + uuid_str;
+  info->discovery_name_ = topic_name;
+
+  info->response_subscription_->subscription_handle_ = rs_libp2p_custom_subscription_new(
+    node_data->node_handle_, info->discovery_name_.c_str(),
+    info->response_subscription_, rmw_libp2p_cpp::Listener::on_publication);
 
   rmw_client = rmw_client_allocate();
   if (!rmw_client) {

@@ -176,7 +176,8 @@ rmw_destroy_subscription(
   (void)node;
   (void)subscription;
 
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t

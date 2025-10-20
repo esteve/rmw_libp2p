@@ -183,7 +183,8 @@ rmw_destroy_publisher(
   (void)node;
   (void)publisher;
 
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t

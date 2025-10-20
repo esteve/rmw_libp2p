@@ -87,6 +87,8 @@ rmw_take_request(
     }
     buffer >> request_header->request_id.sequence_number;
 
+    std::cout << "RECEIVED SEQUENCE NUMBER TAKE REQUEST: " << request_header->request_id.sequence_number << std::endl;
+
     // char uuid_str[37] = {};
     // unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
     // unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
@@ -200,7 +202,7 @@ rmw_send_request(
     uint32_t status = rs_libp2p_custom_publisher_publish(info->request_publisher_->publisher_handle_, ser.data());
     std::cout << "rmw_send_request: publish status " << status << std::endl;
     if (status == 0) {  // TODO(esteve): replace with proper error codes
-      *sequence_id = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);
+      *sequence_id = seq_num;
       returned_value = RMW_RET_OK;
     } else {
       RMW_SET_ERROR_MSG("cannot publish data");

@@ -140,27 +140,8 @@ rmw_destroy_service(
   (void)node;
   (void)service;
 
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
-rmw_take_response(
-  const rmw_client_t * client,
-  rmw_service_info_t * request_header,
-  void * ros_response,
-  bool * taken)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
-
-  (void)client;
-  (void)request_header;
-  (void)ros_response;
-  (void)taken;
-
-  exit(0);
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
@@ -175,7 +156,8 @@ rmw_destroy_client(
   (void)node;
   (void)client;
 
-  return RMW_RET_ERROR;
+  // return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t

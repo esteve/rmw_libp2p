@@ -105,7 +105,7 @@ rmw_take_response(
   bool * taken)
 {
   RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_dps_cpp",
+    "rmw_libp2p_cpp",
     "%s(client=%p,request_header=%p,ros_request=%p,taken=%p)", __FUNCTION__, (void *)client,
     (void *)request_header, ros_response, (void *)taken);
 

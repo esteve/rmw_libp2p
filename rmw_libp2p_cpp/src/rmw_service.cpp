@@ -111,24 +111,39 @@ rmw_create_service(
 
   untyped_request_members =
     get_request_ptr(type_support->data, info->typesupport_identifier_);
-  untyped_response_members = get_response_ptr(type_support->data,
-      info->typesupport_identifier_);
+  untyped_response_members = get_response_ptr(
+    type_support->data,
+    info->typesupport_identifier_);
 
-  std::string request_type_name = _create_type_name(untyped_request_members,
-      info->typesupport_identifier_);
-  std::string response_type_name = _create_type_name(untyped_response_members,
-      info->typesupport_identifier_);
+  std::string request_type_name = _create_type_name(
+    untyped_request_members,
+    info->typesupport_identifier_);
+  std::string response_type_name = _create_type_name(
+    untyped_response_members,
+    info->typesupport_identifier_);
 
-  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_subscription_->type_support_)) {
-    info->request_subscription_->type_support_ = _create_request_type_support(type_support->data,
-        info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->request_subscription_->type_support_, info->typesupport_identifier_);
+  if (!_get_registered_type(
+      node_data->node_handle_, request_type_name,
+      &info->request_subscription_->type_support_))
+  {
+    info->request_subscription_->type_support_ = _create_request_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
+    _register_type(
+      node_data->node_handle_, info->request_subscription_->type_support_,
+      info->typesupport_identifier_);
   }
 
-  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_type_support_)) {
-    info->response_type_support_ = _create_response_type_support(type_support->data,
-        info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->response_type_support_, info->typesupport_identifier_);
+  if (!_get_registered_type(
+      node_data->node_handle_, response_type_name,
+      &info->response_type_support_))
+  {
+    info->response_type_support_ = _create_response_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
+    _register_type(
+      node_data->node_handle_, info->response_type_support_,
+      info->typesupport_identifier_);
   }
 
   // TODO(esteve): delete Listener in the destructor

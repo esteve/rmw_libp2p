@@ -76,7 +76,7 @@ rmw_create_client(
   }
 
   const rosidl_service_type_support_t * type_support = get_service_typesupport_handle(
-  type_supports, rosidl_typesupport_introspection_c__identifier);
+    type_supports, rosidl_typesupport_introspection_c__identifier);
   if (!type_support) {
     type_support = get_service_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
@@ -108,25 +108,40 @@ rmw_create_client(
 
   untyped_request_members =
     get_request_ptr(type_support->data, info->typesupport_identifier_);
-  untyped_response_members = get_response_ptr(type_support->data,
-      info->typesupport_identifier_);
+  untyped_response_members = get_response_ptr(
+    type_support->data,
+    info->typesupport_identifier_);
 
-  std::string request_type_name = _create_type_name(untyped_request_members,
-      info->typesupport_identifier_);
+  std::string request_type_name = _create_type_name(
+    untyped_request_members,
+    info->typesupport_identifier_);
 
-  std::string response_type_name = _create_type_name(untyped_response_members,
-      info->typesupport_identifier_);
+  std::string response_type_name = _create_type_name(
+    untyped_response_members,
+    info->typesupport_identifier_);
 
-  if (!_get_registered_type(node_data->node_handle_, request_type_name, &info->request_publisher_->type_support_)) {
-    info->request_publisher_->type_support_ = _create_request_type_support(type_support->data,
-        info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->request_publisher_->type_support_, info->typesupport_identifier_);
+  if (!_get_registered_type(
+      node_data->node_handle_, request_type_name,
+      &info->request_publisher_->type_support_))
+  {
+    info->request_publisher_->type_support_ = _create_request_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
+    _register_type(
+      node_data->node_handle_, info->request_publisher_->type_support_,
+      info->typesupport_identifier_);
   }
 
-  if (!_get_registered_type(node_data->node_handle_, response_type_name, &info->response_subscription_->type_support_)) {
-    info->response_subscription_->type_support_ = _create_response_type_support(type_support->data,
-        info->typesupport_identifier_);
-    _register_type(node_data->node_handle_, info->response_subscription_->type_support_, info->typesupport_identifier_);
+  if (!_get_registered_type(
+      node_data->node_handle_, response_type_name,
+      &info->response_subscription_->type_support_))
+  {
+    info->response_subscription_->type_support_ = _create_response_type_support(
+      type_support->data,
+      info->typesupport_identifier_);
+    _register_type(
+      node_data->node_handle_, info->response_subscription_->type_support_,
+      info->typesupport_identifier_);
   }
 
   // TODO(esteve): delete Listener in the destructor
@@ -135,7 +150,8 @@ rmw_create_client(
   info->service_name_ = service_name;
   info->request_publisher_->topic_name_ = std::string(service_name) + "/request";
 
-  info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(node_data->node_handle_, info->request_publisher_->topic_name_.c_str());
+  info->request_publisher_->publisher_handle_ = rs_libp2p_custom_publisher_new(
+    node_data->node_handle_, info->request_publisher_->topic_name_.c_str());
   if (!info->request_publisher_->publisher_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p publisher for service");
     // goto fail;
@@ -152,7 +168,8 @@ rmw_create_client(
   // }
 
   char uuid_str[37] = {};
-  sprintf(uuid_str,
+  sprintf(
+    uuid_str,
     "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
     static_cast<uint8_t>(request_guid.data[0]),
     static_cast<uint8_t>(request_guid.data[1]),
@@ -203,11 +220,11 @@ rmw_create_client(
 fail:
   if (node_data) {
     if (info->request_publisher_->type_support_) {
-    //   _unregister_type(node_data->node_, info->request_type_support_, info->typesupport_identifier_);
+      //   _unregister_type(node_data->node_, info->request_type_support_, info->typesupport_identifier_);
     }
 
     if (info->response_subscription_->type_support_) {
-    //   _unregister_type(node_data->node_, info->response_type_support_, info->typesupport_identifier_);
+      //   _unregister_type(node_data->node_, info->response_type_support_, info->typesupport_identifier_);
     }
   } else {
     RCUTILS_LOG_ERROR_NAMED(

@@ -30,7 +30,7 @@ RMW_PUBLIC
 rmw_ret_t
 rmw_take_request(
   const rmw_service_t * service,
-  rmw_service_info_t  * request_header,
+  rmw_service_info_t * request_header,
   void * ros_request,
   bool * taken)
 {
@@ -51,11 +51,15 @@ rmw_take_request(
     return RMW_RET_ERROR;
   }
 
-  rmw_libp2p_cpp::CustomServiceInfo * info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(service->data);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(info, "custom service info is null",
+  rmw_libp2p_cpp::CustomServiceInfo * info =
+    static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(service->data);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
+    info, "custom service info is null",
     return RMW_RET_ERROR);
-  rmw_libp2p_cpp::CustomNodeInfo * node_data = static_cast<rmw_libp2p_cpp::CustomNodeInfo *>(info->node_->data);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(node_data, "custom node info is null",
+  rmw_libp2p_cpp::CustomNodeInfo * node_data =
+    static_cast<rmw_libp2p_cpp::CustomNodeInfo *>(info->node_->data);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
+    node_data, "custom node info is null",
     return RMW_RET_ERROR);
 
   uint8_t * message = nullptr;
@@ -72,7 +76,7 @@ rmw_take_request(
 
     // Get header
     memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
-    for(int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 16; ++i) {
       int8_t value = 0;
       buffer >> value;
       request_header->request_id.writer_guid[i] = value;
@@ -84,14 +88,15 @@ rmw_take_request(
     // unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
     // unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
     // unsigned short uuid_data3 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 6);
-    // sprintf(uuid_str, 
+    // sprintf(uuid_str,
     // "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
     //     uuid_data1, uuid_data2, uuid_data3,
     //     request_header->request_id.writer_guid[8], request_header->request_id.writer_guid[9], request_header->request_id.writer_guid[10], request_header->request_id.writer_guid[11], request_header->request_id.writer_guid[12], request_header->request_id.writer_guid[13], request_header->request_id.writer_guid[14], request_header->request_id.writer_guid[15]
     // );
 
     char uuid_str[37] = {};
-    sprintf(uuid_str,
+    sprintf(
+      uuid_str,
       "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
       static_cast<uint8_t>(request_header->request_id.writer_guid[0]),
       static_cast<uint8_t>(request_header->request_id.writer_guid[1]),
@@ -112,10 +117,11 @@ rmw_take_request(
     );
 
 
-
     std::string topic_name(info->service_name_ + std::string("/response/") + uuid_str);
 
-    rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(node_data->node_handle_, topic_name.c_str());
+    rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(
+      node_data->node_handle_,
+      topic_name.c_str());
 
     // const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_header->request_id.writer_guid);
     // request_header->request_id.sequence_number = rs_libp2p_custom_publisher_get_sequence_number(pub);
@@ -173,17 +179,20 @@ rmw_send_request(
     return RMW_RET_ERROR;
   }
 
-  for(int i = 0; i < 16; ++i) {
+  for (int i = 0; i < 16; ++i) {
     ser << static_cast<int8_t>(request_guid.data[i]);
   }
 
-  int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(info->request_publisher_->publisher_handle_);
+  int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(
+    info->request_publisher_->publisher_handle_);
   ser << seq_num;
 
-  if (_serialize_ros_message(ros_request, ser, info->request_publisher_->type_support_,
-    info->typesupport_identifier_))
+  if (_serialize_ros_message(
+      ros_request, ser, info->request_publisher_->type_support_,
+      info->typesupport_identifier_))
   {
-    uint32_t status = rs_libp2p_custom_publisher_publish(info->request_publisher_->publisher_handle_, ser.data());
+    uint32_t status = rs_libp2p_custom_publisher_publish(
+      info->request_publisher_->publisher_handle_, ser.data());
     if (status == 0) {  // TODO(esteve): replace with proper error codes
       *sequence_id = seq_num;
       returned_value = RMW_RET_OK;

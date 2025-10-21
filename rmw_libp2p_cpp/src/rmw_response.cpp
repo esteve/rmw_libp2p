@@ -63,7 +63,7 @@ rmw_send_response(
   rs_libp2p_custom_publisher_t * pub = std::move(request->second);
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
-    // Get header
+  // Get header
   rmw_gid_t request_guid;
   memset(request_guid.data, 0, RMW_GID_STORAGE_SIZE);
   const size_t ret = rs_libp2p_custom_publisher_get_gid(
@@ -73,15 +73,16 @@ rmw_send_response(
     return RMW_RET_ERROR;
   }
 
-  for(int i = 0; i < 16; ++i) {
+  for (int i = 0; i < 16; ++i) {
     ser << static_cast<int8_t>(request_guid.data[i]);
   }
 
   int64_t seq_num = request_header->sequence_number;
   ser << seq_num;
 
-  if (_serialize_ros_message(ros_response, ser, info->response_type_support_,
-    info->typesupport_identifier_))
+  if (_serialize_ros_message(
+      ros_response, ser, info->response_type_support_,
+      info->typesupport_identifier_))
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(pub, ser.data());
     if (status == 0) {
@@ -138,7 +139,7 @@ rmw_take_response(
 
     // Get header
     memset(request_header->request_id.writer_guid, 0, RMW_GID_STORAGE_SIZE);
-    for(int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 16; ++i) {
       int8_t value = 0;
       buffer >> value;
       request_header->request_id.writer_guid[i] = value;
@@ -146,7 +147,8 @@ rmw_take_response(
     buffer >> request_header->request_id.sequence_number;
 
 
-    _deserialize_ros_message(buffer, ros_response, info->response_subscription_->type_support_,
+    _deserialize_ros_message(
+      buffer, ros_response, info->response_subscription_->type_support_,
       info->typesupport_identifier_);
 
     *taken = true;

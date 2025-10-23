@@ -73,13 +73,6 @@ rmw_send_response(
     return RMW_RET_ERROR;
   }
 
-  for (int i = 0; i < 16; ++i) {
-    ser << static_cast<int8_t>(request_guid.data[i]);
-  }
-
-  int64_t seq_num = request_header->sequence_number;
-  ser << seq_num;
-
   if (_serialize_ros_message(
       ros_response, ser, info->response_type_support_,
       info->typesupport_identifier_))
@@ -145,7 +138,6 @@ rmw_take_response(
       request_header->request_id.writer_guid[i] = value;
     }
     buffer >> request_header->request_id.sequence_number;
-
 
     _deserialize_ros_message(
       buffer, ros_response, info->response_subscription_->type_support_,

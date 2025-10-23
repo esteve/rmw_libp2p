@@ -68,10 +68,12 @@ rmw_take_request(
   if (info->listener_->take_next_data(&message, length)) {
     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
 
+    // Get timestamp
     uint64_t secs = 0;
     uint32_t usecs = 0;
     buffer >> secs;
     buffer >> usecs;
+
     request_header->source_timestamp = secs * 1000000000ull + usecs * 1000ull;
 
     // Get header
@@ -81,19 +83,11 @@ rmw_take_request(
       buffer >> value;
       request_header->request_id.writer_guid[i] = value;
     }
+
+    // Get request sequence number
     buffer >> request_header->request_id.sequence_number;
 
-
-    // char uuid_str[37] = {};
-    // unsigned long uuid_data1 = *reinterpret_cast<unsigned long*>(request_header->request_id.writer_guid);
-    // unsigned short uuid_data2 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 4);
-    // unsigned short uuid_data3 = *reinterpret_cast<unsigned short*>(request_header->request_id.writer_guid + 6);
-    // sprintf(uuid_str,
-    // "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-    //     uuid_data1, uuid_data2, uuid_data3,
-    //     request_header->request_id.writer_guid[8], request_header->request_id.writer_guid[9], request_header->request_id.writer_guid[10], request_header->request_id.writer_guid[11], request_header->request_id.writer_guid[12], request_header->request_id.writer_guid[13], request_header->request_id.writer_guid[14], request_header->request_id.writer_guid[15]
-    // );
-
+    // Convert writer_guid to string
     char uuid_str[37] = {};
     sprintf(
       uuid_str,
@@ -116,15 +110,13 @@ rmw_take_request(
       static_cast<uint8_t>(request_header->request_id.writer_guid[15])
     );
 
-
+    // Create a new publisher for sending the response
     std::string topic_name(info->service_name_ + std::string("/response/") + uuid_str);
 
+    // TODO(esteve): reuse publishers if possible
     rs_libp2p_custom_publisher_t * pub = rs_libp2p_custom_publisher_new(
       node_data->node_handle_,
       topic_name.c_str());
-
-    // const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_header->request_id.writer_guid);
-    // request_header->request_id.sequence_number = rs_libp2p_custom_publisher_get_sequence_number(pub);
 
     _deserialize_ros_message(
       buffer, ros_request, info->request_subscription_->type_support_,
@@ -169,23 +161,9 @@ rmw_send_request(
 
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
-  // Get header
-  rmw_gid_t request_guid;
-  memset(request_guid.data, 0, RMW_GID_STORAGE_SIZE);
-  const size_t ret = rs_libp2p_custom_publisher_get_gid(
-    info->request_publisher_->publisher_handle_, request_guid.data);
-  if (ret == 0) {
-    RMW_SET_ERROR_MSG("no guid found for publisher");
-    return RMW_RET_ERROR;
-  }
-
-  for (int i = 0; i < 16; ++i) {
-    ser << static_cast<int8_t>(request_guid.data[i]);
-  }
-
+  // Serialize sequence number
   int64_t seq_num = rs_libp2p_custom_publisher_get_sequence_number(
     info->request_publisher_->publisher_handle_);
-  ser << seq_num;
 
   if (_serialize_ros_message(
       ros_request, ser, info->request_publisher_->type_support_,

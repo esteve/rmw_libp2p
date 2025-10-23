@@ -63,7 +63,28 @@ impl Libp2pCustomPublisher {
             assert!(!self.node.is_null());
             &mut *self.node
         };
-        libp2p_custom_node.publish_message(self.topic.clone(), buffer);
+
+        let mut out_buffer = Vec::<u8>::new();
+
+        let gid_bytes = self.gid.as_bytes();
+        let count = gid_bytes.len();
+        for i in 0..count {
+            cdr::serialize_into::<_, u8, _, cdr::CdrBe>(
+                &mut out_buffer,
+                &gid_bytes[i],
+                cdr::Infinite,
+            )
+            .unwrap();
+        }
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(
+            &mut out_buffer,
+            &self.sequence_number,
+            cdr::Infinite,
+        )
+        .unwrap();
+
+        out_buffer.extend(buffer);
+        libp2p_custom_node.publish_message(self.topic.clone(), out_buffer);
         self.sequence_number += 1;
     }
 }
@@ -99,8 +120,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
         CStr::from_ptr(topic_str_ptr)
     };
 
-    let libp2p_custom_publisher =
-        Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
+    let libp2p_custom_publisher = Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
     Box::into_raw(Box::new(libp2p_custom_publisher))
 }
 
@@ -211,4 +231,3 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
     };
     libp2p_custom_publisher.sequence_number
 }
-

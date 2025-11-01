@@ -21,8 +21,10 @@
 #include <string>
 
 #include "rmw/rmw.h"
+#include "impl/custom_client_info.hpp"
 #include "impl/custom_publisher_info.hpp"
 #include "impl/custom_subscription_info.hpp"
+#include "impl/custom_service_info.hpp"
 #include "impl/rmw_libp2p_rs.hpp"
 
 namespace rmw_libp2p_cpp
@@ -36,6 +38,10 @@ typedef struct CustomNodeInfo
   std::map<std::string, std::set<CustomPublisherInfo *>> publishers_;
   std::mutex subscriptions_mutex_;
   std::map<std::string, std::set<CustomSubscriptionInfo *>> subscriptions_;
+  std::mutex clients_mutex_;
+  std::map<std::string, std::set<CustomClientInfo *>> clients_;
+  std::mutex services_mutex_;
+  std::map<std::string, std::set<CustomServiceInfo *>> services_;
 } CustomNodeInfo;
 
 }  // namespace rmw_libp2p_cpp

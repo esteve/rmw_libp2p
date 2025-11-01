@@ -22,9 +22,8 @@
 
 extern "C"
 {
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
+rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",

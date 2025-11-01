@@ -20,12 +20,12 @@
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
+#include "impl/custom_client_info.hpp"
+#include "impl/custom_service_info.hpp"
 #include "impl/custom_subscription_info.hpp"
 #include "impl/custom_wait_set_info.hpp"
 #include "impl/listener.hpp"
 
-extern "C"
-{
 // helper function for wait
 bool
 check_wait_set_for_data(
@@ -44,12 +44,31 @@ check_wait_set_for_data(
     }
   }
 
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      void * data = clients->clients[i];
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      if (custom_client_info && custom_client_info->response_subscription_->listener_->has_data()) {
+        return true;
+      }
+    }
+  }
+
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      void * data = services->services[i];
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      if (custom_service_info && custom_service_info->listener_->has_data()) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_wait(
+rmw_wait(
   rmw_subscriptions_t * subscriptions,
   rmw_guard_conditions_t * guard_conditions,
   rmw_services_t * services,
@@ -92,6 +111,23 @@ libp2p_c__rmw_wait(
       void * data = subscriptions->subscribers[i];
       auto custom_subscriber_info = static_cast<rmw_libp2p_cpp::CustomSubscriptionInfo *>(data);
       custom_subscriber_info->listener_->attach_condition(condition_mutex, condition_variable);
+    }
+  }
+
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      void * data = clients->clients[i];
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      custom_client_info->response_subscription_->listener_->attach_condition(
+        condition_mutex, condition_variable);
+    }
+  }
+
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      void * data = services->services[i];
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      custom_service_info->listener_->attach_condition(condition_mutex, condition_variable);
     }
   }
 
@@ -139,6 +175,27 @@ libp2p_c__rmw_wait(
     }
   }
 
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      void * data = clients->clients[i];
+      auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
+      custom_client_info->response_subscription_->listener_->detach_condition();
+      if (!custom_client_info->response_subscription_->listener_->has_data()) {
+        clients->clients[i] = 0;
+      }
+    }
+  }
+
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      void * data = services->services[i];
+      auto custom_service_info = static_cast<rmw_libp2p_cpp::CustomServiceInfo *>(data);
+      custom_service_info->listener_->detach_condition();
+      if (!custom_service_info->listener_->has_data()) {
+        services->services[i] = 0;
+      }
+    }
+  }
+
   return timeout ? RMW_RET_TIMEOUT : RMW_RET_OK;
 }
-}  // extern "C"

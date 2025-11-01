@@ -23,8 +23,6 @@
 #include "impl/listener.hpp"
 #include "ros_message_serialization.hpp"
 
-extern "C"
-{
 rmw_ret_t
 _take(
   const rmw_subscription_t * subscription,
@@ -48,6 +46,28 @@ _take(
 
   if (info->listener_->take_next_data(&message, length)) {
     rmw_libp2p_cpp::cdr::ReadCDRBuffer buffer(message, length);
+
+    // Get timestamp
+    uint64_t secs = 0;
+    uint32_t usecs = 0;
+    buffer >> secs;
+    buffer >> usecs;
+
+    message_info->source_timestamp = secs * 1000000000ull + usecs * 1000ull;
+
+    // Get header
+    memset(message_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+
+    // 16 bytes for a UUID
+    for (int i = 0; i < 16; ++i) {
+      int8_t value = 0;
+      buffer >> value;
+      message_info->publisher_gid.data[i] = value;
+    }
+
+    // Get publication sequence number
+    buffer >> message_info->publication_sequence_number;
+
     _deserialize_ros_message(
       buffer, ros_message, info->type_support_,
       info->typesupport_identifier_);
@@ -57,9 +77,8 @@ _take(
   return RMW_RET_OK;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_take_with_info(
+rmw_take_with_info(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
@@ -82,4 +101,3 @@ libp2p_c__rmw_take_with_info(
 
   return _take(subscription, ros_message, taken, message_info);
 }
-}  // extern "C"

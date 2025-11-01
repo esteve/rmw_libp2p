@@ -14,8 +14,6 @@
 
 #include <cassert>
 
-#include <iostream>
-
 #include "rcutils/logging_macros.h"
 
 #include "rmw/error_handling.h"
@@ -28,9 +26,8 @@
 
 extern "C"
 {
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_publish(
+rmw_publish(
   const rmw_publisher_t * publisher,
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
@@ -40,7 +37,7 @@ libp2p_c__rmw_publish(
     "%s(publisher=%p,ros_message=%p,allocation=%p)",
     __FUNCTION__, (void *)publisher, (void *)ros_message, (void *)allocation);
 
-  rmw_ret_t returnedValue = RMW_RET_ERROR;
+  rmw_ret_t returned_value = RMW_RET_ERROR;
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(publisher, "publisher pointer is null", return RMW_RET_ERROR);
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(
     ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
@@ -61,7 +58,7 @@ libp2p_c__rmw_publish(
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
     if (status == 0) {  // TODO(esteve): replace with proper error codes
-      returnedValue = RMW_RET_OK;
+      returned_value = RMW_RET_OK;
     } else {
       RMW_SET_ERROR_MSG("cannot publish data");
     }
@@ -69,12 +66,11 @@ libp2p_c__rmw_publish(
     RMW_SET_ERROR_MSG("cannot serialize data");
   }
 
-  return returnedValue;
+  return returned_value;
 }
 
-RMW_PUBLIC
 rmw_ret_t
-libp2p_c__rmw_publish_loaned_message(
+rmw_publish_loaned_message(
   const rmw_publisher_t * publisher,
   void * ros_message,
   rmw_publisher_allocation_t * allocation)

@@ -27,6 +27,7 @@ pub struct Libp2pCustomPublisher {
     gid: Uuid,
     node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
     topic: gossipsub::IdentTopic,
+    sequence_number: u64,
 }
 
 /// Represents a custom publisher for the Libp2p network.
@@ -37,17 +38,18 @@ impl Libp2pCustomPublisher {
     ///
     /// # Arguments
     ///
-    /// * `libp2p2_custom_node` - A pointer to the Libp2p custom node.
+    /// * `libp2p_custom_node` - A pointer to the Libp2p custom node.
     /// * `topic_str` - The string representation of the topic to publish to.
     ///
     /// # Returns
     ///
     /// A new instance of `Libp2pCustomPublisher`.
-    fn new(libp2p2_custom_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
+    fn new(libp2p_custom_node: *mut Libp2pCustomNode, topic_str: &str) -> Self {
         Self {
             gid: Uuid::new_v4(),
-            node: libp2p2_custom_node,
+            node: libp2p_custom_node,
             topic: gossipsub::IdentTopic::new(topic_str),
+            sequence_number: 0,
         }
     }
 
@@ -56,13 +58,34 @@ impl Libp2pCustomPublisher {
     /// # Arguments
     ///
     /// * `buffer` - The buffer containing the message to be published.
-    fn publish(&self, buffer: Vec<u8>) -> () {
-        let libp2p2_custom_node = unsafe {
+    fn publish(&mut self, buffer: Vec<u8>) -> () {
+        let libp2p_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
         };
 
-        libp2p2_custom_node.publish_message(self.topic.clone(), buffer);
+        let mut out_buffer = Vec::<u8>::new();
+
+        let gid_bytes = self.gid.as_bytes();
+        let count = gid_bytes.len();
+        for i in 0..count {
+            cdr::serialize_into::<_, u8, _, cdr::CdrBe>(
+                &mut out_buffer,
+                &gid_bytes[i],
+                cdr::Infinite,
+            )
+            .unwrap();
+        }
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(
+            &mut out_buffer,
+            &self.sequence_number,
+            cdr::Infinite,
+        )
+        .unwrap();
+
+        out_buffer.extend(buffer);
+        libp2p_custom_node.publish_message(self.topic.clone(), out_buffer);
+        self.sequence_number += 1;
     }
 }
 
@@ -97,9 +120,8 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
         CStr::from_ptr(topic_str_ptr)
     };
 
-    let libp2p2_custom_publisher =
-        Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
-    Box::into_raw(Box::new(libp2p2_custom_publisher))
+    let libp2p_custom_publisher = Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
+    Box::into_raw(Box::new(libp2p_custom_publisher))
 }
 
 /// Frees a `Libp2pCustomPublisher` from memory.
@@ -148,11 +170,11 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
     ptr: *mut Libp2pCustomPublisher,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
-    let libp2p2_custom_publisher = unsafe {
+    let libp2p_custom_publisher = unsafe {
         assert!(!ptr.is_null());
         &mut *ptr
     };
-    let gid_bytes = libp2p2_custom_publisher.gid.as_bytes();
+    let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
     let count = gid_bytes.len();
     unsafe {
         std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
@@ -186,7 +208,7 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
     ptr_buffer: *const Cursor<Vec<u8>>,
 ) -> usize {
-    let libp2p2_custom_publisher = unsafe {
+    let libp2p_custom_publisher = unsafe {
         assert!(!ptr_publisher.is_null());
         &mut *ptr_publisher
     };
@@ -194,7 +216,18 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
-    libp2p2_custom_publisher.publish(buffer.get_ref().to_vec());
+    libp2p_custom_publisher.publish(buffer.get_ref().to_vec());
     // TODO(esteve): return the number of bytes published
     0
+}
+
+#[no_mangle]
+pub extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
+    ptr: *mut Libp2pCustomPublisher,
+) -> u64 {
+    let libp2p_custom_publisher = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    libp2p_custom_publisher.sequence_number
 }

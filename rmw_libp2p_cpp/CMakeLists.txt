@@ -37,14 +37,21 @@ find_package(rosidl_typesupport_introspection_c REQUIRED)
 find_package(rosidl_typesupport_introspection_cpp REQUIRED)
 
 add_library(rmw_libp2p_cpp
+  src/client_service_common.cpp
+  src/identifier.cpp
+  src/rmw_client.cpp
   src/rmw_guard_condition.cpp
   src/rmw_get_gid_for_publisher.cpp
+  src/rmw_get_implementation_identifier.cpp
+  src/rmw_get_serialization_format.cpp
   src/rmw_guard_condition.cpp
   src/rmw_init.cpp
   src/rmw_libp2p.cpp
   src/rmw_node.cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
+  src/rmw_request.cpp
+  src/rmw_response.cpp
   src/rmw_service.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp
@@ -52,17 +59,18 @@ add_library(rmw_libp2p_cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
   src/ros_message_serialization.cpp
+  src/serialization_format.cpp
   src/type_support_common.cpp
 )
 target_include_directories(rmw_libp2p_cpp
   PRIVATE src
 )
 
-corrosion_import_crate(MANIFEST_PATH rust_internal/Cargo.toml)
+corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
 
-target_link_libraries(rmw_libp2p_rs_internal INTERFACE ZLIB::ZLIB)
+target_link_libraries(rmw_libp2p_rs INTERFACE ZLIB::ZLIB)
 
-target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs_internal)
+target_link_libraries(rmw_libp2p_cpp rmw_libp2p_rs)
 
 # Add the definitions, include directories and libraries of packages
 # to a target
@@ -96,36 +104,9 @@ register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_introspection_c"
   "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp")
 
-corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
-
-add_dependencies(rmw_libp2p_rs-shared rmw_libp2p_cpp)
-add_dependencies(rmw_libp2p_rs rmw_libp2p_cpp)
-target_link_libraries(rmw_libp2p_rs INTERFACE ZLIB::ZLIB)
-
-corrosion_link_libraries(rmw_libp2p_rs rmw_libp2p_cpp)
-# target_link_libraries(rmw_libp2p_rs INTERFACE rmw_libp2p_cpp)
-
-
-install(
-  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs-shared
-  LIBRARY DESTINATION lib
-)
-
 install(
   TARGETS rmw_libp2p_cpp
   ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-install(
-  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs_internal-shared
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-install(
-  IMPORTED_RUNTIME_ARTIFACTS rmw_libp2p_rs-shared
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )

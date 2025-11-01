@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IMPL__CUSTOM_PUBLISHER_INFO_HPP_
-#define IMPL__CUSTOM_PUBLISHER_INFO_HPP_
-
-#include <atomic>
-#include <set>
-#include <string>
+#include "rcutils/logging_macros.h"
 
 #include "rmw/rmw.h"
 
-#include "impl/rmw_libp2p_rs.hpp"
+#include "impl/identifier.hpp"
 
-namespace rmw_libp2p_cpp
+extern "C"
 {
-typedef struct CustomPublisherInfo
+const char *
+rmw_get_implementation_identifier()
 {
-  const rmw_node_t * node_;
-  void * type_support_;
-  const char * typesupport_identifier_;
-  rmw_qos_profile_t qos_;
-  std::string topic_name_;
-  std::set<std::string> subscriptions_;
-  std::atomic_size_t subscriptions_matched_count_;
-  rs_libp2p_custom_publisher_t * publisher_handle_;
-} CustomPublisherInfo;
-}  // namespace rmw_libp2p_cpp
-#endif  // IMPL__CUSTOM_PUBLISHER_INFO_HPP_
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
+
+  return libp2p_identifier;
+}
+}  // extern "C"

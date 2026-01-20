@@ -832,3 +832,515 @@ pub extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8>>, n: 
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    // Helper function to create a write buffer and return raw pointer
+    fn create_write_buffer() -> *mut Cursor<Vec<u8>> {
+        rs_libp2p_cdr_buffer_write_new()
+    }
+
+    // Helper function to get the bytes from a write buffer
+    fn get_buffer_bytes(ptr: *mut Cursor<Vec<u8>>) -> Vec<u8> {
+        unsafe {
+            assert!(!ptr.is_null());
+            (*ptr).get_ref().clone()
+        }
+    }
+
+    // Helper function to create a read buffer from bytes
+    fn create_read_buffer(data: &[u8]) -> *mut Cursor<Vec<u8>> {
+        rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len())
+    }
+
+    // ==================== Write Tests ====================
+
+    #[test]
+    fn test_write_uint8() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint8(buffer, 42);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_uint16() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint16(buffer, 1234);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_uint32() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint32(buffer, 123456);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_uint64() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint64(buffer, 1234567890123);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_int8() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int8(buffer, -42);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_int16() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int16(buffer, -1234);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_int32() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int32(buffer, -123456);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_int64() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int64(buffer, -1234567890123);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_float() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_float(buffer, 3.14159);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_double() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_double(buffer, 3.141592653589793);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_bool_true() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_bool(buffer, true);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_bool_false() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_bool(buffer, false);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_char() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_char(buffer, b'A' as c_char);
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    #[test]
+    fn test_write_char16() {
+        let buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_char16(buffer, 0x0041); // 'A' in UTF-16
+        let bytes = get_buffer_bytes(buffer);
+        assert!(!bytes.is_empty());
+        rs_libp2p_cdr_buffer_free(buffer);
+    }
+
+    // ==================== Read Tests ====================
+
+    #[test]
+    fn test_read_uint8() {
+        // First write a value
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint8(write_buffer, 42);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        // Then read it back
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u8 = 0;
+        rs_libp2p_cdr_buffer_read_uint8(read_buffer, &mut result);
+        assert_eq!(result, 42);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_uint16() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint16(write_buffer, 1234);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u16 = 0;
+        rs_libp2p_cdr_buffer_read_uint16(read_buffer, &mut result);
+        assert_eq!(result, 1234);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_uint32() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint32(write_buffer, 123456);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u32 = 0;
+        rs_libp2p_cdr_buffer_read_uint32(read_buffer, &mut result);
+        assert_eq!(result, 123456);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_uint64() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint64(write_buffer, 1234567890123);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u64 = 0;
+        rs_libp2p_cdr_buffer_read_uint64(read_buffer, &mut result);
+        assert_eq!(result, 1234567890123);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_int8() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int8(write_buffer, -42);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i8 = 0;
+        rs_libp2p_cdr_buffer_read_int8(read_buffer, &mut result);
+        assert_eq!(result, -42);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_int16() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int16(write_buffer, -1234);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i16 = 0;
+        rs_libp2p_cdr_buffer_read_int16(read_buffer, &mut result);
+        assert_eq!(result, -1234);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_int32() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int32(write_buffer, -123456);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i32 = 0;
+        rs_libp2p_cdr_buffer_read_int32(read_buffer, &mut result);
+        assert_eq!(result, -123456);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_int64() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int64(write_buffer, -1234567890123);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i64 = 0;
+        rs_libp2p_cdr_buffer_read_int64(read_buffer, &mut result);
+        assert_eq!(result, -1234567890123);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_float() {
+        let write_buffer = create_write_buffer();
+        let expected: f32 = 3.14159;
+        rs_libp2p_cdr_buffer_write_float(write_buffer, expected);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: f32 = 0.0;
+        rs_libp2p_cdr_buffer_read_float(read_buffer, &mut result);
+        assert!((result - expected).abs() < 0.0001);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_double() {
+        let write_buffer = create_write_buffer();
+        let expected: f64 = 3.141592653589793;
+        rs_libp2p_cdr_buffer_write_double(write_buffer, expected);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: f64 = 0.0;
+        rs_libp2p_cdr_buffer_read_double(read_buffer, &mut result);
+        assert!((result - expected).abs() < 0.0000001);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_bool_true() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_bool(write_buffer, true);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: bool = false;
+        rs_libp2p_cdr_buffer_read_bool(read_buffer, &mut result);
+        assert!(result);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_bool_false() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_bool(write_buffer, false);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: bool = true;
+        rs_libp2p_cdr_buffer_read_bool(read_buffer, &mut result);
+        assert!(!result);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_char() {
+        let write_buffer = create_write_buffer();
+        let expected: c_char = b'X' as c_char;
+        rs_libp2p_cdr_buffer_write_char(write_buffer, expected);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: c_char = 0;
+        rs_libp2p_cdr_buffer_read_char(read_buffer, &mut result);
+        assert_eq!(result, expected);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_read_char16() {
+        let write_buffer = create_write_buffer();
+        let expected: u16 = 0x0041; // 'A' in UTF-16
+        rs_libp2p_cdr_buffer_write_char16(write_buffer, expected);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u16 = 0;
+        rs_libp2p_cdr_buffer_read_char16(read_buffer, &mut result);
+        assert_eq!(result, expected);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    // ==================== Edge Case Tests ====================
+
+    #[test]
+    fn test_write_read_uint8_boundary_values() {
+        // Test min value (0)
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint8(write_buffer, u8::MIN);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u8 = 255;
+        rs_libp2p_cdr_buffer_read_uint8(read_buffer, &mut result);
+        assert_eq!(result, u8::MIN);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+
+        // Test max value (255)
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint8(write_buffer, u8::MAX);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: u8 = 0;
+        rs_libp2p_cdr_buffer_read_uint8(read_buffer, &mut result);
+        assert_eq!(result, u8::MAX);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_write_read_int32_boundary_values() {
+        // Test min value
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int32(write_buffer, i32::MIN);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i32 = 0;
+        rs_libp2p_cdr_buffer_read_int32(read_buffer, &mut result);
+        assert_eq!(result, i32::MIN);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+
+        // Test max value
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_int32(write_buffer, i32::MAX);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: i32 = 0;
+        rs_libp2p_cdr_buffer_read_int32(read_buffer, &mut result);
+        assert_eq!(result, i32::MAX);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_write_read_multiple_values_sequential() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint32(write_buffer, 100);
+        rs_libp2p_cdr_buffer_write_uint32(write_buffer, 200);
+        rs_libp2p_cdr_buffer_write_uint32(write_buffer, 300);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result1: u32 = 0;
+        let mut result2: u32 = 0;
+        let mut result3: u32 = 0;
+        rs_libp2p_cdr_buffer_read_uint32(read_buffer, &mut result1);
+        rs_libp2p_cdr_buffer_read_uint32(read_buffer, &mut result2);
+        rs_libp2p_cdr_buffer_read_uint32(read_buffer, &mut result3);
+        assert_eq!(result1, 100);
+        assert_eq!(result2, 200);
+        assert_eq!(result3, 300);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_write_read_mixed_types() {
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_uint8(write_buffer, 42);
+        rs_libp2p_cdr_buffer_write_int32(write_buffer, -1000);
+        rs_libp2p_cdr_buffer_write_double(write_buffer, 3.14);
+        rs_libp2p_cdr_buffer_write_bool(write_buffer, true);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut u8_result: u8 = 0;
+        let mut i32_result: i32 = 0;
+        let mut f64_result: f64 = 0.0;
+        let mut bool_result: bool = false;
+
+        rs_libp2p_cdr_buffer_read_uint8(read_buffer, &mut u8_result);
+        rs_libp2p_cdr_buffer_read_int32(read_buffer, &mut i32_result);
+        rs_libp2p_cdr_buffer_read_double(read_buffer, &mut f64_result);
+        rs_libp2p_cdr_buffer_read_bool(read_buffer, &mut bool_result);
+
+        assert_eq!(u8_result, 42);
+        assert_eq!(i32_result, -1000);
+        assert!((f64_result - 3.14).abs() < 0.0001);
+        assert!(bool_result);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_buffer_free_null_pointer() {
+        // Should not panic when freeing null pointer
+        rs_libp2p_cdr_buffer_free(std::ptr::null_mut());
+    }
+
+    #[test]
+    fn test_string_free_null_pointer() {
+        // Should not panic when freeing null pointer
+        rs_libp2p_cdr_buffer_free_string(std::ptr::null_mut());
+    }
+
+    #[test]
+    fn test_write_read_float_special_values() {
+        // Test zero
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_float(write_buffer, 0.0);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: f32 = 1.0;
+        rs_libp2p_cdr_buffer_read_float(read_buffer, &mut result);
+        assert_eq!(result, 0.0);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+
+        // Test negative zero
+        let write_buffer = create_write_buffer();
+        rs_libp2p_cdr_buffer_write_float(write_buffer, -0.0);
+        let bytes = get_buffer_bytes(write_buffer);
+        rs_libp2p_cdr_buffer_free(write_buffer);
+
+        let read_buffer = create_read_buffer(&bytes);
+        let mut result: f32 = 1.0;
+        rs_libp2p_cdr_buffer_read_float(read_buffer, &mut result);
+        // -0.0 == 0.0 in floating point comparison
+        assert_eq!(result, 0.0);
+        rs_libp2p_cdr_buffer_free(read_buffer);
+    }
+
+    #[test]
+    fn test_buffer_creation_and_destruction() {
+        // Test that we can create and destroy buffers without memory issues
+        for _ in 0..100 {
+            let buffer = create_write_buffer();
+            rs_libp2p_cdr_buffer_write_uint64(buffer, 12345);
+            rs_libp2p_cdr_buffer_free(buffer);
+        }
+    }
+}

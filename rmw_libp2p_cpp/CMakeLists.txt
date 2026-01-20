@@ -113,7 +113,72 @@ install(
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(osrf_testing_tools_cpp REQUIRED)
+  find_package(test_msgs REQUIRED)
+
   ament_lint_auto_find_test_dependencies()
+
+  # Test for rmw_init functions
+  ament_add_gtest(test_rmw_init test/test_rmw_init.cpp)
+  target_link_libraries(test_rmw_init rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_init
+    "rcutils"
+    "rmw"
+  )
+
+  # Test for rmw_node functions
+  ament_add_gtest(test_rmw_node test/test_rmw_node.cpp)
+  target_link_libraries(test_rmw_node rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_node
+    "rcutils"
+    "rmw"
+  )
+
+  # Test for rmw_guard_condition functions
+  ament_add_gtest(test_rmw_guard_condition test/test_rmw_guard_condition.cpp)
+  target_link_libraries(test_rmw_guard_condition rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_guard_condition
+    "rcutils"
+    "rmw"
+  )
+
+  # Test for rmw_publisher functions
+  ament_add_gtest(test_rmw_publisher test/test_rmw_publisher.cpp)
+  target_link_libraries(test_rmw_publisher rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_publisher
+    "rcutils"
+    "rmw"
+    "rosidl_typesupport_introspection_c"
+    "rosidl_typesupport_introspection_cpp"
+    "test_msgs"
+  )
+
+  # Test for rmw_subscription functions
+  ament_add_gtest(test_rmw_subscription test/test_rmw_subscription.cpp)
+  target_link_libraries(test_rmw_subscription rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_subscription
+    "rcutils"
+    "rmw"
+    "rosidl_typesupport_introspection_c"
+    "rosidl_typesupport_introspection_cpp"
+    "test_msgs"
+  )
+
+  # Test for rmw_wait functions
+  ament_add_gtest(test_rmw_wait test/test_rmw_wait.cpp)
+  target_link_libraries(test_rmw_wait rmw_libp2p_cpp)
+  ament_target_dependencies(test_rmw_wait
+    "rcutils"
+    "rmw"
+  )
+
+  # Test for guard_condition internal class
+  ament_add_gtest(test_guard_condition_class test/test_guard_condition_class.cpp)
+  target_include_directories(test_guard_condition_class PRIVATE src)
+  ament_target_dependencies(test_guard_condition_class
+    "rcpputils"
+  )
 endif()
 
 ament_export_include_directories(include)

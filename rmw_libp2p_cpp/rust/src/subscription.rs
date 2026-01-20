@@ -16,6 +16,7 @@ use crate::CustomSubscriptionHandle;
 use crate::Libp2pCustomNode;
 
 use std::ffi::CStr;
+use std::ffi::c_void;
 use std::io::Cursor;
 use std::os::raw::c_char;
 use std::sync::Arc;
@@ -210,4 +211,252 @@ pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
         std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
     }
     count
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rs_libp2p_custom_node_new;
+    use crate::rs_libp2p_custom_node_free;
+    use std::ffi::CString;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    // Global counter for callback invocations (for testing)
+    static CALLBACK_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+    // Test callback function
+    unsafe extern "C" fn test_callback(
+        _handle: &CustomSubscriptionHandle,
+        _data: *mut u8,
+        _len: usize,
+    ) {
+        CALLBACK_COUNT.fetch_add(1, Ordering::SeqCst);
+    }
+
+    fn reset_callback_count() {
+        CALLBACK_COUNT.store(0, Ordering::SeqCst);
+    }
+
+    #[test]
+    fn test_subscription_creation_and_destruction() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+
+        let topic = CString::new("test_topic").unwrap();
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let subscription_ptr = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle,
+            test_callback,
+        );
+        assert!(!subscription_ptr.is_null());
+
+        rs_libp2p_custom_subscription_free(subscription_ptr);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_subscription_free_null_pointer() {
+        // Should not panic when freeing null pointer
+        rs_libp2p_custom_subscription_free(std::ptr::null_mut());
+    }
+
+    #[test]
+    fn test_subscription_get_gid() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+        let topic = CString::new("test_topic").unwrap();
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let subscription_ptr = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle,
+            test_callback,
+        );
+
+        let mut gid_buffer: [u8; 16] = [0; 16];
+        let gid_len = rs_libp2p_custom_subscription_get_gid(
+            subscription_ptr,
+            gid_buffer.as_mut_ptr(),
+        );
+
+        // UUID is 16 bytes
+        assert_eq!(gid_len, 16);
+        // GID should not be all zeros (it's a random UUID)
+        assert!(gid_buffer.iter().any(|&x| x != 0));
+
+        rs_libp2p_custom_subscription_free(subscription_ptr);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_subscription_unique_gids() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+
+        let topic1 = CString::new("topic1").unwrap();
+        let topic2 = CString::new("topic2").unwrap();
+
+        let handle1 = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+        let handle2 = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let subscription1 = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic1.as_ptr(),
+            handle1,
+            test_callback,
+        );
+        let subscription2 = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic2.as_ptr(),
+            handle2,
+            test_callback,
+        );
+
+        let mut gid1: [u8; 16] = [0; 16];
+        let mut gid2: [u8; 16] = [0; 16];
+
+        rs_libp2p_custom_subscription_get_gid(subscription1, gid1.as_mut_ptr());
+        rs_libp2p_custom_subscription_get_gid(subscription2, gid2.as_mut_ptr());
+
+        // GIDs should be different for different subscriptions
+        assert_ne!(gid1, gid2);
+
+        rs_libp2p_custom_subscription_free(subscription1);
+        rs_libp2p_custom_subscription_free(subscription2);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_multiple_subscriptions_same_topic() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+        let topic = CString::new("shared_topic").unwrap();
+
+        let handle1 = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+        let handle2 = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let subscription1 = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle1,
+            test_callback,
+        );
+        let subscription2 = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle2,
+            test_callback,
+        );
+
+        assert!(!subscription1.is_null());
+        assert!(!subscription2.is_null());
+        assert_ne!(subscription1, subscription2);
+
+        rs_libp2p_custom_subscription_free(subscription1);
+        rs_libp2p_custom_subscription_free(subscription2);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_subscription_with_various_topics() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+
+        // Test with various topic names
+        let topics = vec![
+            "simple",
+            "with/slashes",
+            "with_underscores",
+            "MixedCase",
+            "numbers123",
+            "/leading/slash",
+        ];
+
+        for topic_name in topics {
+            let topic = CString::new(topic_name).unwrap();
+            let handle = CustomSubscriptionHandle {
+                ptr: std::ptr::null(),
+            };
+            let subscription_ptr = rs_libp2p_custom_subscription_new(
+                node_ptr,
+                topic.as_ptr(),
+                handle,
+                test_callback,
+            );
+            assert!(!subscription_ptr.is_null());
+            rs_libp2p_custom_subscription_free(subscription_ptr);
+        }
+
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_subscription_gid_stability() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+        let topic = CString::new("test_topic").unwrap();
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let subscription_ptr = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle,
+            test_callback,
+        );
+
+        let mut gid1: [u8; 16] = [0; 16];
+        let mut gid2: [u8; 16] = [0; 16];
+
+        rs_libp2p_custom_subscription_get_gid(subscription_ptr, gid1.as_mut_ptr());
+        rs_libp2p_custom_subscription_get_gid(subscription_ptr, gid2.as_mut_ptr());
+
+        // GID should remain the same when queried multiple times
+        assert_eq!(gid1, gid2);
+
+        rs_libp2p_custom_subscription_free(subscription_ptr);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_custom_subscription_handle_with_data() {
+        reset_callback_count();
+        let node_ptr = rs_libp2p_custom_node_new();
+        let topic = CString::new("test_topic").unwrap();
+
+        // Create a handle with a non-null pointer
+        let test_data: i32 = 42;
+        let handle = CustomSubscriptionHandle {
+            ptr: &test_data as *const i32 as *const c_void,
+        };
+
+        let subscription_ptr = rs_libp2p_custom_subscription_new(
+            node_ptr,
+            topic.as_ptr(),
+            handle,
+            test_callback,
+        );
+        assert!(!subscription_ptr.is_null());
+
+        rs_libp2p_custom_subscription_free(subscription_ptr);
+        rs_libp2p_custom_node_free(node_ptr);
+    }
 }

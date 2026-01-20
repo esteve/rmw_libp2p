@@ -372,3 +372,84 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
     }
     let _ = unsafe { Box::from_raw(ptr) };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_node_creation_and_destruction() {
+        // Test that we can create and destroy a node
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_node_free_null_pointer() {
+        // Should not panic when freeing null pointer
+        rs_libp2p_custom_node_free(std::ptr::null_mut());
+    }
+
+    #[test]
+    fn test_multiple_node_creation() {
+        // Test creating multiple nodes
+        let node1 = rs_libp2p_custom_node_new();
+        let node2 = rs_libp2p_custom_node_new();
+
+        assert!(!node1.is_null());
+        assert!(!node2.is_null());
+        assert_ne!(node1, node2);
+
+        rs_libp2p_custom_node_free(node1);
+        rs_libp2p_custom_node_free(node2);
+    }
+
+    #[test]
+    fn test_swarm_creation() {
+        // Test that swarm can be created (internal function)
+        // This is tested indirectly through node creation
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+
+        // The node should be listening on some address
+        // We can't easily test this without more infrastructure,
+        // but at least verify the node was created successfully
+        rs_libp2p_custom_node_free(node_ptr);
+    }
+
+    #[test]
+    fn test_out_event_from_mdns() {
+        // Test the From trait implementation for OutEvent from mdns::Event
+        // We can't easily construct an mdns::Event, but we can verify the trait exists
+        // by checking the type system at compile time
+        fn _assert_from<T: From<mdns::Event>>() {}
+        _assert_from::<OutEvent>();
+    }
+
+    #[test]
+    fn test_out_event_from_gossipsub() {
+        // Test the From trait implementation for OutEvent from gossipsub::Event
+        fn _assert_from<T: From<gossipsub::Event>>() {}
+        _assert_from::<OutEvent>();
+    }
+
+    #[test]
+    fn test_custom_subscription_handle_send_sync() {
+        // Verify that CustomSubscriptionHandle implements Send and Sync
+        fn _assert_send<T: Send>() {}
+        fn _assert_sync<T: Sync>() {}
+        _assert_send::<CustomSubscriptionHandle>();
+        _assert_sync::<CustomSubscriptionHandle>();
+    }
+
+    #[test]
+    fn test_node_lifecycle_repeated() {
+        // Test repeated creation and destruction to check for memory leaks
+        for _ in 0..3 {
+            let node_ptr = rs_libp2p_custom_node_new();
+            assert!(!node_ptr.is_null());
+            rs_libp2p_custom_node_free(node_ptr);
+        }
+    }
+}

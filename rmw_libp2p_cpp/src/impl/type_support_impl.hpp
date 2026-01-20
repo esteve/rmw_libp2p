@@ -150,7 +150,7 @@ void serialize_field<std::string>(
     if (member->string_upper_bound_ && str.length() > member->string_upper_bound_ + 1) {
       throw std::runtime_error("string overcomes the maximum length");
     }
-    // ser << str;
+    ser << str;
   } else {
     // First, cast field to rosidl_runtime_c
     // Then convert to a std::string using StringHelper and serialize the std::string
@@ -187,7 +187,7 @@ void serialize_field<std::u16string>(
     if (member->string_upper_bound_ && str.length() > member->string_upper_bound_ + 1) {
       throw std::runtime_error("string overcomes the maximum length");
     }
-    // ser << str;
+    ser << str;
   } else {
     // First, cast field to rosidl_runtime_c
     // Then convert to a std::u16string using U16StringHelper and serialize the std::u16string
@@ -309,10 +309,10 @@ bool TypeSupport<MembersType>::serializeROSmessage(
         serialize_field<uint64_t>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_STRING:
-        // serialize_field<std::string>(member, field, ser);
+        serialize_field<std::string>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
-        // serialize_field<std::u16string>(member, field, ser);
+        serialize_field<std::u16string>(member, field, ser);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
         {
@@ -575,7 +575,7 @@ bool TypeSupport<MembersType>::deserializeROSmessage(
         deserialize_field<std::string>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_WSTRING:
-        // deserialize_field<std::u16string>(member, field, deser, call_new);
+        deserialize_field<std::u16string>(member, field, deser, call_new);
         break;
       case ::rosidl_typesupport_introspection_cpp::ROS_TYPE_MESSAGE:
         {

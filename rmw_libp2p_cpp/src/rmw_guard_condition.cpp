@@ -19,20 +19,15 @@
 
 #include "impl/identifier.hpp"
 
-#include "impl/rmw_libp2p_rs.hpp"
 #include "impl/guard_condition.hpp"
+#include "impl/rmw_libp2p_rs.hpp"
 
-extern "C"
-{
-rmw_guard_condition_t *
-rmw_create_guard_condition(rmw_context_t * context)
+extern "C" {
+rmw_guard_condition_t * rmw_create_guard_condition(rmw_context_t * context)
 {
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    init context,
-    context->implementation_identifier,
-    libp2p_identifier,
-    return nullptr);
+    init context, context->implementation_identifier, libp2p_identifier, return nullptr);
 
   rmw_guard_condition_t * guard_condition_handle = new rmw_guard_condition_t;
   guard_condition_handle->implementation_identifier = libp2p_identifier;
@@ -40,8 +35,7 @@ rmw_create_guard_condition(rmw_context_t * context)
   return guard_condition_handle;
 }
 
-rmw_ret_t
-rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
+rmw_ret_t rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
   if (guard_condition) {
     delete static_cast<GuardCondition *>(guard_condition->data);

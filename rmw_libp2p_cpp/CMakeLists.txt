@@ -9,23 +9,28 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+  set(
+    CMAKE_SHARED_LINKER_FLAGS
+    "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined"
+  )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
+  set(
+    CMAKE_SHARED_LINKER_FLAGS
+    "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error"
+  )
 endif()
 
 include(FetchContent)
 
-fetchcontent_declare(
-    Corrosion
-    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-    GIT_TAG v0.5
+FetchContent_Declare(
+  Corrosion
+  GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+  GIT_TAG v0.5
 )
 
-fetchcontent_makeavailable(Corrosion)
+FetchContent_MakeAvailable(Corrosion)
 
 find_package(ZLIB REQUIRED)
-
 
 find_package(ament_cmake_ros REQUIRED)
 
@@ -36,7 +41,8 @@ find_package(rmw REQUIRED)
 find_package(rosidl_typesupport_introspection_c REQUIRED)
 find_package(rosidl_typesupport_introspection_cpp REQUIRED)
 
-add_library(rmw_libp2p_cpp
+add_library(
+  rmw_libp2p_cpp
   src/client_service_common.cpp
   src/identifier.cpp
   src/rmw_client.cpp
@@ -62,9 +68,7 @@ add_library(rmw_libp2p_cpp
   src/serialization_format.cpp
   src/type_support_common.cpp
 )
-target_include_directories(rmw_libp2p_cpp
-  PRIVATE src
-)
+target_include_directories(rmw_libp2p_cpp PRIVATE src)
 
 corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml)
 
@@ -102,7 +106,8 @@ ament_export_dependencies(rmw)
 # typesupport package and typesupport is the name of the package
 register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_introspection_c"
-  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp")
+  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp"
+)
 
 install(
   TARGETS rmw_libp2p_cpp
@@ -114,6 +119,18 @@ install(
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(test_rmw_api test/test_rmw_api.cpp)
+  if(TARGET test_rmw_api)
+    target_link_libraries(test_rmw_api rmw_libp2p_cpp)
+    ament_target_dependencies(test_rmw_api
+      "rcpputils"
+      "rcutils"
+      "rmw"
+    )
+  endif()
 endif()
 
 ament_export_include_directories(include)

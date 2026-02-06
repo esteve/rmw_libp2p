@@ -16,8 +16,7 @@
 
 #include "type_support_common.hpp"
 
-const void *
-get_request_ptr(const void * untyped_service_members, const char * typesupport)
+const void * get_request_ptr(const void * untyped_service_members, const char * typesupport)
 {
   if (using_introspection_c_typesupport(typesupport)) {
     return get_request_ptr<rosidl_typesupport_introspection_c__ServiceMembers>(
@@ -30,8 +29,7 @@ get_request_ptr(const void * untyped_service_members, const char * typesupport)
   return nullptr;
 }
 
-const void *
-get_response_ptr(const void * untyped_service_members, const char * typesupport)
+const void * get_response_ptr(const void * untyped_service_members, const char * typesupport)
 {
   if (using_introspection_c_typesupport(typesupport)) {
     return get_response_ptr<rosidl_typesupport_introspection_c__ServiceMembers>(

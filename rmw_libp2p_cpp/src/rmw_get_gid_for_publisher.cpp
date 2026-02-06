@@ -20,14 +20,11 @@
 #include "impl/custom_publisher_info.hpp"
 #include "impl/identifier.hpp"
 
-extern "C"
-{
-rmw_ret_t
-rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
+extern "C" {
+rmw_ret_t rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
 {
   RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(publisher=%p,gid=%p)", __FUNCTION__, (void *)publisher, (void *)gid);
+    "rmw_libp2p_cpp", "%s(publisher=%p,gid=%p)", __FUNCTION__, (void *)publisher, (void *)gid);
 
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher is null");
@@ -55,8 +52,7 @@ rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
   gid->implementation_identifier = libp2p_identifier;
   static_assert(
     rs_uuid_size <= RMW_GID_STORAGE_SIZE,
-    "RMW_GID_STORAGE_SIZE insufficient to store the rmw_libp2p_cpp GID implementation."
-  );
+    "RMW_GID_STORAGE_SIZE insufficient to store the rmw_libp2p_cpp GID implementation.");
 
   memset(gid->data, 0, RMW_GID_STORAGE_SIZE);
   const size_t ret = rs_libp2p_custom_publisher_get_gid(info->publisher_handle_, gid->data);

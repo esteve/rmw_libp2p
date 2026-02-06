@@ -16,16 +16,14 @@
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
-#include "rmw/rmw.h"
 #include "rmw/impl/cpp/macros.hpp"
+#include "rmw/rmw.h"
 
-#include "impl/identifier.hpp"
 #include "impl/custom_wait_set_info.hpp"
+#include "impl/identifier.hpp"
 
-extern "C"
-{
-rmw_wait_set_t *
-rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
+extern "C" {
+rmw_wait_set_t * rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 {
   (void)context;
   (void)max_conditions;
@@ -41,8 +39,7 @@ rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 
   wait_set_info = static_cast<rmw_libp2p_cpp::CustomWaitsetInfo *>(wait_set->data);
   RMW_TRY_PLACEMENT_NEW(
-    wait_set_info, wait_set_info, goto fail, rmw_libp2p_cpp::CustomWaitsetInfo,
-  )
+    wait_set_info, wait_set_info, goto fail, rmw_libp2p_cpp::CustomWaitsetInfo, )
   if (!wait_set_info) {
     RMW_SET_ERROR_MSG("failed to construct wait set info struct");
     goto fail;
@@ -53,8 +50,7 @@ rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 fail:
   if (wait_set) {
     if (wait_set->data) {
-      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
-        wait_set_info->~CustomWaitsetInfo(), wait_set_info)
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(wait_set_info->~CustomWaitsetInfo(), wait_set_info)
       rmw_free(wait_set->data);
     }
     rmw_wait_set_free(wait_set);
@@ -62,8 +58,7 @@ fail:
   return nullptr;
 }
 
-rmw_ret_t
-rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
+rmw_ret_t rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {
   if (!wait_set) {
     RMW_SET_ERROR_MSG("wait set handle is null");
@@ -71,7 +66,8 @@ rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     wait set handle,
-    wait_set->implementation_identifier, libp2p_identifier,
+    wait_set->implementation_identifier,
+    libp2p_identifier,
     return RMW_RET_ERROR);
 
   auto result = RMW_RET_OK;
@@ -88,8 +84,7 @@ rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 
   if (wait_set->data) {
     if (wait_set_info) {
-      RMW_TRY_DESTRUCTOR(
-        wait_set_info->~CustomWaitsetInfo(), wait_set_info, result = RMW_RET_ERROR)
+      RMW_TRY_DESTRUCTOR(wait_set_info->~CustomWaitsetInfo(), wait_set_info, result = RMW_RET_ERROR)
     }
     rmw_free(wait_set->data);
   }

@@ -17,9 +17,9 @@
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
 #include "rmw/impl/cpp/macros.hpp"
+#include "rmw/rmw.h"
 #include "rmw/types.h"
 #include "rmw/validate_full_topic_name.h"
-#include "rmw/rmw.h"
 
 #include "rcutils/logging_macros.h"
 
@@ -27,25 +27,22 @@
 
 #include "rosidl_typesupport_introspection_c/identifier.h"
 
-#include "impl/identifier.hpp"
 #include "impl/custom_node_info.hpp"
 #include "impl/custom_subscription_info.hpp"
+#include "impl/identifier.hpp"
 #include "impl/listener.hpp"
 
 #include "type_support_common.hpp"
 
 // Create and return an rmw subscriber
-rmw_subscription_t *
-rmw_create_subscription(
+rmw_subscription_t * rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
   const rmw_qos_profile_t * qos_policies,
   const rmw_subscription_options_t * subscription_options)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
 
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -78,8 +75,8 @@ rmw_create_subscription(
     return nullptr;
   }
 
-  const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
-    type_supports, rosidl_typesupport_introspection_c__identifier);
+  const rosidl_message_type_support_t * type_support =
+    get_message_typesupport_handle(type_supports, rosidl_typesupport_introspection_c__identifier);
   if (!type_support) {
     type_support = get_message_typesupport_handle(
       type_supports, rosidl_typesupport_introspection_cpp::typesupport_identifier);
@@ -96,12 +93,10 @@ rmw_create_subscription(
   info->node_ = node;
   info->typesupport_identifier_ = type_support->typesupport_identifier;
 
-  std::string type_name = _create_type_name(
-    type_support->data, info->typesupport_identifier_);
+  std::string type_name = _create_type_name(type_support->data, info->typesupport_identifier_);
   if (!_get_registered_type(node_data->node_handle_, type_name, &info->type_support_)) {
-    info->type_support_ = _create_message_type_support(
-      type_support->data,
-      info->typesupport_identifier_);
+    info->type_support_ =
+      _create_message_type_support(type_support->data, info->typesupport_identifier_);
     _register_type(node_data->node_handle_, info->type_support_, info->typesupport_identifier_);
   }
 
@@ -114,10 +109,8 @@ rmw_create_subscription(
   // TODO(esteve): delete Listener in the destructor
   info->listener_ = new rmw_libp2p_cpp::Listener;
 
-  info->subscription_handle_ =
-    rs_libp2p_custom_subscription_new(
-    node_data->node_handle_, topic_name,
-    info, rmw_libp2p_cpp::Listener::on_publication);
+  info->subscription_handle_ = rs_libp2p_custom_subscription_new(
+    node_data->node_handle_, topic_name, info, rmw_libp2p_cpp::Listener::on_publication);
   if (!info->subscription_handle_) {
     RMW_SET_ERROR_MSG("failed to create libp2p subscription");
     goto fail;
@@ -131,8 +124,7 @@ rmw_create_subscription(
 
   rmw_subscription->implementation_identifier = libp2p_identifier;
   rmw_subscription->data = info;
-  rmw_subscription->topic_name = reinterpret_cast<char *>(
-    rmw_allocate(strlen(topic_name) + 1));
+  rmw_subscription->topic_name = reinterpret_cast<char *>(rmw_allocate(strlen(topic_name) + 1));
   if (!rmw_subscription->topic_name) {
     RMW_SET_ERROR_MSG("failed to allocate memory for subscription topic name");
     goto fail;
@@ -164,14 +156,9 @@ fail:
 }
 
 // Destroy and deallocate an RMW subscription
-rmw_ret_t
-rmw_destroy_subscription(
-  rmw_node_t * node,
-  rmw_subscription_t * subscription)
+rmw_ret_t rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
 
   (void)node;
   (void)subscription;
@@ -180,14 +167,11 @@ rmw_destroy_subscription(
   return RMW_RET_OK;
 }
 
-rmw_ret_t
-rmw_subscription_get_actual_qos(
+rmw_ret_t rmw_subscription_get_actual_qos(
   const rmw_subscription_t * subscription,
   rmw_qos_profile_t * qos)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
 
   (void)subscription;
   (void)qos;

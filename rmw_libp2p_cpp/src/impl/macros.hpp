@@ -20,8 +20,7 @@
 
 #define SPECIALIZE_GENERIC_C_SEQUENCE(C_NAME, C_TYPE) \
   template<> \
-  struct GenericCSequence<C_TYPE> \
-  { \
+  struct GenericCSequence<C_TYPE> { \
     using type = rosidl_runtime_c__ ## C_NAME ## __Sequence; \
  \
     static void fini(type * sequence) { \

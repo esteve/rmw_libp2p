@@ -18,14 +18,10 @@
 
 #include "impl/serialization_format.hpp"
 
-extern "C"
+extern "C" {
+const char * rmw_get_serialization_format()
 {
-const char *
-rmw_get_serialization_format()
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
 
   return libp2p_serialization_format;
 }

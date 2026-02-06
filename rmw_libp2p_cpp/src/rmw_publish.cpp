@@ -24,10 +24,8 @@
 #include "impl/identifier.hpp"
 #include "ros_message_serialization.hpp"
 
-extern "C"
-{
-rmw_ret_t
-rmw_publish(
+extern "C" {
+rmw_ret_t rmw_publish(
   const rmw_publisher_t * publisher,
   const void * ros_message,
   rmw_publisher_allocation_t * allocation)
@@ -35,12 +33,14 @@ rmw_publish(
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(publisher=%p,ros_message=%p,allocation=%p)",
-    __FUNCTION__, (void *)publisher, (void *)ros_message, (void *)allocation);
+    __FUNCTION__,
+    (void *)publisher,
+    (void *)ros_message,
+    (void *)allocation);
 
   rmw_ret_t returned_value = RMW_RET_ERROR;
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(publisher, "publisher pointer is null", return RMW_RET_ERROR);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
-    ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
 
   if (publisher->implementation_identifier != libp2p_identifier) {
     RMW_SET_ERROR_MSG("publisher handle not from this implementation");
@@ -53,8 +53,7 @@ rmw_publish(
   rmw_libp2p_cpp::cdr::WriteCDRBuffer ser;
 
   if (_serialize_ros_message(
-      ros_message, ser, info->type_support_,
-      info->typesupport_identifier_))
+      ros_message, ser, info->type_support_, info->typesupport_identifier_))
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(info->publisher_handle_, ser.data());
     if (status == 0) {  // TODO(esteve): replace with proper error codes
@@ -69,15 +68,14 @@ rmw_publish(
   return returned_value;
 }
 
-rmw_ret_t
-rmw_publish_loaned_message(
+rmw_ret_t rmw_publish_loaned_message(
   const rmw_publisher_t * publisher,
   void * ros_message,
   rmw_publisher_allocation_t * allocation)
 {
-  (void) publisher;
-  (void) ros_message;
-  (void) allocation;
+  (void)publisher;
+  (void)ros_message;
+  (void)allocation;
 
   RMW_SET_ERROR_MSG("rmw_publish_loaned_message not implemented for rmw_libp2p_cpp");
   return RMW_RET_UNSUPPORTED;

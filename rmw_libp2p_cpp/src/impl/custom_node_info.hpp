@@ -20,12 +20,12 @@
 #include <set>
 #include <string>
 
-#include "rmw/rmw.h"
 #include "impl/custom_client_info.hpp"
 #include "impl/custom_publisher_info.hpp"
-#include "impl/custom_subscription_info.hpp"
 #include "impl/custom_service_info.hpp"
+#include "impl/custom_subscription_info.hpp"
 #include "impl/rmw_libp2p_rs.hpp"
+#include "rmw/rmw.h"
 
 namespace rmw_libp2p_cpp
 {

@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "impl/type_support.hpp"
-#include "rosidl_typesupport_introspection_cpp/message_introspection.hpp"
 #include "rosidl_typesupport_introspection_cpp/field_types.hpp"
+#include "rosidl_typesupport_introspection_cpp/message_introspection.hpp"
 
 namespace rmw_libp2p_cpp
 {

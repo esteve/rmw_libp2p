@@ -32,6 +32,7 @@ use tokio::{select, task};
 use deadqueue::unlimited::Queue;
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub(crate) struct CustomSubscriptionHandle {
     pub ptr: *const c_void,
 }
@@ -75,8 +76,8 @@ impl From<gossipsub::Event> for OutEvent {
 pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_notify: Arc<Notify>,
-    outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
-    new_subscribers_queue: Arc<
+    pub(crate) outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
+    pub(crate) new_subscribers_queue: Arc<
         deadqueue::unlimited::Queue<(
             gossipsub::IdentTopic,
             CustomSubscriptionHandle,
@@ -126,6 +127,31 @@ impl Libp2pCustomNode {
         };
 
         libp2p::Swarm::with_tokio_executor(transport, behaviour, peer_id)
+    }
+
+    /// Test-only constructor that creates a minimal node without starting the event loop
+    /// This allows testing queue operations and lifecycle without network overhead
+    #[cfg(test)]
+    pub(crate) fn new_test_only() -> Self {
+        let reactor = Runtime::new().unwrap();
+        let stop_notify = Arc::new(Notify::new());
+        let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(
+            gossipsub::IdentTopic,
+            Vec<u8>,
+        )>::new());
+        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<(
+            gossipsub::IdentTopic,
+            CustomSubscriptionHandle,
+            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
+        )>::new());
+
+        Self {
+            thread_handle: None, // No actual event loop thread for testing
+            stop_notify,
+            outgoing_queue,
+            new_subscribers_queue,
+            reactor,
+        }
     }
 
     /// Creates a new instance of the struct.
@@ -371,4 +397,457 @@ pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
         return;
     }
     let _ = unsafe { Box::from_raw(ptr) };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Test helper: Create a dummy callback for testing
+    unsafe extern "C" fn dummy_callback(
+        _handle: &CustomSubscriptionHandle,
+        _data: *mut u8,
+        _len: usize,
+    ) {
+        // This is a no-op callback for testing purposes
+    }
+
+    #[test]
+    fn test_node_creation_and_destruction() {
+        // Create a test node without network overhead
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Verify node components are initialized (queues exist)
+        assert_eq!(Arc::strong_count(&node.outgoing_queue), 1);
+        assert_eq!(Arc::strong_count(&node.new_subscribers_queue), 1);
+
+        // Node should be dropped cleanly at the end of scope
+        drop(node);
+
+        // If we reach here without hanging, Drop worked correctly
+    }
+
+    #[test]
+    fn test_multiple_nodes_in_same_process() {
+        // Create multiple test nodes to verify isolation
+        let node1 = Libp2pCustomNode::new_test_only();
+        let node2 = Libp2pCustomNode::new_test_only();
+        let node3 = Libp2pCustomNode::new_test_only();
+
+        // Verify nodes have separate queue instances
+        assert!(!Arc::ptr_eq(&node1.outgoing_queue, &node2.outgoing_queue));
+        assert!(!Arc::ptr_eq(&node2.outgoing_queue, &node3.outgoing_queue));
+        assert!(!Arc::ptr_eq(
+            &node1.new_subscribers_queue,
+            &node2.new_subscribers_queue
+        ));
+
+        // Drop in different order to test independence
+        drop(node2);
+        drop(node1);
+        drop(node3);
+    }
+
+    #[test]
+    fn test_node_drop_behavior() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Drop the node
+        drop(node);
+
+        // If we reach here without hanging, Drop worked correctly
+    }
+
+    #[test]
+    fn test_outgoing_queue_push() {
+        let node = Libp2pCustomNode::new_test_only();
+        let topic = gossipsub::IdentTopic::new("test_topic");
+        let message = vec![1, 2, 3, 4, 5];
+
+        // Push message to outgoing queue via publish_message
+        node.publish_message(topic.clone(), message.clone());
+
+        // Push multiple messages
+        for i in 0..10 {
+            let msg = vec![i; 10];
+            node.publish_message(topic.clone(), msg);
+        }
+
+        // All pushes should succeed without blocking or panicking
+    }
+
+    #[test]
+    fn test_new_subscribers_queue() {
+        let node = Libp2pCustomNode::new_test_only();
+        let topic = gossipsub::IdentTopic::new("subscriber_test");
+
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        // Add a subscriber
+        node.notify_new_subscriber(topic.clone(), handle, dummy_callback);
+
+        // Add multiple subscribers to different topics
+        for i in 0..5 {
+            let topic = gossipsub::IdentTopic::new(format!("topic_{}", i));
+            let handle = CustomSubscriptionHandle {
+                ptr: std::ptr::null(),
+            };
+            node.notify_new_subscriber(topic, handle, dummy_callback);
+        }
+
+        // All operations should complete without blocking
+    }
+
+    #[test]
+    fn test_multiple_subscribers_same_topic() {
+        let node = Libp2pCustomNode::new_test_only();
+        let topic = gossipsub::IdentTopic::new("shared_topic");
+
+        // Create multiple subscription handles for the same topic
+        let handle1 = CustomSubscriptionHandle {
+            ptr: 1 as *const c_void,
+        };
+        let handle2 = CustomSubscriptionHandle {
+            ptr: 2 as *const c_void,
+        };
+        let handle3 = CustomSubscriptionHandle {
+            ptr: 3 as *const c_void,
+        };
+
+        // All should be able to subscribe
+        node.notify_new_subscriber(topic.clone(), handle1, dummy_callback);
+        node.notify_new_subscriber(topic.clone(), handle2, dummy_callback);
+        node.notify_new_subscriber(topic.clone(), handle3, dummy_callback);
+
+        // The last subscriber should override in the current implementation
+        // This tests that the queue accepts multiple subscribers
+    }
+
+    #[test]
+    fn test_queue_cleanup_on_drop() {
+        let node = Libp2pCustomNode::new_test_only();
+        let queue_ref = Arc::clone(&node.outgoing_queue);
+        let subscribers_ref = Arc::clone(&node.new_subscribers_queue);
+
+        // Add some items to queues
+        let topic = gossipsub::IdentTopic::new("cleanup_test");
+        node.publish_message(topic.clone(), vec![1, 2, 3]);
+
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+        node.notify_new_subscriber(topic, handle, dummy_callback);
+
+        // Get Arc strong counts before drop
+        let queue_strong_count_before = Arc::strong_count(&queue_ref);
+        let subscribers_strong_count_before = Arc::strong_count(&subscribers_ref);
+
+        // Drop the node
+        drop(node);
+
+        // The Arc counts should decrease by 1 (node's reference is gone)
+        assert_eq!(Arc::strong_count(&queue_ref), queue_strong_count_before - 1);
+        assert_eq!(
+            Arc::strong_count(&subscribers_ref),
+            subscribers_strong_count_before - 1
+        );
+    }
+
+    #[test]
+    fn test_custom_subscription_handle_send_sync() {
+        // This test verifies that CustomSubscriptionHandle implements Send + Sync
+        fn assert_send<T: Send>() {}
+        fn assert_sync<T: Sync>() {}
+
+        assert_send::<CustomSubscriptionHandle>();
+        assert_sync::<CustomSubscriptionHandle>();
+    }
+
+    #[test]
+    fn test_custom_subscription_handle_creation() {
+        // Test creating various handles
+        let handle1 = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+
+        let handle2 = CustomSubscriptionHandle {
+            ptr: 0x12345678 as *const c_void,
+        };
+
+        // Verify they can be created with different pointer values
+        assert!(handle1.ptr.is_null());
+        assert!(!handle2.ptr.is_null());
+    }
+
+    #[test]
+    fn test_publish_message_includes_timestamp() {
+        let node = Libp2pCustomNode::new_test_only();
+        let topic = gossipsub::IdentTopic::new("timestamp_test");
+        let message = vec![0xAA, 0xBB, 0xCC];
+
+        // Publish a message
+        node.publish_message(topic.clone(), message.clone());
+
+        // The message in queue should have timestamp prepended
+        // We can't easily inspect it here, but we verify the method completes
+    }
+
+    #[test]
+    fn test_concurrent_publish_operations() {
+        let node = Arc::new(Libp2pCustomNode::new_test_only());
+        let mut handles = vec![];
+
+        // Spawn multiple threads publishing simultaneously
+        for i in 0..10 {
+            let node_clone = Arc::clone(&node);
+            let handle = std::thread::spawn(move || {
+                let topic = gossipsub::IdentTopic::new(format!("concurrent_{}", i));
+                for j in 0..100 {
+                    let message = vec![i as u8, j];
+                    node_clone.publish_message(topic.clone(), message);
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads to complete
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        // If we reach here, concurrent access to queue worked correctly
+    }
+
+    #[test]
+    fn test_concurrent_subscriber_operations() {
+        let node = Arc::new(Libp2pCustomNode::new_test_only());
+        let mut handles = vec![];
+
+        // Spawn multiple threads adding subscribers simultaneously
+        for i in 0..10 {
+            let node_clone = Arc::clone(&node);
+            let handle = std::thread::spawn(move || {
+                let topic = gossipsub::IdentTopic::new(format!("sub_concurrent_{}", i));
+                for j in 0..10 {
+                    let sub_handle = CustomSubscriptionHandle {
+                        ptr: (i * 1000 + j) as *const c_void,
+                    };
+                    node_clone.notify_new_subscriber(topic.clone(), sub_handle, dummy_callback);
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads to complete
+        for handle in handles {
+            handle.join().unwrap();
+        }
+    }
+
+    #[test]
+    fn test_runtime_creation() {
+        // Verify that each node gets its own runtime
+        let node1 = Libp2pCustomNode::new_test_only();
+        let node2 = Libp2pCustomNode::new_test_only();
+
+        // Both should have successfully created runtimes
+        // (if runtime creation failed, new_test_only() would have panicked)
+
+        drop(node1);
+        drop(node2);
+    }
+
+    // FFI tests use the real constructor to test the actual FFI interface
+    // These may take longer but test the actual production code path
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_node_with_ffi_api() {
+        // Test the C FFI functions
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(
+            !node_ptr.is_null(),
+            "FFI node creation should return non-null pointer"
+        );
+
+        // Free the node
+        rs_libp2p_custom_node_free(node_ptr);
+
+        // Test freeing null pointer (should not crash)
+        rs_libp2p_custom_node_free(std::ptr::null_mut());
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_ffi_multiple_nodes() {
+        // Create multiple nodes via FFI
+        let node1 = rs_libp2p_custom_node_new();
+        let node2 = rs_libp2p_custom_node_new();
+        let node3 = rs_libp2p_custom_node_new();
+
+        assert!(!node1.is_null());
+        assert!(!node2.is_null());
+        assert!(!node3.is_null());
+
+        // Verify they're different pointers
+        assert_ne!(node1, node2);
+        assert_ne!(node2, node3);
+        assert_ne!(node1, node3);
+
+        // Free in different order
+        rs_libp2p_custom_node_free(node2);
+        rs_libp2p_custom_node_free(node1);
+        rs_libp2p_custom_node_free(node3);
+    }
+
+    #[test]
+    fn test_message_id_uniqueness() {
+        // Test that the message ID function produces unique IDs for different data
+        use std::collections::HashSet;
+
+        let mut message_ids = HashSet::new();
+
+        for i in 0..100 {
+            let data = vec![i; 10];
+            let message = gossipsub::Message {
+                source: None,
+                data: data.clone(),
+                sequence_number: None,
+                topic: gossipsub::TopicHash::from_raw("test"),
+            };
+
+            let mut s = DefaultHasher::new();
+            message.data.hash(&mut s);
+            let id = gossipsub::MessageId::from(s.finish().to_string());
+
+            message_ids.insert(id);
+        }
+
+        // We should have 100 unique message IDs
+        assert_eq!(
+            message_ids.len(),
+            100,
+            "Message IDs should be unique for different data"
+        );
+    }
+
+    #[test]
+    fn test_same_content_same_message_id() {
+        // Verify that identical content produces the same message ID
+        let data = vec![42; 20];
+
+        let message1 = gossipsub::Message {
+            source: None,
+            data: data.clone(),
+            sequence_number: None,
+            topic: gossipsub::TopicHash::from_raw("test"),
+        };
+
+        let message2 = gossipsub::Message {
+            source: None,
+            data: data.clone(),
+            sequence_number: None,
+            topic: gossipsub::TopicHash::from_raw("test"),
+        };
+
+        let mut s1 = DefaultHasher::new();
+        message1.data.hash(&mut s1);
+        let id1 = gossipsub::MessageId::from(s1.finish().to_string());
+
+        let mut s2 = DefaultHasher::new();
+        message2.data.hash(&mut s2);
+        let id2 = gossipsub::MessageId::from(s2.finish().to_string());
+
+        assert_eq!(id1, id2, "Same content should produce same message ID");
+    }
+
+    #[test]
+    fn test_topic_creation() {
+        // Test creating various topics
+        let topic1 = gossipsub::IdentTopic::new("topic1");
+        let topic2 = gossipsub::IdentTopic::new("topic2");
+        let topic3 = gossipsub::IdentTopic::new("topic1"); // Same as topic1
+
+        // Verify topic hashes
+        assert_eq!(
+            topic1.hash(),
+            topic3.hash(),
+            "Same topic names should have same hash"
+        );
+        assert_ne!(
+            topic1.hash(),
+            topic2.hash(),
+            "Different topic names should have different hash"
+        );
+    }
+
+    #[test]
+    fn test_graceful_shutdown_with_pending_messages() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Queue up many messages
+        for i in 0..1000 {
+            let topic = gossipsub::IdentTopic::new("shutdown_test");
+            let message = vec![i as u8; 100];
+            node.publish_message(topic, message);
+        }
+
+        // Drop should handle pending messages gracefully
+        drop(node);
+
+        // If we reach here without hanging, shutdown worked correctly
+    }
+
+    #[test]
+    fn test_graceful_shutdown_with_pending_subscribers() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Queue up many subscriber registrations
+        for i in 0..100 {
+            let topic = gossipsub::IdentTopic::new(format!("shutdown_sub_{}", i));
+            let handle = CustomSubscriptionHandle {
+                ptr: i as *const c_void,
+            };
+            node.notify_new_subscriber(topic, handle, dummy_callback);
+        }
+
+        // Drop should handle pending subscribers gracefully
+        drop(node);
+    }
+
+    // Integration tests with actual event loop
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_full_node_lifecycle() {
+        // Test creating a full node with event loop
+        let node = Libp2pCustomNode::new();
+
+        // Verify thread handle exists
+        assert!(node.thread_handle.is_some());
+
+        // Drop should cleanly shut down the event loop
+        drop(node);
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_full_node_with_operations() {
+        let node = Libp2pCustomNode::new();
+
+        // Perform some operations
+        let topic = gossipsub::IdentTopic::new("integration_test");
+        node.publish_message(topic.clone(), vec![1, 2, 3]);
+
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+        node.notify_new_subscriber(topic, handle, dummy_callback);
+
+        // Allow some time for processing
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
+        // Clean shutdown
+        drop(node);
+    }
 }

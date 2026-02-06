@@ -45,9 +45,9 @@ public:
   {
   }
 
-  static void
-  on_publication(
-    const CustomSubscriptionHandle * subscription_handle, uint8_t * message,
+  static void on_publication(
+    const CustomSubscriptionHandle * subscription_handle,
+    uint8_t * message,
     uintptr_t length)
   {
     CustomSubscriptionInfo * subscription_impl =
@@ -70,30 +70,28 @@ public:
     }
   }
 
-  void
-  attach_condition(std::mutex * condition_mutex, std::condition_variable * condition_variable)
+  void attach_condition(
+    std::mutex * condition_mutex,
+    std::condition_variable * condition_variable)
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     condition_mutex_ = condition_mutex;
     condition_variable_ = condition_variable;
   }
 
-  void
-  detach_condition()
+  void detach_condition()
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     condition_mutex_ = nullptr;
     condition_variable_ = nullptr;
   }
 
-  bool
-  has_data()
+  bool has_data()
   {
     return message_queue_.size() > 0;
   }
 
-  bool
-  take_next_data(uint8_t ** message, uintptr_t & length)
+  bool take_next_data(uint8_t ** message, uintptr_t & length)
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     if (message_queue_.empty()) {

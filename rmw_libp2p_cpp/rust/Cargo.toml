@@ -47,5 +47,13 @@ features = [
     "yamux",
 ]
 
+[dev-dependencies]
+proptest = "1.4"
+
+[profile.test]
+# Optimize tests for faster execution while keeping debug info
+opt-level = 1
+debug = true
+
 [lib]
 crate-type=["staticlib"]

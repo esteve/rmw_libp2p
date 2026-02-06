@@ -22,69 +22,68 @@
 
 #include "type_support_common.hpp"
 
-bool
-using_introspection_c_typesupport(const char * typesupport_identifier)
+bool using_introspection_c_typesupport(const char * typesupport_identifier)
 {
   return typesupport_identifier == rosidl_typesupport_introspection_c__identifier;
 }
 
-bool
-using_introspection_cpp_typesupport(const char * typesupport_identifier)
+bool using_introspection_cpp_typesupport(const char * typesupport_identifier)
 {
-  return typesupport_identifier ==
-         rosidl_typesupport_introspection_cpp::typesupport_identifier;
+  return typesupport_identifier == rosidl_typesupport_introspection_cpp::typesupport_identifier;
 }
 
-void *
-_create_message_type_support(const void * untyped_members, const char * typesupport_identifier)
+void * _create_message_type_support(
+  const void * untyped_members,
+  const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_c__MessageMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_c__MessageMembers *>(untyped_members);
     return new MessageTypeSupport_c(members);
   } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_cpp::MessageMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_cpp::MessageMembers *>(untyped_members);
     return new MessageTypeSupport_cpp(members);
   }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return nullptr;
 }
 
-void *
-_create_request_type_support(const void * untyped_members, const char * typesupport_identifier)
+void * _create_request_type_support(
+  const void * untyped_members,
+  const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_c__ServiceMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_c__ServiceMembers *>(untyped_members);
     return new RequestTypeSupport_c(members);
   } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_cpp::ServiceMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_cpp::ServiceMembers *>(untyped_members);
     return new RequestTypeSupport_cpp(members);
   }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return nullptr;
 }
 
-void *
-_create_response_type_support(const void * untyped_members, const char * typesupport_identifier)
+void * _create_response_type_support(
+  const void * untyped_members,
+  const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_c__ServiceMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_c__ServiceMembers *>(untyped_members);
     return new ResponseTypeSupport_c(members);
   } else if (using_introspection_cpp_typesupport(typesupport_identifier)) {
-    auto members = static_cast<const rosidl_typesupport_introspection_cpp::ServiceMembers *>(
-      untyped_members);
+    auto members =
+      static_cast<const rosidl_typesupport_introspection_cpp::ServiceMembers *>(untyped_members);
     return new ResponseTypeSupport_cpp(members);
   }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return nullptr;
 }
 
-void
-_register_type(
+void _register_type(
   rs_libp2p_custom_node_t * node,
   void * untyped_typesupport,
   const char * typesupport_identifier)
@@ -101,8 +100,7 @@ _register_type(
   }
 }
 
-void
-_unregister_type(
+void _unregister_type(
   rs_libp2p_custom_node_t * node,
   void * untyped_typesupport,
   const char * typesupport_identifier)
@@ -124,8 +122,7 @@ _unregister_type(
   }
 }
 
-bool
-_get_registered_type(
+bool _get_registered_type(
   rs_libp2p_custom_node_t * node,
   const std::string & type_name,
   void ** untyped_typesupport)
@@ -137,8 +134,7 @@ _get_registered_type(
   return false;
 }
 
-void
-_delete_typesupport(void * untyped_typesupport, const char * typesupport_identifier)
+void _delete_typesupport(void * untyped_typesupport, const char * typesupport_identifier)
 {
   if (using_introspection_c_typesupport(typesupport_identifier)) {
     auto typed_typesupport = static_cast<MessageTypeSupport_c *>(untyped_typesupport);

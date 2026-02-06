@@ -26,33 +26,23 @@
 #include "rmw/validate_namespace.h"
 #include "rmw/validate_node_name.h"
 
-#include "impl/identifier.hpp"
 #include "impl/custom_node_info.hpp"
+#include "impl/identifier.hpp"
 #include "impl/rmw_libp2p_rs.hpp"
 
-extern "C"
-{
+extern "C" {
 // Create a node and return a handle to that node.
 //
 // rmw_node_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__node__t.html
-rmw_node_t *
-rmw_create_node(
-  rmw_context_t * context,
-  const char * name,
-  const char * namespace_)
+rmw_node_t * rmw_create_node(rmw_context_t * context, const char * name, const char * namespace_)
 {
   RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(name=%s,namespace_=%s)",
-    __FUNCTION__, name, namespace_);
+    "rmw_libp2p_cpp", "%s(name=%s,namespace_=%s)", __FUNCTION__, name, namespace_);
 
   // ASSERTIONS ================================================================
   RMW_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    context,
-    context->implementation_identifier,
-    libp2p_identifier,
-    return nullptr);
+    context, context->implementation_identifier, libp2p_identifier, return nullptr);
   RMW_CHECK_FOR_NULL_WITH_MSG(context->impl, "expected initialized context", return nullptr);
   RMW_CHECK_FOR_NULL_WITH_MSG(name, "name is null", return nullptr);
   RMW_CHECK_FOR_NULL_WITH_MSG(namespace_, "namespace is null", return nullptr);
@@ -73,8 +63,7 @@ rmw_create_node(
   }
   node_handle->implementation_identifier = libp2p_identifier;
 
-  node_handle->name =
-    static_cast<const char *>(rmw_allocate(sizeof(char) * strlen(name) + 1));
+  node_handle->name = static_cast<const char *>(rmw_allocate(sizeof(char) * strlen(name) + 1));
   if (!node_handle->name) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
@@ -116,21 +105,15 @@ rmw_create_node(
 fail:
   rmw_ret_t ret = rmw_destroy_node(node_handle);
   if (ret != RMW_RET_OK) {
-    RCUTILS_LOG_ERROR_NAMED(
-      "rmw_libp2p_cpp",
-      "failed to destroy node during error handling");
+    RCUTILS_LOG_ERROR_NAMED("rmw_libp2p_cpp", "failed to destroy node during error handling");
   }
   return nullptr;
 }
 
 // Finalize a given node handle, reclaim the resources, and deallocate the node handle.
-rmw_ret_t
-rmw_destroy_node(
-  rmw_node_t * node)
+rmw_ret_t rmw_destroy_node(rmw_node_t * node)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(node=%p)", __FUNCTION__, (void *)node);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s(node=%p)", __FUNCTION__, (void *)node);
 
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -150,9 +133,7 @@ rmw_destroy_node(
     if (impl->graph_guard_condition_) {
       rmw_ret_t ret = rmw_destroy_guard_condition(impl->graph_guard_condition_);
       if (ret != RMW_RET_OK) {
-        RCUTILS_LOG_ERROR_NAMED(
-          "rmw_libp2p_cpp",
-          "failed to destroy guard condition");
+        RCUTILS_LOG_ERROR_NAMED("rmw_libp2p_cpp", "failed to destroy guard condition");
       }
     }
     delete impl;
@@ -168,12 +149,9 @@ rmw_destroy_node(
   return RMW_RET_OK;
 }
 
-const rmw_guard_condition_t *
-rmw_node_get_graph_guard_condition(const rmw_node_t * node)
+const rmw_guard_condition_t * rmw_node_get_graph_guard_condition(const rmw_node_t * node)
 {
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(node=%p)", __FUNCTION__, (void *)node);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s(node=%p)", __FUNCTION__, (void *)node);
 
   auto impl = static_cast<rmw_libp2p_cpp::CustomNodeInfo *>(node->data);
   if (!impl) {

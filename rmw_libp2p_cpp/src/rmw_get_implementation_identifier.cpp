@@ -18,14 +18,10 @@
 
 #include "impl/identifier.hpp"
 
-extern "C"
+extern "C" {
+const char * rmw_get_implementation_identifier()
 {
-const char *
-rmw_get_implementation_identifier()
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
 
   return libp2p_identifier;
 }

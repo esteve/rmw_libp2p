@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use core::slice;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::io::Cursor;
 use std::os::raw::c_char;
 
@@ -831,4 +831,85 @@ pub extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8>>, n: 
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
+}
+
+/// Writes a string to a `Cursor<Vec<u8>>`.
+///
+/// This function serializes a string into a `Cursor<Vec<u8>>` using the `cdr::serialize_into` function.
+/// The serialization is done in Big Endian format (`cdr::CdrBe`).
+///
+/// # Safety
+///
+/// This function is unsafe because it uses raw pointers.
+///
+/// # Arguments
+///
+/// * `ptr` - A raw pointer to a `Cursor<Vec<u8>>`.
+/// * `s` - A raw pointer to a C string.
+/// * `size` - The length of the string (excluding null terminator).
+///
+/// # Panics
+///
+/// This function will panic if the provided pointer is null.
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_write_string(
+    ptr: *mut Cursor<Vec<u8>>,
+    s: *const c_char,
+    size: usize,
+) {
+    let libp2p_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    if size == 0 || s.is_null() {
+        // Write empty string
+        let empty = CString::new("").unwrap();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite)
+            .unwrap();
+    } else {
+        let cs = unsafe { CStr::from_ptr(s) };
+        let cstring = CString::new(cs.to_bytes()).unwrap();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &cstring, cdr::Infinite)
+            .unwrap();
+    }
+}
+
+/// Writes a u16 string to a `Cursor<Vec<u8>>`.
+///
+/// This function serializes a u16 string into a `Cursor<Vec<u8>>` using the `cdr::serialize_into` function.
+/// The serialization is done in Big Endian format (`cdr::CdrBe`).
+///
+/// # Safety
+///
+/// This function is unsafe because it uses raw pointers.
+///
+/// # Arguments
+///
+/// * `ptr` - A raw pointer to a `Cursor<Vec<u8>>`.
+/// * `s` - A raw pointer to a u16 array.
+/// * `size` - The number of u16 elements in the string.
+///
+/// # Panics
+///
+/// This function will panic if the provided pointer is null.
+#[no_mangle]
+pub extern "C" fn rs_libp2p_cdr_buffer_write_u16string(
+    ptr: *mut Cursor<Vec<u8>>,
+    s: *const u16,
+    size: usize,
+) {
+    let libp2p_cdr_buffer = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    if size == 0 || s.is_null() {
+        // Write empty u16 string
+        let empty: Vec<u16> = Vec::new();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite)
+            .unwrap();
+    } else {
+        let slice = unsafe { slice::from_raw_parts(s, size) };
+        let vec: Vec<u16> = slice.to_vec();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &vec, cdr::Infinite).unwrap();
+    }
 }

@@ -190,12 +190,14 @@ fail:
     rs_libp2p_custom_subscription_free(info->request_subscription_->subscription_handle_);
   }
   // if (info->request_type_support_handle_) {
-  //   _unregister_type(impl->node_, info->request_type_support_handle_, info->typesupport_identifier_);
+  //   _unregister_type(impl->node_, info->request_type_support_handle_,
+  //                    info->typesupport_identifier_);
   // }
 
   _delete_typesupport(info->response_type_support_, info->typesupport_identifier_);
   // if (info->response_type_support_) {
-  //   _unregister_type(impl->node_, info->response_type_support_handle_, info->typesupport_identifier_);
+  //   _unregister_type(impl->node_, info->response_type_support_handle_,
+  //                    info->typesupport_identifier_);
   // }
   delete info;
 

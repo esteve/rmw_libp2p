@@ -17,13 +17,17 @@
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 
-#include "impl/guard_condition.hpp"
 #include "impl/identifier.hpp"
+#include "impl/guard_condition.hpp"
 
-extern "C" {
-rmw_ret_t rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
+extern "C"
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+rmw_ret_t
+rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition_handle)
+{
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   assert(guard_condition_handle);
 

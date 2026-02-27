@@ -18,14 +18,17 @@
 #include "rmw/rmw.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 typedef struct rs_libp2p_custom_node rs_libp2p_custom_node_t;
 
-extern rs_libp2p_custom_node_t * rs_libp2p_custom_node_new(void);
+extern rs_libp2p_custom_node_t *
+rs_libp2p_custom_node_new(void);
 
-extern void rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
+extern void
+rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
 
 #ifdef __cplusplus
 }

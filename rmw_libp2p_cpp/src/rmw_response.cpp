@@ -18,10 +18,10 @@
 #include "rcutils/logging_macros.h"
 
 #include "impl/cdr_buffer.hpp"
+#include "impl/identifier.hpp"
 #include "impl/custom_client_info.hpp"
 #include "impl/custom_node_info.hpp"
 #include "impl/custom_service_info.hpp"
-#include "impl/identifier.hpp"
 #include "ros_message_serialization.hpp"
 
 extern "C"
@@ -63,14 +63,16 @@ rmw_send_response(
   // Get header
   rmw_gid_t request_guid;
   memset(request_guid.data, 0, RMW_GID_STORAGE_SIZE);
-  const size_t ret = rs_libp2p_custom_publisher_get_gid(pub, request_guid.data);
+  const size_t ret = rs_libp2p_custom_publisher_get_gid(
+    pub, request_guid.data);
   if (ret == 0) {
     RMW_SET_ERROR_MSG("no guid found for publisher");
     return RMW_RET_ERROR;
   }
 
   if (_serialize_ros_message(
-      ros_response, ser, info->response_type_support_, info->typesupport_identifier_))
+      ros_response, ser, info->response_type_support_,
+      info->typesupport_identifier_))
   {
     uint32_t status = rs_libp2p_custom_publisher_publish(pub, ser.data());
     if (status == 0) {
@@ -86,7 +88,8 @@ rmw_send_response(
   return returned_value;
 }
 
-rmw_ret_t rmw_take_response(
+rmw_ret_t
+rmw_take_response(
   const rmw_client_t * client,
   rmw_service_info_t * request_header,
   void * ros_response,
@@ -94,12 +97,8 @@ rmw_ret_t rmw_take_response(
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
-    "%s(client=%p,request_header=%p,ros_request=%p,taken=%p)",
-    __FUNCTION__,
-    (void *)client,
-    (void *)request_header,
-    ros_response,
-    (void *)taken);
+    "%s(client=%p,request_header=%p,ros_request=%p,taken=%p)", __FUNCTION__, (void *)client,
+    (void *)request_header, ros_response, (void *)taken);
 
   assert(client);
   assert(request_header);
@@ -138,9 +137,7 @@ rmw_ret_t rmw_take_response(
     buffer >> request_header->request_id.sequence_number;
 
     _deserialize_ros_message(
-      buffer,
-      ros_response,
-      info->response_subscription_->type_support_,
+      buffer, ros_response, info->response_subscription_->type_support_,
       info->typesupport_identifier_);
 
     *taken = true;

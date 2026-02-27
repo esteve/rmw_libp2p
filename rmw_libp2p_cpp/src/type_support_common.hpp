@@ -34,26 +34,34 @@ using TypeSupport_c =
 using TypeSupport_cpp =
   rmw_libp2p_cpp::TypeSupport<rosidl_typesupport_introspection_cpp::MessageMembers>;
 
-using RequestTypeSupport_c =
-  rmw_libp2p_cpp::RequestTypeSupport<rosidl_typesupport_introspection_c__ServiceMembers,
-    rosidl_typesupport_introspection_c__MessageMembers>;
-using RequestTypeSupport_cpp =
-  rmw_libp2p_cpp::RequestTypeSupport<rosidl_typesupport_introspection_cpp::ServiceMembers,
-    rosidl_typesupport_introspection_cpp::MessageMembers>;
+using RequestTypeSupport_c = rmw_libp2p_cpp::RequestTypeSupport<
+  rosidl_typesupport_introspection_c__ServiceMembers,
+  rosidl_typesupport_introspection_c__MessageMembers
+>;
+using RequestTypeSupport_cpp = rmw_libp2p_cpp::RequestTypeSupport<
+  rosidl_typesupport_introspection_cpp::ServiceMembers,
+  rosidl_typesupport_introspection_cpp::MessageMembers
+>;
 
-using ResponseTypeSupport_c =
-  rmw_libp2p_cpp::ResponseTypeSupport<rosidl_typesupport_introspection_c__ServiceMembers,
-    rosidl_typesupport_introspection_c__MessageMembers>;
-using ResponseTypeSupport_cpp =
-  rmw_libp2p_cpp::ResponseTypeSupport<rosidl_typesupport_introspection_cpp::ServiceMembers,
-    rosidl_typesupport_introspection_cpp::MessageMembers>;
+using ResponseTypeSupport_c = rmw_libp2p_cpp::ResponseTypeSupport<
+  rosidl_typesupport_introspection_c__ServiceMembers,
+  rosidl_typesupport_introspection_c__MessageMembers
+>;
+using ResponseTypeSupport_cpp = rmw_libp2p_cpp::ResponseTypeSupport<
+  rosidl_typesupport_introspection_cpp::ServiceMembers,
+  rosidl_typesupport_introspection_cpp::MessageMembers
+>;
 
-bool using_introspection_c_typesupport(const char * typesupport_identifier);
+bool
+using_introspection_c_typesupport(const char * typesupport_identifier);
 
-bool using_introspection_cpp_typesupport(const char * typesupport_identifier);
+bool
+using_introspection_cpp_typesupport(const char * typesupport_identifier);
 
 template<typename MembersType>
-ROSIDL_TYPESUPPORT_INTROSPECTION_CPP_LOCAL inline std::string _create_type_name(
+ROSIDL_TYPESUPPORT_INTROSPECTION_CPP_LOCAL
+inline std::string
+_create_type_name(
   const void * untyped_members)
 {
   auto members = static_cast<const MembersType *>(untyped_members);
@@ -73,44 +81,50 @@ ROSIDL_TYPESUPPORT_INTROSPECTION_CPP_LOCAL inline std::string _create_type_name(
 }
 
 ROSIDL_TYPESUPPORT_INTROSPECTION_CPP_LOCAL
-inline std::string _create_type_name(const void * untyped_members, const char * typesupport)
+inline std::string
+_create_type_name(
+  const void * untyped_members,
+  const char * typesupport)
 {
   if (using_introspection_c_typesupport(typesupport)) {
-    return _create_type_name<rosidl_typesupport_introspection_c__MessageMembers>(untyped_members);
+    return _create_type_name<rosidl_typesupport_introspection_c__MessageMembers>(
+      untyped_members);
   } else if (using_introspection_cpp_typesupport(typesupport)) {
-    return _create_type_name<rosidl_typesupport_introspection_cpp::MessageMembers>(untyped_members);
+    return _create_type_name<rosidl_typesupport_introspection_cpp::MessageMembers>(
+      untyped_members);
   }
   RMW_SET_ERROR_MSG("Unknown typesupport identifier");
   return "";
 }
 
-void * _create_message_type_support(
-  const void * untyped_members,
-  const char * typesupport_identifier);
+void *
+_create_message_type_support(const void * untyped_members, const char * typesupport_identifier);
 
-void * _create_request_type_support(
-  const void * untyped_members,
-  const char * typesupport_identifier);
+void *
+_create_request_type_support(const void * untyped_members, const char * typesupport_identifier);
 
-void * _create_response_type_support(
-  const void * untyped_members,
-  const char * typesupport_identifier);
+void *
+_create_response_type_support(const void * untyped_members, const char * typesupport_identifier);
 
-void _register_type(
+void
+_register_type(
   rs_libp2p_custom_node_t * node,
   void * untyped_typesupport,
   const char * typesupport_identifier);
 
-void _unregister_type(
+void
+_unregister_type(
   rs_libp2p_custom_node_t * node,
   void * untyped_typesupport,
   const char * typesupport_identifier);
 
-bool _get_registered_type(
+bool
+_get_registered_type(
   rs_libp2p_custom_node_t * node,
   const std::string & type_name,
   void ** untyped_typesupport);
 
-void _delete_typesupport(void * untyped_typesupport, const char * typesupport_identifier);
+void
+_delete_typesupport(void * untyped_typesupport, const char * typesupport_identifier);
 
 #endif  // TYPE_SUPPORT_COMMON_HPP_

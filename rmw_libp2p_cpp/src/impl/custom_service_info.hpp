@@ -18,12 +18,13 @@
 #include <map>
 #include <string>
 
-#include "impl/custom_subscription_info.hpp"
+#include "rmw/rmw.h"
 #include "impl/listener.hpp"
 #include "impl/rmw_libp2p_rs.hpp"
-#include "rmw/rmw.h"
+#include "impl/custom_subscription_info.hpp"
 
-inline bool operator<(const rmw_request_id_t & lhs, const rmw_request_id_t & rhs)
+inline bool
+operator<(const rmw_request_id_t & lhs, const rmw_request_id_t & rhs)
 {
   return memcmp(&lhs, &rhs, sizeof(rmw_request_id_t)) < 0;
 }

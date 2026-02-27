@@ -19,7 +19,8 @@
 
 #include "impl/cdr_buffer.hpp"
 
-bool _serialize_ros_message(
+bool
+_serialize_ros_message(
   const void * ros_message,
   rmw_libp2p_cpp::cdr::WriteCDRBuffer & ser,
   void * untyped_typesupport,
@@ -36,7 +37,8 @@ bool _serialize_ros_message(
   return false;
 }
 
-bool _deserialize_ros_message(
+bool
+_deserialize_ros_message(
   rmw_libp2p_cpp::cdr::ReadCDRBuffer & deser,
   void * ros_message,
   void * untyped_typesupport,

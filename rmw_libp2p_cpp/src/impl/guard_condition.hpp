@@ -28,11 +28,11 @@ class GuardCondition
 {
 public:
   GuardCondition()
-  : has_triggered_(false), condition_mutex_(nullptr), condition_variable_(nullptr)
-  {
-  }
+  : has_triggered_(false),
+    condition_mutex_(nullptr), condition_variable_(nullptr) {}
 
-  void trigger()
+  void
+  trigger()
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
 
@@ -46,26 +46,30 @@ public:
     }
   }
 
-  void attachCondition(std::mutex * condition_mutex, std::condition_variable * conditionVariable)
+  void
+  attachCondition(std::mutex * condition_mutex, std::condition_variable * conditionVariable)
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     condition_mutex_ = condition_mutex;
     condition_variable_ = conditionVariable;
   }
 
-  void detachCondition()
+  void
+  detachCondition()
   {
     std::lock_guard<std::mutex> lock(internal_mutex_);
     condition_mutex_ = nullptr;
     condition_variable_ = nullptr;
   }
 
-  bool hasTriggered()
+  bool
+  hasTriggered()
   {
     return has_triggered_;
   }
 
-  bool getHasTriggered()
+  bool
+  getHasTriggered()
   {
     return has_triggered_.exchange(false);
   }

@@ -25,7 +25,8 @@
 
 #include "impl/rmw_libp2p_rs.hpp"
 
-extern "C" {
+extern "C"
+{
 // Initialize given init_options with the default values
 // and implementation specific values.
 //
@@ -33,9 +34,14 @@ extern "C" {
 //
 // Note: You should call rmw_get_zero_initialized_init_options()
 // to get a zero initialized rmw_init_options_t struct first
-rmw_ret_t rmw_init_options_init(rmw_init_options_t * init_options, rcutils_allocator_t allocator)
+rmw_ret_t
+rmw_init_options_init(
+  rmw_init_options_t * init_options,
+  rcutils_allocator_t allocator)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(init_options, RMW_RET_INVALID_ARGUMENT);
   RCUTILS_CHECK_ALLOCATOR(&allocator, return RMW_RET_INVALID_ARGUMENT);
@@ -55,9 +61,14 @@ rmw_ret_t rmw_init_options_init(rmw_init_options_t * init_options, rcutils_alloc
 }
 
 // Copy the given source init options to the destination init options.
-rmw_ret_t rmw_init_options_copy(const rmw_init_options_t * src, rmw_init_options_t * dst)
+rmw_ret_t
+rmw_init_options_copy(
+  const rmw_init_options_t * src,
+  rmw_init_options_t * dst)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(src, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(dst, RMW_RET_INVALID_ARGUMENT);
@@ -94,9 +105,13 @@ rmw_ret_t rmw_init_options_copy(const rmw_init_options_t * src, rmw_init_options
 }
 
 // Finalize the given init_options. (Cleanup and deallocation.)
-rmw_ret_t rmw_init_options_fini(rmw_init_options_t * init_options)
+rmw_ret_t
+rmw_init_options_fini(
+  rmw_init_options_t * init_options)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(init_options, RMW_RET_INVALID_ARGUMENT);
   RCUTILS_CHECK_ALLOCATOR(&(init_options->allocator), return RMW_RET_INVALID_ARGUMENT);
@@ -112,9 +127,14 @@ rmw_ret_t rmw_init_options_fini(rmw_init_options_t * init_options)
 // Initialize the middleware with the given options, and yielding an context.
 //
 // rmw_context_t Doc: http://docs.ros2.org/latest/api/rmw/structrmw__context__t.html
-rmw_ret_t rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
+rmw_ret_t
+rmw_init(
+  const rmw_init_options_t * options,
+  rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(options, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
@@ -123,7 +143,9 @@ rmw_ret_t rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
     "init option is not initialized",
     return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_FOR_NULL_WITH_MSG(
-    options->enclave, "init options encalve is null", return RMW_RET_INVALID_ARGUMENT);
+    options->enclave,
+    "init options encalve is null",
+    return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     options,
     options->implementation_identifier,
@@ -135,8 +157,8 @@ rmw_ret_t rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
     return RMW_RET_INVALID_ARGUMENT;
   }
 
-  auto restore_context =
-    rcpputils::make_scope_exit([context]() {*context = rmw_get_zero_initialized_context();});
+  auto restore_context = rcpputils::make_scope_exit(
+    [context]() {*context = rmw_get_zero_initialized_context();});
 
   context->instance_id = options->instance_id;
   context->implementation_identifier = libp2p_identifier;
@@ -149,7 +171,8 @@ rmw_ret_t rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
     return RMW_RET_BAD_ALLOC;
   }
 
-  auto cleanup_impl = rcpputils::make_scope_exit([context]() {delete context->impl;});
+  auto cleanup_impl = rcpputils::make_scope_exit(
+    [context]() {delete context->impl;});
 
   // context->impl->rs_event_loop_thread = rs_rmw_init();
   context->options = rmw_get_zero_initialized_init_options();
@@ -169,13 +192,19 @@ rmw_ret_t rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
 }
 
 // Shutdown the middleware for a given context.
-rmw_ret_t rmw_shutdown(rmw_context_t * context)
+rmw_ret_t
+rmw_shutdown(
+  rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_FOR_NULL_WITH_MSG(
-    context->impl, "expected initialized context", return RMW_RET_INVALID_ARGUMENT);
+    context->impl,
+    "expected initialized context",
+    return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     context,
     context->implementation_identifier,
@@ -187,13 +216,19 @@ rmw_ret_t rmw_shutdown(rmw_context_t * context)
 }
 
 // Finalize a context. (Cleanup and deallocation)
-rmw_ret_t rmw_context_fini(rmw_context_t * context)
+rmw_ret_t
+rmw_context_fini(
+  rmw_context_t * context)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   RMW_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_FOR_NULL_WITH_MSG(
-    context->impl, "expected initialized context", return RMW_RET_INVALID_ARGUMENT);
+    context->impl,
+    "expected initialized context",
+    return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     context,
     context->implementation_identifier,

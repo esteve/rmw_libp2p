@@ -25,7 +25,8 @@ namespace rmw_libp2p_cpp
 {
 
 template<typename MembersType>
-ServiceTypeSupport<MembersType>::ServiceTypeSupport(const MembersType * members)
+ServiceTypeSupport<MembersType>::ServiceTypeSupport(
+  const MembersType * members)
 : TypeSupport<MembersType>(members)
 {
 }

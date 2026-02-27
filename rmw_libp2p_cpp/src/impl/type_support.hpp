@@ -57,11 +57,15 @@ struct StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
   {
     auto c_string = static_cast<rosidl_runtime_c__String *>(data);
     if (!c_string) {
-      RCUTILS_LOG_ERROR_NAMED("rmw_libp2p_cpp", "Failed to cast data as rosidl_runtime_c__String");
+      RCUTILS_LOG_ERROR_NAMED(
+        "rmw_libp2p_cpp",
+        "Failed to cast data as rosidl_runtime_c__String");
       return "";
     }
     if (!c_string->data) {
-      RCUTILS_LOG_ERROR_NAMED("rmw_libp2p_cpp", "rosidl_runtime_c_String had invalid data");
+      RCUTILS_LOG_ERROR_NAMED(
+        "rmw_libp2p_cpp",
+        "rosidl_runtime_c_String had invalid data");
       return "";
     }
     return std::string(c_string->data);
@@ -96,7 +100,7 @@ struct StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
   {
     std::string & str = *(std::string *)field;
     if (call_new) {
-      new (&str) std::string;
+      new(&str) std::string;
     }
     deser >> str;
   }
@@ -122,7 +126,9 @@ struct U16StringHelper<rosidl_typesupport_introspection_c__MessageMembers>
       return u"";
     }
     if (!c_u16string->data) {
-      RCUTILS_LOG_ERROR_NAMED("rmw_libp2p_cpp", "rosidl_runtime_c_U16String had invalid data");
+      RCUTILS_LOG_ERROR_NAMED(
+        "rmw_libp2p_cpp",
+        "rosidl_runtime_c_U16String had invalid data");
       return u"";
     }
     return std::u16string(reinterpret_cast<char16_t *>(c_u16string->data));
@@ -157,7 +163,7 @@ struct U16StringHelper<rosidl_typesupport_introspection_cpp::MessageMembers>
   {
     std::u16string & str = *(std::u16string *)field;
     if (call_new) {
-      new (&str) std::u16string;
+      new(&str) std::u16string;
     }
     deser >> str;
   }
@@ -178,14 +184,10 @@ protected:
 
 private:
   bool serializeROSmessage(
-    cdr::WriteCDRBuffer & ser,
-    const MembersType * members,
-    const void * ros_message);
+    cdr::WriteCDRBuffer & ser, const MembersType * members, const void * ros_message);
 
   bool deserializeROSmessage(
-    cdr::ReadCDRBuffer & deser,
-    const MembersType * members,
-    void * ros_message,
+    cdr::ReadCDRBuffer & deser, const MembersType * members, void * ros_message,
     bool call_new);
 };
 

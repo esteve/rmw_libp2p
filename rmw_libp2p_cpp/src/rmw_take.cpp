@@ -18,12 +18,13 @@
 #include "rcutils/logging_macros.h"
 
 #include "impl/cdr_buffer.hpp"
-#include "impl/custom_subscription_info.hpp"
 #include "impl/identifier.hpp"
+#include "impl/custom_subscription_info.hpp"
 #include "impl/listener.hpp"
 #include "ros_message_serialization.hpp"
 
-rmw_ret_t _take(
+rmw_ret_t
+_take(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
@@ -68,14 +69,16 @@ rmw_ret_t _take(
     buffer >> message_info->publication_sequence_number;
 
     _deserialize_ros_message(
-      buffer, ros_message, info->type_support_, info->typesupport_identifier_);
+      buffer, ros_message, info->type_support_,
+      info->typesupport_identifier_);
     *taken = true;
   }
 
   return RMW_RET_OK;
 }
 
-rmw_ret_t rmw_take_with_info(
+rmw_ret_t
+rmw_take_with_info(
   const rmw_subscription_t * subscription,
   void * ros_message,
   bool * taken,
@@ -84,18 +87,15 @@ rmw_ret_t rmw_take_with_info(
 {
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
-    "%s(subscription=%p,ros_message=%p,taken=%p,message_info=%p,allocation=%p)",
-    __FUNCTION__,
-    (void *)subscription,
-    ros_message,
-    (void *)taken,
-    (void *)message_info,
-    (void *)allocation);
+    "%s(subscription=%p,ros_message=%p,taken=%p,message_info=%p,allocation=%p)", __FUNCTION__,
+    (void *)subscription, ros_message, (void *)taken, (void *)message_info, (void *)allocation);
 
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(
     subscription, "subscription pointer is null", return RMW_RET_ERROR);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(taken, "boolean flag for taken is null", return RMW_RET_ERROR);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
+    ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
+  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
+    taken, "boolean flag for taken is null", return RMW_RET_ERROR);
   RCUTILS_CHECK_FOR_NULL_WITH_MSG(
     message_info, "message info pointer is null", return RMW_RET_ERROR);
 

@@ -19,10 +19,10 @@
 
 #include "rmw/rmw.h"
 
+#include "impl/rmw_libp2p_rs.hpp"
 #include "impl/custom_publisher_info.hpp"
 #include "impl/custom_subscription_info.hpp"
 #include "impl/listener.hpp"
-#include "impl/rmw_libp2p_rs.hpp"
 
 namespace rmw_libp2p_cpp
 {

@@ -27,7 +27,8 @@
 #include "impl/listener.hpp"
 
 // helper function for wait
-bool check_wait_set_for_data(
+bool
+check_wait_set_for_data(
   const rmw_subscriptions_t * subscriptions,
   const rmw_guard_conditions_t * guard_conditions,
   const rmw_services_t * services,
@@ -66,7 +67,8 @@ bool check_wait_set_for_data(
   return false;
 }
 
-rmw_ret_t rmw_wait(
+rmw_ret_t
+rmw_wait(
   rmw_subscriptions_t * subscriptions,
   rmw_guard_conditions_t * guard_conditions,
   rmw_services_t * services,
@@ -75,7 +77,9 @@ rmw_ret_t rmw_wait(
   rmw_wait_set_t * wait_set,
   const rmw_time_t * wait_timeout)
 {
-  RCUTILS_LOG_DEBUG_NAMED("rmw_libp2p_cpp", "%s()", __FUNCTION__);
+  RCUTILS_LOG_DEBUG_NAMED(
+    "rmw_libp2p_cpp",
+    "%s()", __FUNCTION__);
 
   if (events && events->event_count) {
     RMW_SET_ERROR_MSG("unimplemented");
@@ -115,8 +119,7 @@ rmw_ret_t rmw_wait(
       void * data = clients->clients[i];
       auto custom_client_info = static_cast<rmw_libp2p_cpp::CustomClientInfo *>(data);
       custom_client_info->response_subscription_->listener_->attach_condition(
-        condition_mutex,
-        condition_variable);
+        condition_mutex, condition_variable);
     }
   }
 
@@ -134,7 +137,8 @@ rmw_ret_t rmw_wait(
   // otherwise the decision to wait might be incorrect
   std::unique_lock<std::mutex> lock(*condition_mutex);
 
-  bool has_data = check_wait_set_for_data(subscriptions, guard_conditions, services, clients);
+  bool has_data = check_wait_set_for_data(
+    subscriptions, guard_conditions, services, clients);
   auto predicate = [subscriptions, guard_conditions, services, clients]() {
       return check_wait_set_for_data(subscriptions, guard_conditions, services, clients);
     };

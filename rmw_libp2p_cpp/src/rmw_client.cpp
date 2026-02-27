@@ -168,8 +168,8 @@ rmw_create_client(
   // }
 
   char uuid_str[37] = {};
-  sprintf(
-    uuid_str,
+  snprintf(
+    uuid_str, sizeof(uuid_str),
     "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
     static_cast<uint8_t>(request_guid.data[0]),
     static_cast<uint8_t>(request_guid.data[1]),
@@ -220,11 +220,13 @@ rmw_create_client(
 fail:
   if (node_data) {
     if (info->request_publisher_->type_support_) {
-      //   _unregister_type(node_data->node_, info->request_type_support_, info->typesupport_identifier_);
+      //   _unregister_type(node_data->node_, info->request_type_support_,
+      //                    info->typesupport_identifier_);
     }
 
     if (info->response_subscription_->type_support_) {
-      //   _unregister_type(node_data->node_, info->response_type_support_, info->typesupport_identifier_);
+      //   _unregister_type(node_data->node_, info->response_type_support_,
+      //                    info->typesupport_identifier_);
     }
   } else {
     RCUTILS_LOG_ERROR_NAMED(

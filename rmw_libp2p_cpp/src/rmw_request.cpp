@@ -89,8 +89,8 @@ rmw_take_request(
 
     // Convert writer_guid to string
     char uuid_str[37] = {};
-    sprintf(
-      uuid_str,
+    snprintf(
+      uuid_str, sizeof(uuid_str),
       "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
       static_cast<uint8_t>(request_header->request_id.writer_guid[0]),
       static_cast<uint8_t>(request_header->request_id.writer_guid[1]),

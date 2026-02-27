@@ -26,15 +26,12 @@
 
 extern "C"
 {
-
 rmw_ret_t
 rmw_send_response(
   const rmw_service_t * service,
   rmw_request_id_t * request_header,
   void * ros_response)
 {
-
-
   RCUTILS_LOG_DEBUG_NAMED(
     "rmw_libp2p_cpp",
     "%s(service=%p,request_header=%p,ros_response=%p)", __FUNCTION__, (void *)service,
@@ -148,6 +145,4 @@ rmw_take_response(
 
   return RMW_RET_OK;
 }
-
-
 }  // extern "C"

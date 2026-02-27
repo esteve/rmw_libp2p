@@ -864,11 +864,13 @@ pub extern "C" fn rs_libp2p_cdr_buffer_write_string(
     if size == 0 || s.is_null() {
         // Write empty string
         let empty = CString::new("").unwrap();
-        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite).unwrap();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite)
+            .unwrap();
     } else {
         let cs = unsafe { CStr::from_ptr(s) };
         let cstring = CString::new(cs.to_bytes()).unwrap();
-        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &cstring, cdr::Infinite).unwrap();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &cstring, cdr::Infinite)
+            .unwrap();
     }
 }
 
@@ -903,7 +905,8 @@ pub extern "C" fn rs_libp2p_cdr_buffer_write_u16string(
     if size == 0 || s.is_null() {
         // Write empty u16 string
         let empty: Vec<u16> = Vec::new();
-        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite).unwrap();
+        cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &empty, cdr::Infinite)
+            .unwrap();
     } else {
         let slice = unsafe { slice::from_raw_parts(s, size) };
         let vec: Vec<u16> = slice.to_vec();

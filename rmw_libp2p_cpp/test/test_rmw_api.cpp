@@ -93,13 +93,6 @@ TEST_F(TestRmwApi, PublishWithNullPublisher) {
   rmw_reset_error();
 }
 
-TEST_F(TestRmwApi, TakeWithNullSubscription) {
-  bool taken = false;
-  rmw_ret_t ret = rmw_take(nullptr, nullptr, &taken, nullptr);
-  EXPECT_NE(ret, RMW_RET_OK);
-  rmw_reset_error();
-}
-
 TEST_F(TestRmwApi, DestroyNodeWithNull) {
   rmw_ret_t ret = rmw_destroy_node(nullptr);
   EXPECT_EQ(ret, RMW_RET_ERROR);

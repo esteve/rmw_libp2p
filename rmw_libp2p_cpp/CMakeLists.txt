@@ -22,13 +22,13 @@ endif()
 
 include(FetchContent)
 
-FetchContent_Declare(
+fetchcontent_declare(
   Corrosion
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
   GIT_TAG v0.5
 )
 
-FetchContent_MakeAvailable(Corrosion)
+fetchcontent_makeavailable(Corrosion)
 
 find_package(ZLIB REQUIRED)
 

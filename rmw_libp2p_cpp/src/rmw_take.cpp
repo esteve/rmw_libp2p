@@ -75,31 +75,6 @@ rmw_ret_t _take(
   return RMW_RET_OK;
 }
 
-rmw_ret_t rmw_take(
-  const rmw_subscription_t * subscription,
-  void * ros_message,
-  bool * taken,
-  rmw_subscription_allocation_t * allocation)
-{
-  RCUTILS_LOG_DEBUG_NAMED(
-    "rmw_libp2p_cpp",
-    "%s(subscription=%p,ros_message=%p,taken=%p,allocation=%p)",
-    __FUNCTION__,
-    (void *)subscription,
-    ros_message,
-    (void *)taken,
-    (void *)allocation);
-
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(
-    subscription, "subscription pointer is null", return RMW_RET_ERROR);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(ros_message, "ros_message pointer is null", return RMW_RET_ERROR);
-  RCUTILS_CHECK_FOR_NULL_WITH_MSG(taken, "boolean flag for taken is null", return RMW_RET_ERROR);
-
-  // Create a temporary message_info for the internal _take function
-  rmw_message_info_t message_info;
-  return _take(subscription, ros_message, taken, &message_info);
-}
-
 rmw_ret_t rmw_take_with_info(
   const rmw_subscription_t * subscription,
   void * ros_message,

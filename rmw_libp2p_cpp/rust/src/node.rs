@@ -30,6 +30,14 @@ use tokio::{select, task};
 
 use deadqueue::unlimited::Queue;
 
+// Type aliases to fix clippy::type_complexity warning
+type SubscriberQueueItem = (
+    gossipsub::IdentTopic,
+    CustomSubscriptionHandle,
+    unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
+);
+type SubscriberQueue = Arc<Queue<SubscriberQueueItem>>;
+
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CustomSubscriptionHandle {
@@ -76,13 +84,7 @@ pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_notify: Arc<Notify>,
     pub(crate) outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
-    pub(crate) new_subscribers_queue: Arc<
-        deadqueue::unlimited::Queue<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>,
-    >,
+    pub(crate) new_subscribers_queue: SubscriberQueue,
     reactor: Runtime,
 }
 
@@ -139,11 +141,7 @@ impl Libp2pCustomNode {
             gossipsub::IdentTopic,
             Vec<u8>,
         )>::new());
-        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>::new());
+        let new_subscribers_queue: SubscriberQueue = Arc::new(Queue::<SubscriberQueueItem>::new());
 
         Self {
             thread_handle: None, // No actual event loop thread for testing
@@ -189,11 +187,7 @@ impl Libp2pCustomNode {
             unsafe extern "C" fn(CustomSubscriptionHandle, *mut u8, len: usize),
             Vec<u8>,
         )>::new();
-        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>::new());
+        let new_subscribers_queue: SubscriberQueue = Arc::new(Queue::<SubscriberQueueItem>::new());
         let new_subscribers_queue_clone = Arc::clone(&new_subscribers_queue);
         let thread_handle = tokio::spawn(async move {
             let mut subscription_callback = HashMap::<
@@ -667,7 +661,7 @@ mod tests {
     #[ignore] // Run with: cargo test -- --ignored --test-threads=1
     fn test_node_with_ffi_api() {
         // Test the C FFI functions
-        let node_ptr = unsafe { rs_libp2p_custom_node_new() };
+        let node_ptr = rs_libp2p_custom_node_new();
         assert!(
             !node_ptr.is_null(),
             "FFI node creation should return non-null pointer"
@@ -684,9 +678,9 @@ mod tests {
     #[ignore] // Run with: cargo test -- --ignored --test-threads=1
     fn test_ffi_multiple_nodes() {
         // Create multiple nodes via FFI
-        let node1 = unsafe { rs_libp2p_custom_node_new() };
-        let node2 = unsafe { rs_libp2p_custom_node_new() };
-        let node3 = unsafe { rs_libp2p_custom_node_new() };
+        let node1 = rs_libp2p_custom_node_new();
+        let node2 = rs_libp2p_custom_node_new();
+        let node3 = rs_libp2p_custom_node_new();
 
         assert!(!node1.is_null());
         assert!(!node2.is_null());

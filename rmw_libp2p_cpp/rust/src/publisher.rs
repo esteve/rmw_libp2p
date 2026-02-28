@@ -223,6 +223,23 @@ pub unsafe extern "C" fn rs_libp2p_custom_publisher_publish(
     }
 }
 
+/// Gets the current sequence number from a `Libp2pCustomPublisher`.
+///
+/// # Safety
+///
+/// This function is unsafe because it dereferences a raw pointer.
+///
+/// # Arguments
+///
+/// * `ptr` - A raw pointer to a `Libp2pCustomPublisher`.
+///
+/// # Returns
+///
+/// The current sequence number.
+///
+/// # Panics
+///
+/// This function will panic if `ptr` is null.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
     ptr: *mut Libp2pCustomPublisher,

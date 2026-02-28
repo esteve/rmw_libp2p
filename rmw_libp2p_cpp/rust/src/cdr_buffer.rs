@@ -1283,6 +1283,270 @@ mod tests {
         rs_libp2p_cdr_buffer_free(read_buf);
     }
 
+    // === Write/Read String Roundtrip Tests ===
+
+    #[test]
+    fn test_string_write_read_roundtrip() {
+        // Test basic ASCII string roundtrip through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_string = CString::new("Hello, World!").unwrap();
+
+        rs_libp2p_cdr_buffer_write_string(
+            write_buf,
+            test_string.as_ptr(),
+            test_string.to_bytes().len(),
+        );
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const c_char = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_string(
+            read_buf,
+            &mut s_ptr as *mut *const c_char,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+        assert_eq!(size, 13);
+
+        let result_str = unsafe { CStr::from_ptr(s_ptr) };
+        assert_eq!(result_str.to_str().unwrap(), "Hello, World!");
+
+        rs_libp2p_cdr_buffer_free_string(s_ptr as *mut c_char);
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    fn test_empty_string_write_read_roundtrip() {
+        // Test empty string edge case through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_string = CString::new("").unwrap();
+
+        rs_libp2p_cdr_buffer_write_string(
+            write_buf,
+            test_string.as_ptr(),
+            test_string.to_bytes().len(),
+        );
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const c_char = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_string(
+            read_buf,
+            &mut s_ptr as *mut *const c_char,
+            &mut size as *mut usize,
+        );
+
+        assert_eq!(size, 0);
+
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    fn test_long_string_write_read_roundtrip() {
+        // Test 10KB string stress test through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data = "A".repeat(10240); // 10KB string
+        let test_string = CString::new(test_data.as_str()).unwrap();
+
+        rs_libp2p_cdr_buffer_write_string(
+            write_buf,
+            test_string.as_ptr(),
+            test_string.to_bytes().len(),
+        );
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const c_char = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_string(
+            read_buf,
+            &mut s_ptr as *mut *const c_char,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+        assert_eq!(size, 10240);
+
+        let result_str = unsafe { CStr::from_ptr(s_ptr) };
+        assert_eq!(result_str.to_str().unwrap(), test_data);
+
+        rs_libp2p_cdr_buffer_free_string(s_ptr as *mut c_char);
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    fn test_unicode_string_write_read_roundtrip() {
+        // Test UTF-8 emoji/multibyte characters through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data = "Hello 👋 世界 🌍";
+        let test_string = CString::new(test_data).unwrap();
+
+        rs_libp2p_cdr_buffer_write_string(
+            write_buf,
+            test_string.as_ptr(),
+            test_string.to_bytes().len(),
+        );
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const c_char = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_string(
+            read_buf,
+            &mut s_ptr as *mut *const c_char,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+
+        let result_str = unsafe { CStr::from_ptr(s_ptr) };
+        assert_eq!(result_str.to_str().unwrap(), test_data);
+
+        rs_libp2p_cdr_buffer_free_string(s_ptr as *mut c_char);
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    // === Write/Read U16String Roundtrip Tests ===
+    // NOTE: These tests are currently ignored due to use-after-free bug in
+    // rs_libp2p_cdr_buffer_read_u16string (lines 464-481). The function returns
+    // cs.as_ptr() but cs (Vec<u16>) is dropped at end of function scope.
+    // Additionally, rs_libp2p_cdr_buffer_free_u16string is not implemented.
+
+    #[test]
+    #[ignore]
+    fn test_u16string_write_read_roundtrip() {
+        // Test basic u16 array roundtrip through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data: Vec<u16> = vec![0x0041, 0x0042, 0x0043]; // ABC
+
+        rs_libp2p_cdr_buffer_write_u16string(write_buf, test_data.as_ptr(), test_data.len());
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const u16 = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_u16string(
+            read_buf,
+            &mut s_ptr as *mut *const u16,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+        assert_eq!(size, 3);
+
+        let result_slice = unsafe { slice::from_raw_parts(s_ptr, size) };
+        assert_eq!(result_slice, test_data.as_slice());
+
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_empty_u16string_write_read_roundtrip() {
+        // Test empty Vec<u16> edge case through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data: Vec<u16> = Vec::new();
+
+        rs_libp2p_cdr_buffer_write_u16string(write_buf, test_data.as_ptr(), test_data.len());
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const u16 = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_u16string(
+            read_buf,
+            &mut s_ptr as *mut *const u16,
+            &mut size as *mut usize,
+        );
+
+        assert_eq!(size, 0);
+
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_long_u16string_write_read_roundtrip() {
+        // Test 10000 element u16 array stress test through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data: Vec<u16> = (0..10000).map(|i| (i % 65536) as u16).collect();
+
+        rs_libp2p_cdr_buffer_write_u16string(write_buf, test_data.as_ptr(), test_data.len());
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const u16 = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_u16string(
+            read_buf,
+            &mut s_ptr as *mut *const u16,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+        assert_eq!(size, 10000);
+
+        let result_slice = unsafe { slice::from_raw_parts(s_ptr, size) };
+        assert_eq!(result_slice, test_data.as_slice());
+
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_unicode_u16string_write_read_roundtrip() {
+        // Test Japanese hiragana/kanji through write/read functions
+        let write_buf = rs_libp2p_cdr_buffer_write_new();
+        let test_data: Vec<u16> = vec![0x3042, 0x3044, 0x3046, 0x4E00, 0x4E8C]; // あいう一二
+
+        rs_libp2p_cdr_buffer_write_u16string(write_buf, test_data.as_ptr(), test_data.len());
+
+        let data = get_buffer_data(write_buf);
+        let read_buf = rs_libp2p_cdr_buffer_read_new(data.as_ptr(), data.len());
+
+        let mut s_ptr: *const u16 = std::ptr::null();
+        let mut size: usize = 0;
+
+        rs_libp2p_cdr_buffer_read_u16string(
+            read_buf,
+            &mut s_ptr as *mut *const u16,
+            &mut size as *mut usize,
+        );
+
+        assert!(!s_ptr.is_null());
+        assert_eq!(size, 5);
+
+        let result_slice = unsafe { slice::from_raw_parts(s_ptr, size) };
+        assert_eq!(result_slice, test_data.as_slice());
+
+        rs_libp2p_cdr_buffer_free(write_buf);
+        rs_libp2p_cdr_buffer_free(read_buf);
+    }
+
     // FIXME: This test exposes a bug in rs_libp2p_cdr_buffer_read_u16string
     // The function returns a pointer to a Vec that gets dropped, causing UB.
     // The FFI function needs to leak the Vec or use a different memory management strategy.

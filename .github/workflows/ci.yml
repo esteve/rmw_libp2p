@@ -10,7 +10,43 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  rust-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@1.85
+      with:
+        components: clippy, rustfmt
+
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rmw_libp2p_cpp/rust/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('rmw_libp2p_cpp/rust/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Run cargo fmt
+      working-directory: rmw_libp2p_cpp/rust
+      run: cargo fmt --check
+
+    - name: Run cargo clippy
+      working-directory: rmw_libp2p_cpp/rust
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run cargo test
+      working-directory: rmw_libp2p_cpp/rust
+      run: cargo test --verbose
+
   build:
+    needs: rust-checks
     strategy:
       matrix:
         ros_distro: [humble, rolling] # iron not supported yet by action-ros-ci
@@ -56,6 +92,20 @@ jobs:
       uses: dtolnay/rust-toolchain@1.85
       with:
         components: clippy, rustfmt
+
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rmw_libp2p_cpp/rust/target/
+        key: ${{ runner.os }}-cargo-${{ matrix.ros_distribution }}-${{ hashFiles('rmw_libp2p_cpp/rust/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-${{ matrix.ros_distribution }}-
+          ${{ runner.os }}-cargo-
 
     - name: build and test
       uses: ros-tooling/action-ros-ci@v0.4

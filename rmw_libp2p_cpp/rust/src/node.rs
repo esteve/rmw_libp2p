@@ -387,12 +387,10 @@ pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
 /// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
-    unsafe {
-        if ptr.is_null() {
-            return;
-        }
-        let _ = Box::from_raw(ptr);
+    if ptr.is_null() {
+        return;
     }
+    let _ = unsafe { Box::from_raw(ptr) };
 }
 
 #[cfg(test)]
@@ -503,13 +501,13 @@ mod tests {
 
         // Create multiple subscription handles for the same topic
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // All should be able to subscribe

@@ -458,16 +458,16 @@ mod tests {
         let topic = std::ffi::CString::new("ffi_topic").unwrap();
 
         // Create publisher via FFI
-        let pub_ptr = rs_libp2p_custom_publisher_new(node, topic.as_ptr());
+        let pub_ptr = unsafe { rs_libp2p_custom_publisher_new(node, topic.as_ptr()) };
 
         // Verify pointer is not null
         assert!(!pub_ptr.is_null());
 
         // Free publisher
-        rs_libp2p_custom_publisher_free(pub_ptr);
+        unsafe { rs_libp2p_custom_publisher_free(pub_ptr) };
 
         // Test freeing null pointer (should not crash)
-        rs_libp2p_custom_publisher_free(std::ptr::null_mut());
+        unsafe { rs_libp2p_custom_publisher_free(std::ptr::null_mut()) };
 
         // Cleanup
         unsafe {
@@ -480,13 +480,14 @@ mod tests {
         let node = Box::into_raw(Box::new(Libp2pCustomNode::new_test_only()));
         let topic = std::ffi::CString::new("gid_test").unwrap();
 
-        let pub_ptr = rs_libp2p_custom_publisher_new(node, topic.as_ptr());
+        let pub_ptr = unsafe { rs_libp2p_custom_publisher_new(node, topic.as_ptr()) };
 
         // Allocate buffer for GID
         let mut gid_buffer = vec![0u8; 16];
 
         // Get GID via FFI
-        let gid_len = rs_libp2p_custom_publisher_get_gid(pub_ptr, gid_buffer.as_mut_ptr());
+        let gid_len =
+            unsafe { rs_libp2p_custom_publisher_get_gid(pub_ptr, gid_buffer.as_mut_ptr()) };
 
         // Verify GID length
         assert_eq!(gid_len, 16);
@@ -496,13 +497,14 @@ mod tests {
 
         // Get GID again and verify it's the same
         let mut gid_buffer2 = vec![0u8; 16];
-        let gid_len2 = rs_libp2p_custom_publisher_get_gid(pub_ptr, gid_buffer2.as_mut_ptr());
+        let gid_len2 =
+            unsafe { rs_libp2p_custom_publisher_get_gid(pub_ptr, gid_buffer2.as_mut_ptr()) };
 
         assert_eq!(gid_len2, 16);
         assert_eq!(gid_buffer, gid_buffer2);
 
         // Cleanup
-        rs_libp2p_custom_publisher_free(pub_ptr);
+        unsafe { rs_libp2p_custom_publisher_free(pub_ptr) };
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -514,31 +516,31 @@ mod tests {
         let node = Box::into_raw(node_box);
         let topic = std::ffi::CString::new("seq_ffi_test").unwrap();
 
-        let pub_ptr = rs_libp2p_custom_publisher_new(node, topic.as_ptr());
+        let pub_ptr = unsafe { rs_libp2p_custom_publisher_new(node, topic.as_ptr()) };
 
         // Initial sequence number should be 0
-        let seq = rs_libp2p_custom_publisher_get_sequence_number(pub_ptr);
+        let seq = unsafe { rs_libp2p_custom_publisher_get_sequence_number(pub_ptr) };
         assert_eq!(seq, 0);
 
         // Publish a message via FFI
         let buffer = Cursor::new(vec![1u8, 2, 3]);
-        rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _);
+        unsafe { rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _) };
 
         // Sequence number should increment
-        let seq = rs_libp2p_custom_publisher_get_sequence_number(pub_ptr);
+        let seq = unsafe { rs_libp2p_custom_publisher_get_sequence_number(pub_ptr) };
         assert_eq!(seq, 1);
 
         // Publish more messages
         for i in 0..10 {
             let buffer = Cursor::new(vec![i as u8]);
-            rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _);
+            unsafe { rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _) };
         }
 
-        let seq = rs_libp2p_custom_publisher_get_sequence_number(pub_ptr);
+        let seq = unsafe { rs_libp2p_custom_publisher_get_sequence_number(pub_ptr) };
         assert_eq!(seq, 11);
 
         // Cleanup
-        rs_libp2p_custom_publisher_free(pub_ptr);
+        unsafe { rs_libp2p_custom_publisher_free(pub_ptr) };
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -551,14 +553,14 @@ mod tests {
         let node = Box::into_raw(node_box);
         let topic = std::ffi::CString::new("publish_ffi_test").unwrap();
 
-        let pub_ptr = rs_libp2p_custom_publisher_new(node, topic.as_ptr());
+        let pub_ptr = unsafe { rs_libp2p_custom_publisher_new(node, topic.as_ptr()) };
 
         // Create a message buffer
         let message = vec![0xDE, 0xAD, 0xBE, 0xEF];
         let buffer = Cursor::new(message.clone());
 
         // Publish via FFI
-        let result = rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _);
+        let result = unsafe { rs_libp2p_custom_publisher_publish(pub_ptr, &buffer as *const _) };
 
         // Currently returns 0 (as per TODO in code)
         assert_eq!(result, 0);
@@ -576,7 +578,7 @@ mod tests {
         assert_eq!(&queued_msg[msg_start..], &message[..]);
 
         // Cleanup
-        rs_libp2p_custom_publisher_free(pub_ptr);
+        unsafe { rs_libp2p_custom_publisher_free(pub_ptr) };
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -590,17 +592,17 @@ mod tests {
         let topic2 = std::ffi::CString::new("topic2").unwrap();
         let topic3 = std::ffi::CString::new("topic3").unwrap();
 
-        let pub1 = rs_libp2p_custom_publisher_new(node, topic1.as_ptr());
-        let pub2 = rs_libp2p_custom_publisher_new(node, topic2.as_ptr());
-        let pub3 = rs_libp2p_custom_publisher_new(node, topic3.as_ptr());
+        let pub1 = unsafe { rs_libp2p_custom_publisher_new(node, topic1.as_ptr()) };
+        let pub2 = unsafe { rs_libp2p_custom_publisher_new(node, topic2.as_ptr()) };
+        let pub3 = unsafe { rs_libp2p_custom_publisher_new(node, topic3.as_ptr()) };
 
         let mut gid1 = vec![0u8; 16];
         let mut gid2 = vec![0u8; 16];
         let mut gid3 = vec![0u8; 16];
 
-        rs_libp2p_custom_publisher_get_gid(pub1, gid1.as_mut_ptr());
-        rs_libp2p_custom_publisher_get_gid(pub2, gid2.as_mut_ptr());
-        rs_libp2p_custom_publisher_get_gid(pub3, gid3.as_mut_ptr());
+        unsafe { rs_libp2p_custom_publisher_get_gid(pub1, gid1.as_mut_ptr()) };
+        unsafe { rs_libp2p_custom_publisher_get_gid(pub2, gid2.as_mut_ptr()) };
+        unsafe { rs_libp2p_custom_publisher_get_gid(pub3, gid3.as_mut_ptr()) };
 
         // All GIDs should be unique
         assert_ne!(gid1, gid2);
@@ -608,9 +610,9 @@ mod tests {
         assert_ne!(gid2, gid3);
 
         // Cleanup
-        rs_libp2p_custom_publisher_free(pub1);
-        rs_libp2p_custom_publisher_free(pub2);
-        rs_libp2p_custom_publisher_free(pub3);
+        unsafe { rs_libp2p_custom_publisher_free(pub1) };
+        unsafe { rs_libp2p_custom_publisher_free(pub2) };
+        unsafe { rs_libp2p_custom_publisher_free(pub3) };
         unsafe {
             let _ = Box::from_raw(node);
         }

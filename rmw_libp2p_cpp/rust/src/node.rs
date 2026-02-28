@@ -667,26 +667,26 @@ mod tests {
     #[ignore] // Run with: cargo test -- --ignored --test-threads=1
     fn test_node_with_ffi_api() {
         // Test the C FFI functions
-        let node_ptr = rs_libp2p_custom_node_new();
+        let node_ptr = unsafe { rs_libp2p_custom_node_new() };
         assert!(
             !node_ptr.is_null(),
             "FFI node creation should return non-null pointer"
         );
 
         // Free the node
-        rs_libp2p_custom_node_free(node_ptr);
+        unsafe { rs_libp2p_custom_node_free(node_ptr) };
 
         // Test freeing null pointer (should not crash)
-        rs_libp2p_custom_node_free(std::ptr::null_mut());
+        unsafe { rs_libp2p_custom_node_free(std::ptr::null_mut()) };
     }
 
     #[test]
     #[ignore] // Run with: cargo test -- --ignored --test-threads=1
     fn test_ffi_multiple_nodes() {
         // Create multiple nodes via FFI
-        let node1 = rs_libp2p_custom_node_new();
-        let node2 = rs_libp2p_custom_node_new();
-        let node3 = rs_libp2p_custom_node_new();
+        let node1 = unsafe { rs_libp2p_custom_node_new() };
+        let node2 = unsafe { rs_libp2p_custom_node_new() };
+        let node3 = unsafe { rs_libp2p_custom_node_new() };
 
         assert!(!node1.is_null());
         assert!(!node2.is_null());
@@ -698,9 +698,9 @@ mod tests {
         assert_ne!(node1, node3);
 
         // Free in different order
-        rs_libp2p_custom_node_free(node2);
-        rs_libp2p_custom_node_free(node1);
-        rs_libp2p_custom_node_free(node3);
+        unsafe { rs_libp2p_custom_node_free(node2) };
+        unsafe { rs_libp2p_custom_node_free(node1) };
+        unsafe { rs_libp2p_custom_node_free(node3) };
     }
 
     #[test]

@@ -40,8 +40,11 @@ use libp2p::gossipsub;
 /// This struct is unsafe because it uses raw pointers.
 pub struct Libp2pCustomSubscription {
     gid: Uuid,
+    #[allow(dead_code)]
     node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
+    #[allow(dead_code)]
     topic: gossipsub::IdentTopic,
+    #[allow(dead_code)]
     incoming_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
 }
 
@@ -130,8 +133,9 @@ impl Libp2pCustomSubscription {
 /// # Panics
 ///
 /// This function will panic if `topic_str_ptr` is null or if it does not point to a valid null-terminated string.
-#[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_new(
+#[allow(private_interfaces)]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
     obj: CustomSubscriptionHandle,
@@ -163,8 +167,8 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
 /// # Panics
 ///
 /// This function will panic if the provided pointer has been previously deallocated or was not returned by `rs_libp2p_custom_subscription_new`.
-#[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_free(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
     ptr_subscription: *mut Libp2pCustomSubscription,
 ) {
     if ptr_subscription.is_null() {
@@ -194,8 +198,8 @@ pub extern "C" fn rs_libp2p_custom_subscription_free(
 /// # Panics
 ///
 /// This function will panic if `ptr_subscription` is null.
-#[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_get_gid(
     ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
@@ -206,7 +210,7 @@ pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
     let gid_bytes = libp2p_custom_subscription.gid.as_bytes();
     let count = gid_bytes.len();
     unsafe {
-        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
+        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
     }
     count
 }
@@ -388,13 +392,13 @@ mod tests {
 
         // Create multiple subscription handles
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // Create multiple subscriptions to the same topic
@@ -490,17 +494,22 @@ mod tests {
         };
 
         // Create subscription via FFI
-        let sub_ptr =
-            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback);
+        let sub_ptr = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback)
+        };
 
         // Verify pointer is not null
         assert!(!sub_ptr.is_null());
 
         // Free subscription
-        rs_libp2p_custom_subscription_free(sub_ptr);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub_ptr);
+        }
 
         // Test freeing null pointer (should not crash)
-        rs_libp2p_custom_subscription_free(std::ptr::null_mut());
+        unsafe {
+            rs_libp2p_custom_subscription_free(std::ptr::null_mut());
+        }
 
         // Cleanup
         unsafe {
@@ -516,14 +525,16 @@ mod tests {
             ptr: std::ptr::null(),
         };
 
-        let sub_ptr =
-            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback);
+        let sub_ptr = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback)
+        };
 
         // Allocate buffer for GID
         let mut gid_buffer = vec![0u8; 16];
 
         // Get GID via FFI
-        let gid_len = rs_libp2p_custom_subscription_get_gid(sub_ptr, gid_buffer.as_mut_ptr());
+        let gid_len =
+            unsafe { rs_libp2p_custom_subscription_get_gid(sub_ptr, gid_buffer.as_mut_ptr()) };
 
         // Verify GID length
         assert_eq!(gid_len, 16);
@@ -533,13 +544,16 @@ mod tests {
 
         // Get GID again and verify it's the same
         let mut gid_buffer2 = vec![0u8; 16];
-        let gid_len2 = rs_libp2p_custom_subscription_get_gid(sub_ptr, gid_buffer2.as_mut_ptr());
+        let gid_len2 =
+            unsafe { rs_libp2p_custom_subscription_get_gid(sub_ptr, gid_buffer2.as_mut_ptr()) };
 
         assert_eq!(gid_len2, 16);
         assert_eq!(gid_buffer, gid_buffer2);
 
         // Cleanup
-        rs_libp2p_custom_subscription_free(sub_ptr);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub_ptr);
+        }
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -557,17 +571,29 @@ mod tests {
             ptr: std::ptr::null(),
         };
 
-        let sub1 = rs_libp2p_custom_subscription_new(node, topic1.as_ptr(), handle, noop_callback);
-        let sub2 = rs_libp2p_custom_subscription_new(node, topic2.as_ptr(), handle, noop_callback);
-        let sub3 = rs_libp2p_custom_subscription_new(node, topic3.as_ptr(), handle, noop_callback);
+        let sub1 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic1.as_ptr(), handle, noop_callback)
+        };
+        let sub2 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic2.as_ptr(), handle, noop_callback)
+        };
+        let sub3 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic3.as_ptr(), handle, noop_callback)
+        };
 
         let mut gid1 = vec![0u8; 16];
         let mut gid2 = vec![0u8; 16];
         let mut gid3 = vec![0u8; 16];
 
-        rs_libp2p_custom_subscription_get_gid(sub1, gid1.as_mut_ptr());
-        rs_libp2p_custom_subscription_get_gid(sub2, gid2.as_mut_ptr());
-        rs_libp2p_custom_subscription_get_gid(sub3, gid3.as_mut_ptr());
+        unsafe {
+            rs_libp2p_custom_subscription_get_gid(sub1, gid1.as_mut_ptr());
+        }
+        unsafe {
+            rs_libp2p_custom_subscription_get_gid(sub2, gid2.as_mut_ptr());
+        }
+        unsafe {
+            rs_libp2p_custom_subscription_get_gid(sub3, gid3.as_mut_ptr());
+        }
 
         // All GIDs should be unique
         assert_ne!(gid1, gid2);
@@ -575,9 +601,11 @@ mod tests {
         assert_ne!(gid2, gid3);
 
         // Cleanup
-        rs_libp2p_custom_subscription_free(sub1);
-        rs_libp2p_custom_subscription_free(sub2);
-        rs_libp2p_custom_subscription_free(sub3);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub1);
+            rs_libp2p_custom_subscription_free(sub2);
+            rs_libp2p_custom_subscription_free(sub3);
+        }
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -589,37 +617,47 @@ mod tests {
         let topic = std::ffi::CString::new("shared_topic").unwrap();
 
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // Create multiple subscriptions to the same topic
-        let sub1 = rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle1, noop_callback);
-        let sub2 = rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle2, noop_callback);
-        let sub3 = rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle3, noop_callback);
+        let sub1 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle1, noop_callback)
+        };
+        let sub2 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle2, noop_callback)
+        };
+        let sub3 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle3, noop_callback)
+        };
 
         // All should have unique GIDs
         let mut gid1 = vec![0u8; 16];
         let mut gid2 = vec![0u8; 16];
         let mut gid3 = vec![0u8; 16];
 
-        rs_libp2p_custom_subscription_get_gid(sub1, gid1.as_mut_ptr());
-        rs_libp2p_custom_subscription_get_gid(sub2, gid2.as_mut_ptr());
-        rs_libp2p_custom_subscription_get_gid(sub3, gid3.as_mut_ptr());
+        unsafe {
+            rs_libp2p_custom_subscription_get_gid(sub1, gid1.as_mut_ptr());
+            rs_libp2p_custom_subscription_get_gid(sub2, gid2.as_mut_ptr());
+            rs_libp2p_custom_subscription_get_gid(sub3, gid3.as_mut_ptr());
+        }
 
         assert_ne!(gid1, gid2);
         assert_ne!(gid1, gid3);
         assert_ne!(gid2, gid3);
 
         // Cleanup
-        rs_libp2p_custom_subscription_free(sub1);
-        rs_libp2p_custom_subscription_free(sub2);
-        rs_libp2p_custom_subscription_free(sub3);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub1);
+            rs_libp2p_custom_subscription_free(sub2);
+            rs_libp2p_custom_subscription_free(sub3);
+        }
         unsafe {
             let _ = Box::from_raw(node);
         }
@@ -636,7 +674,9 @@ mod tests {
         };
 
         let topic = std::ffi::CString::new("notify_test").unwrap();
-        let _sub = rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, test_callback);
+        let _sub = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, test_callback)
+        };
 
         // Verify subscriber was queued
         let (queued_topic, queued_handle, _callback) = new_subscribers_queue
@@ -698,29 +738,35 @@ mod tests {
             ptr: std::ptr::null(),
         };
         let topic = std::ffi::CString::new("lifecycle_test").unwrap();
-        let sub_ptr =
-            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback);
+        let sub_ptr = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic.as_ptr(), handle, noop_callback)
+        };
 
         // Verify creation
         assert!(!sub_ptr.is_null());
 
         // Get GID to verify it's alive
         let mut gid = vec![0u8; 16];
-        let len = rs_libp2p_custom_subscription_get_gid(sub_ptr, gid.as_mut_ptr());
+        let len = unsafe { rs_libp2p_custom_subscription_get_gid(sub_ptr, gid.as_mut_ptr()) };
         assert_eq!(len, 16);
         assert!(gid.iter().any(|&x| x != 0));
 
         // Free subscription
-        rs_libp2p_custom_subscription_free(sub_ptr);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub_ptr);
+        }
 
         // Create another subscription to verify node is still usable
         let topic2 = std::ffi::CString::new("lifecycle_test2").unwrap();
-        let sub_ptr2 =
-            rs_libp2p_custom_subscription_new(node, topic2.as_ptr(), handle, noop_callback);
+        let sub_ptr2 = unsafe {
+            rs_libp2p_custom_subscription_new(node, topic2.as_ptr(), handle, noop_callback)
+        };
         assert!(!sub_ptr2.is_null());
 
         // Cleanup
-        rs_libp2p_custom_subscription_free(sub_ptr2);
+        unsafe {
+            rs_libp2p_custom_subscription_free(sub_ptr2);
+        }
         unsafe {
             let _ = Box::from_raw(node);
         }

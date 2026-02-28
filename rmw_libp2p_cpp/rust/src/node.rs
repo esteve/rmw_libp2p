@@ -25,15 +25,22 @@ use libp2p::{
 };
 
 use tokio::runtime::Runtime;
-use tokio::sync::Mutex;
 use tokio::sync::Notify;
 use tokio::{select, task};
 
 use deadqueue::unlimited::Queue;
 
+// Type aliases to fix clippy::type_complexity warning
+type SubscriberQueueItem = (
+    gossipsub::IdentTopic,
+    CustomSubscriptionHandle,
+    unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
+);
+type SubscriberQueue = Arc<Queue<SubscriberQueueItem>>;
+
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub(crate) struct CustomSubscriptionHandle {
+pub struct CustomSubscriptionHandle {
     pub ptr: *const c_void,
 }
 
@@ -77,13 +84,7 @@ pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_notify: Arc<Notify>,
     pub(crate) outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
-    pub(crate) new_subscribers_queue: Arc<
-        deadqueue::unlimited::Queue<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>,
-    >,
+    pub(crate) new_subscribers_queue: SubscriberQueue,
     reactor: Runtime,
 }
 
@@ -121,11 +122,12 @@ impl Libp2pCustomNode {
 
         let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), peer_id).unwrap();
 
-        let behaviour = RosNetworkBehaviour {
-            gossipsub: gossipsub,
-            mdns: mdns,
-        };
+        let behaviour = RosNetworkBehaviour { gossipsub, mdns };
 
+        // Note: with_tokio_executor is deprecated in libp2p 0.51 but SwarmBuilder
+        // (the recommended replacement) is not yet available in this version.
+        // This will be addressed when upgrading to libp2p 0.52+.
+        #[allow(deprecated)]
         libp2p::Swarm::with_tokio_executor(transport, behaviour, peer_id)
     }
 
@@ -139,11 +141,7 @@ impl Libp2pCustomNode {
             gossipsub::IdentTopic,
             Vec<u8>,
         )>::new());
-        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>::new());
+        let new_subscribers_queue: SubscriberQueue = Arc::new(Queue::<SubscriberQueueItem>::new());
 
         Self {
             thread_handle: None, // No actual event loop thread for testing
@@ -184,16 +182,12 @@ impl Libp2pCustomNode {
 
         let stop_notify_clone = Arc::clone(&stop_notify);
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
-        let incoming_queue = Queue::<(
+        let _incoming_queue = Queue::<(
             String,
             unsafe extern "C" fn(CustomSubscriptionHandle, *mut u8, len: usize),
             Vec<u8>,
         )>::new();
-        let new_subscribers_queue = Arc::new(deadqueue::unlimited::Queue::<(
-            gossipsub::IdentTopic,
-            CustomSubscriptionHandle,
-            unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-        )>::new());
+        let new_subscribers_queue: SubscriberQueue = Arc::new(Queue::<SubscriberQueueItem>::new());
         let new_subscribers_queue_clone = Arc::clone(&new_subscribers_queue);
         let thread_handle = tokio::spawn(async move {
             let mut subscription_callback = HashMap::<
@@ -229,8 +223,8 @@ impl Libp2pCustomNode {
 
                     event = swarm.select_next_some() => match event {
                         SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
-                            propagation_source: peer_id,
-                            message_id: id,
+                            propagation_source: _peer_id,
+                            message_id: _id,
                             message,
                         })) => {
                             // TODO(esteve): use some sort of debug log
@@ -249,7 +243,7 @@ impl Libp2pCustomNode {
                             std::mem::forget(input_vec);
                             let (obj, callback) = subscription_callback.get(&message.topic.into_string()).unwrap();
                             unsafe {
-                                callback(&obj, ptr, len);
+                                callback(obj, ptr, len);
                             }
                         }
                         SwarmEvent::NewListenAddr { address, .. } => {
@@ -289,10 +283,10 @@ impl Libp2pCustomNode {
 
         Self {
             thread_handle: Some(thread_handle),
-            stop_notify: stop_notify,
-            outgoing_queue: outgoing_queue,
-            new_subscribers_queue: new_subscribers_queue,
-            reactor: reactor,
+            stop_notify,
+            outgoing_queue,
+            new_subscribers_queue,
+            reactor,
         }
     }
 
@@ -309,7 +303,7 @@ impl Libp2pCustomNode {
     /// # Panics
     ///
     /// This function will panic if the system time is before the UNIX_EPOCH.
-    pub(crate) fn publish_message(&self, topic: gossipsub::IdentTopic, buffer: Vec<u8>) -> () {
+    pub(crate) fn publish_message(&self, topic: gossipsub::IdentTopic, buffer: Vec<u8>) {
         let mut out_buffer = Vec::<u8>::new();
 
         let start = SystemTime::now();
@@ -348,7 +342,7 @@ impl Libp2pCustomNode {
         topic: gossipsub::IdentTopic,
         obj: CustomSubscriptionHandle,
         callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-    ) -> () {
+    ) {
         self.new_subscribers_queue.push((topic, obj, callback));
     }
 }
@@ -375,7 +369,7 @@ impl Drop for Libp2pCustomNode {
 /// # Returns
 ///
 /// A raw pointer to a `Libp2pCustomNode`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
     Box::into_raw(Box::new(Libp2pCustomNode::new()))
 }
@@ -391,8 +385,8 @@ pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
 /// # Arguments
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
-#[no_mangle]
-pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
     if ptr.is_null() {
         return;
     }
@@ -507,13 +501,13 @@ mod tests {
 
         // Create multiple subscription handles for the same topic
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // All should be able to subscribe
@@ -672,10 +666,10 @@ mod tests {
         );
 
         // Free the node
-        rs_libp2p_custom_node_free(node_ptr);
+        unsafe { rs_libp2p_custom_node_free(node_ptr) };
 
         // Test freeing null pointer (should not crash)
-        rs_libp2p_custom_node_free(std::ptr::null_mut());
+        unsafe { rs_libp2p_custom_node_free(std::ptr::null_mut()) };
     }
 
     #[test]
@@ -696,9 +690,9 @@ mod tests {
         assert_ne!(node1, node3);
 
         // Free in different order
-        rs_libp2p_custom_node_free(node2);
-        rs_libp2p_custom_node_free(node1);
-        rs_libp2p_custom_node_free(node3);
+        unsafe { rs_libp2p_custom_node_free(node2) };
+        unsafe { rs_libp2p_custom_node_free(node1) };
+        unsafe { rs_libp2p_custom_node_free(node3) };
     }
 
     #[test]

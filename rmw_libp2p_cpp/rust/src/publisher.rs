@@ -109,15 +109,18 @@ impl Libp2pCustomPublisher {
 pub unsafe extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
-) -> *mut Libp2pCustomPublisher { unsafe {
-    let topic_str = {
-        assert!(!topic_str_ptr.is_null());
-        CStr::from_ptr(topic_str_ptr)
-    };
+) -> *mut Libp2pCustomPublisher {
+    unsafe {
+        let topic_str = {
+            assert!(!topic_str_ptr.is_null());
+            CStr::from_ptr(topic_str_ptr)
+        };
 
-    let libp2p_custom_publisher = Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
-    Box::into_raw(Box::new(libp2p_custom_publisher))
-}}
+        let libp2p_custom_publisher =
+            Libp2pCustomPublisher::new(ptr_node, topic_str.to_str().unwrap());
+        Box::into_raw(Box::new(libp2p_custom_publisher))
+    }
+}
 
 /// Frees a `Libp2pCustomPublisher` from memory.
 ///
@@ -132,12 +135,14 @@ pub unsafe extern "C" fn rs_libp2p_custom_publisher_new(
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomPublisher`.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublisher) { unsafe {
-    if ptr.is_null() {
-        return;
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublisher) {
+    unsafe {
+        if ptr.is_null() {
+            return;
+        }
+        let _ = Box::from_raw(ptr);
     }
-    let _ = Box::from_raw(ptr);
-}}
+}
 
 /// Gets the GID of a `Libp2pCustomPublisher`.
 ///
@@ -164,16 +169,18 @@ pub unsafe extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomP
 pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_gid(
     ptr: *mut Libp2pCustomPublisher,
     buf: *mut std::os::raw::c_uchar,
-) -> usize { unsafe {
-    let libp2p_custom_publisher = {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-    let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
-    let count = gid_bytes.len();
-    std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
-    count
-}}
+) -> usize {
+    unsafe {
+        let libp2p_custom_publisher = {
+            assert!(!ptr.is_null());
+            &mut *ptr
+        };
+        let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
+        let count = gid_bytes.len();
+        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
+        count
+    }
+}
 
 /// Publishes a message using a `Libp2pCustomPublisher`.
 ///
@@ -200,30 +207,34 @@ pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_gid(
 pub unsafe extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
     ptr_buffer: *const Cursor<Vec<u8>>,
-) -> usize { unsafe {
-    let libp2p_custom_publisher = {
-        assert!(!ptr_publisher.is_null());
-        &mut *ptr_publisher
-    };
-    let buffer = {
-        assert!(!ptr_buffer.is_null());
-        &*ptr_buffer
-    };
-    libp2p_custom_publisher.publish(buffer.get_ref().to_vec());
-    // TODO(esteve): return the number of bytes published
-    0
-}}
+) -> usize {
+    unsafe {
+        let libp2p_custom_publisher = {
+            assert!(!ptr_publisher.is_null());
+            &mut *ptr_publisher
+        };
+        let buffer = {
+            assert!(!ptr_buffer.is_null());
+            &*ptr_buffer
+        };
+        libp2p_custom_publisher.publish(buffer.get_ref().to_vec());
+        // TODO(esteve): return the number of bytes published
+        0
+    }
+}
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
     ptr: *mut Libp2pCustomPublisher,
-) -> u64 { unsafe {
-    let libp2p_custom_publisher = {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-    libp2p_custom_publisher.sequence_number
-}}
+) -> u64 {
+    unsafe {
+        let libp2p_custom_publisher = {
+            assert!(!ptr.is_null());
+            &mut *ptr
+        };
+        libp2p_custom_publisher.sequence_number
+    }
+}
 
 #[cfg(test)]
 mod tests {

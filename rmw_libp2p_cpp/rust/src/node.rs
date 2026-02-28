@@ -392,12 +392,14 @@ pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) { unsafe {
-    if ptr.is_null() {
-        return;
+pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
+    unsafe {
+        if ptr.is_null() {
+            return;
+        }
+        let _ = Box::from_raw(ptr);
     }
-    let _ = Box::from_raw(ptr);
-}}
+}
 
 #[cfg(test)]
 mod tests {

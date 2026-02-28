@@ -140,16 +140,18 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
     topic_str_ptr: *const c_char,
     obj: CustomSubscriptionHandle,
     callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-) -> *mut Libp2pCustomSubscription { unsafe {
-    let topic_str = {
-        assert!(!topic_str_ptr.is_null());
-        CStr::from_ptr(topic_str_ptr)
-    };
+) -> *mut Libp2pCustomSubscription {
+    unsafe {
+        let topic_str = {
+            assert!(!topic_str_ptr.is_null());
+            CStr::from_ptr(topic_str_ptr)
+        };
 
-    let libp2p_custom_subscription =
-        Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
-    Box::into_raw(Box::new(libp2p_custom_subscription))
-}}
+        let libp2p_custom_subscription =
+            Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
+        Box::into_raw(Box::new(libp2p_custom_subscription))
+    }
+}
 
 /// Frees a `Libp2pCustomSubscription` from memory.
 ///
@@ -170,12 +172,14 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
     ptr_subscription: *mut Libp2pCustomSubscription,
-) { unsafe {
-    if ptr_subscription.is_null() {
-        return;
+) {
+    unsafe {
+        if ptr_subscription.is_null() {
+            return;
+        }
+        let _ = Box::from_raw(ptr_subscription);
     }
-    let _ = Box::from_raw(ptr_subscription);
-}}
+}
 
 /// Gets the GID of a `Libp2pCustomSubscription`.
 ///
@@ -202,16 +206,18 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
 pub unsafe extern "C" fn rs_libp2p_custom_subscription_get_gid(
     ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
-) -> usize { unsafe {
-    let libp2p_custom_subscription = {
-        assert!(!ptr_subscription.is_null());
-        &mut *ptr_subscription
-    };
-    let gid_bytes = libp2p_custom_subscription.gid.as_bytes();
-    let count = gid_bytes.len();
-    std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
-    count
-}}
+) -> usize {
+    unsafe {
+        let libp2p_custom_subscription = {
+            assert!(!ptr_subscription.is_null());
+            &mut *ptr_subscription
+        };
+        let gid_bytes = libp2p_custom_subscription.gid.as_bytes();
+        let count = gid_bytes.len();
+        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
+        count
+    }
+}
 
 #[cfg(test)]
 mod tests {

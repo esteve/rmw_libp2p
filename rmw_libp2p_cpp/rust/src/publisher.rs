@@ -58,7 +58,7 @@ impl Libp2pCustomPublisher {
     /// # Arguments
     ///
     /// * `buffer` - The buffer containing the message to be published.
-    fn publish(&mut self, buffer: Vec<u8>) -> () {
+    fn publish(&mut self, buffer: Vec<u8>) {
         let libp2p_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
@@ -67,14 +67,9 @@ impl Libp2pCustomPublisher {
         let mut out_buffer = Vec::<u8>::new();
 
         let gid_bytes = self.gid.as_bytes();
-        let count = gid_bytes.len();
-        for i in 0..count {
-            cdr::serialize_into::<_, u8, _, cdr::CdrBe>(
-                &mut out_buffer,
-                &gid_bytes[i],
-                cdr::Infinite,
-            )
-            .unwrap();
+        for &byte in gid_bytes.iter() {
+            cdr::serialize_into::<_, u8, _, cdr::CdrBe>(&mut out_buffer, &byte, cdr::Infinite)
+                .unwrap();
         }
         cdr::serialize_into::<_, _, _, cdr::CdrBe>(
             &mut out_buffer,
@@ -111,11 +106,11 @@ impl Libp2pCustomPublisher {
 ///
 /// This function will panic if `topic_str_ptr` is null or if it does not point to a valid null-terminated string.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_new(
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
 ) -> *mut Libp2pCustomPublisher {
-    let topic_str = unsafe {
+    let topic_str = {
         assert!(!topic_str_ptr.is_null());
         CStr::from_ptr(topic_str_ptr)
     };
@@ -137,11 +132,11 @@ pub extern "C" fn rs_libp2p_custom_publisher_new(
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomPublisher`.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublisher) {
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublisher) {
     if ptr.is_null() {
         return;
     }
-    let _ = unsafe { Box::from_raw(ptr) };
+    let _ = Box::from_raw(ptr);
 }
 
 /// Gets the GID of a `Libp2pCustomPublisher`.
@@ -166,19 +161,17 @@ pub extern "C" fn rs_libp2p_custom_publisher_free(ptr: *mut Libp2pCustomPublishe
 ///
 /// This function will panic if `ptr` is null.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_gid(
     ptr: *mut Libp2pCustomPublisher,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
-    let libp2p_custom_publisher = unsafe {
+    let libp2p_custom_publisher = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     let gid_bytes = libp2p_custom_publisher.gid.as_bytes();
     let count = gid_bytes.len();
-    unsafe {
-        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
-    }
+    std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
     count
 }
 
@@ -204,15 +197,15 @@ pub extern "C" fn rs_libp2p_custom_publisher_get_gid(
 ///
 /// This function will panic if either `ptr_publisher` or `ptr_buffer` is null.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_publish(
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_publish(
     ptr_publisher: *mut Libp2pCustomPublisher,
     ptr_buffer: *const Cursor<Vec<u8>>,
 ) -> usize {
-    let libp2p_custom_publisher = unsafe {
+    let libp2p_custom_publisher = {
         assert!(!ptr_publisher.is_null());
         &mut *ptr_publisher
     };
-    let buffer = unsafe {
+    let buffer = {
         assert!(!ptr_buffer.is_null());
         &*ptr_buffer
     };
@@ -222,10 +215,10 @@ pub extern "C" fn rs_libp2p_custom_publisher_publish(
 }
 
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
+pub unsafe extern "C" fn rs_libp2p_custom_publisher_get_sequence_number(
     ptr: *mut Libp2pCustomPublisher,
 ) -> u64 {
-    let libp2p_custom_publisher = unsafe {
+    let libp2p_custom_publisher = {
         assert!(!ptr.is_null());
         &mut *ptr
     };

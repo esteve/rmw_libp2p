@@ -40,8 +40,11 @@ use libp2p::gossipsub;
 /// This struct is unsafe because it uses raw pointers.
 pub struct Libp2pCustomSubscription {
     gid: Uuid,
+    #[allow(dead_code)]
     node: *mut Libp2pCustomNode, // We need to store the Node here to have access to the outgoing queue
+    #[allow(dead_code)]
     topic: gossipsub::IdentTopic,
+    #[allow(dead_code)]
     incoming_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
 }
 
@@ -130,14 +133,15 @@ impl Libp2pCustomSubscription {
 /// # Panics
 ///
 /// This function will panic if `topic_str_ptr` is null or if it does not point to a valid null-terminated string.
+#[allow(private_interfaces)]
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_new(
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
     obj: CustomSubscriptionHandle,
     callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
 ) -> *mut Libp2pCustomSubscription {
-    let topic_str = unsafe {
+    let topic_str = {
         assert!(!topic_str_ptr.is_null());
         CStr::from_ptr(topic_str_ptr)
     };
@@ -164,13 +168,13 @@ pub extern "C" fn rs_libp2p_custom_subscription_new(
 ///
 /// This function will panic if the provided pointer has been previously deallocated or was not returned by `rs_libp2p_custom_subscription_new`.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_free(
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
     ptr_subscription: *mut Libp2pCustomSubscription,
 ) {
     if ptr_subscription.is_null() {
         return;
     }
-    let _ = unsafe { Box::from_raw(ptr_subscription) };
+    let _ = Box::from_raw(ptr_subscription);
 }
 
 /// Gets the GID of a `Libp2pCustomSubscription`.
@@ -195,19 +199,17 @@ pub extern "C" fn rs_libp2p_custom_subscription_free(
 ///
 /// This function will panic if `ptr_subscription` is null.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_subscription_get_gid(
+pub unsafe extern "C" fn rs_libp2p_custom_subscription_get_gid(
     ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
 ) -> usize {
-    let libp2p_custom_subscription = unsafe {
+    let libp2p_custom_subscription = {
         assert!(!ptr_subscription.is_null());
         &mut *ptr_subscription
     };
     let gid_bytes = libp2p_custom_subscription.gid.as_bytes();
     let count = gid_bytes.len();
-    unsafe {
-        std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf as *mut u8, count);
-    }
+    std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
     count
 }
 
@@ -388,13 +390,13 @@ mod tests {
 
         // Create multiple subscription handles
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // Create multiple subscriptions to the same topic
@@ -589,13 +591,13 @@ mod tests {
         let topic = std::ffi::CString::new("shared_topic").unwrap();
 
         let handle1 = CustomSubscriptionHandle {
-            ptr: 1 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle2 = CustomSubscriptionHandle {
-            ptr: 2 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
         let handle3 = CustomSubscriptionHandle {
-            ptr: 3 as *const c_void,
+            ptr: std::ptr::dangling::<c_void>(),
         };
 
         // Create multiple subscriptions to the same topic

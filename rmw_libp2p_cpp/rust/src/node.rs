@@ -25,7 +25,6 @@ use libp2p::{
 };
 
 use tokio::runtime::Runtime;
-use tokio::sync::Mutex;
 use tokio::sync::Notify;
 use tokio::{select, task};
 
@@ -33,7 +32,7 @@ use deadqueue::unlimited::Queue;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub(crate) struct CustomSubscriptionHandle {
+pub struct CustomSubscriptionHandle {
     pub ptr: *const c_void,
 }
 
@@ -121,11 +120,12 @@ impl Libp2pCustomNode {
 
         let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), peer_id).unwrap();
 
-        let behaviour = RosNetworkBehaviour {
-            gossipsub: gossipsub,
-            mdns: mdns,
-        };
+        let behaviour = RosNetworkBehaviour { gossipsub, mdns };
 
+        // Note: with_tokio_executor is deprecated in libp2p 0.51 but SwarmBuilder
+        // (the recommended replacement) is not yet available in this version.
+        // This will be addressed when upgrading to libp2p 0.52+.
+        #[allow(deprecated)]
         libp2p::Swarm::with_tokio_executor(transport, behaviour, peer_id)
     }
 
@@ -184,7 +184,7 @@ impl Libp2pCustomNode {
 
         let stop_notify_clone = Arc::clone(&stop_notify);
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
-        let incoming_queue = Queue::<(
+        let _incoming_queue = Queue::<(
             String,
             unsafe extern "C" fn(CustomSubscriptionHandle, *mut u8, len: usize),
             Vec<u8>,
@@ -229,8 +229,8 @@ impl Libp2pCustomNode {
 
                     event = swarm.select_next_some() => match event {
                         SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
-                            propagation_source: peer_id,
-                            message_id: id,
+                            propagation_source: _peer_id,
+                            message_id: _id,
                             message,
                         })) => {
                             // TODO(esteve): use some sort of debug log
@@ -249,7 +249,7 @@ impl Libp2pCustomNode {
                             std::mem::forget(input_vec);
                             let (obj, callback) = subscription_callback.get(&message.topic.into_string()).unwrap();
                             unsafe {
-                                callback(&obj, ptr, len);
+                                callback(obj, ptr, len);
                             }
                         }
                         SwarmEvent::NewListenAddr { address, .. } => {
@@ -289,10 +289,10 @@ impl Libp2pCustomNode {
 
         Self {
             thread_handle: Some(thread_handle),
-            stop_notify: stop_notify,
-            outgoing_queue: outgoing_queue,
-            new_subscribers_queue: new_subscribers_queue,
-            reactor: reactor,
+            stop_notify,
+            outgoing_queue,
+            new_subscribers_queue,
+            reactor,
         }
     }
 
@@ -309,7 +309,7 @@ impl Libp2pCustomNode {
     /// # Panics
     ///
     /// This function will panic if the system time is before the UNIX_EPOCH.
-    pub(crate) fn publish_message(&self, topic: gossipsub::IdentTopic, buffer: Vec<u8>) -> () {
+    pub(crate) fn publish_message(&self, topic: gossipsub::IdentTopic, buffer: Vec<u8>) {
         let mut out_buffer = Vec::<u8>::new();
 
         let start = SystemTime::now();
@@ -348,7 +348,7 @@ impl Libp2pCustomNode {
         topic: gossipsub::IdentTopic,
         obj: CustomSubscriptionHandle,
         callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-    ) -> () {
+    ) {
         self.new_subscribers_queue.push((topic, obj, callback));
     }
 }
@@ -392,11 +392,11 @@ pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
 #[no_mangle]
-pub extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
+pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
     if ptr.is_null() {
         return;
     }
-    let _ = unsafe { Box::from_raw(ptr) };
+    let _ = Box::from_raw(ptr);
 }
 
 #[cfg(test)]

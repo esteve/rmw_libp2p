@@ -30,13 +30,13 @@ use std::os::raw::c_char;
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Cursor<Vec<u8>>) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Cursor<Vec<u8>>) { unsafe {
     if ptr.is_null() {
         return;
     }
     drop(Box::from_raw(ptr));
-}
+}}
 
 /// Creates a new `Cursor<Vec<u8>>` from a raw pointer to a byte array.
 ///
@@ -52,14 +52,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free(ptr: *mut Cursor<Vec<u8>>) {
 /// # Returns
 ///
 /// A raw pointer to a `Cursor<Vec<u8>>`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_new(
     data: *const u8,
     length: usize,
-) -> *mut Cursor<Vec<u8>> {
+) -> *mut Cursor<Vec<u8>> { unsafe {
     let libp2p_cdr_buffer = Cursor::new(slice::from_raw_parts(data, length).to_vec());
     Box::into_raw(Box::new(libp2p_cdr_buffer))
-}
+}}
 
 /// Reads a `u64` from a `Cursor<Vec<u8>>`.
 ///
@@ -75,15 +75,15 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_new(
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint64(ptr: *mut Cursor<Vec<u8>>, n: *mut u64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint64(ptr: *mut Cursor<Vec<u8>>, n: *mut u64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     let x = cdr::deserialize_from::<_, u64, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
     *n = x
-}
+}}
 
 /// Reads a `u32` from a `Cursor<Vec<u8>>`.
 ///
@@ -99,14 +99,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint64(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint32(ptr: *mut Cursor<Vec<u8>>, n: *mut u32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint32(ptr: *mut Cursor<Vec<u8>>, n: *mut u32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, u32, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `u16` from a `Cursor<Vec<u8>>`.
 ///
@@ -122,14 +122,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint32(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint16(ptr: *mut Cursor<Vec<u8>>, n: *mut u16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint16(ptr: *mut Cursor<Vec<u8>>, n: *mut u16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, u16, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `u8` from a `Cursor<Vec<u8>>`.
 ///
@@ -145,14 +145,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint16(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint8(ptr: *mut Cursor<Vec<u8>>, n: *mut u8) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint8(ptr: *mut Cursor<Vec<u8>>, n: *mut u8) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, u8, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `i64` from a `Cursor<Vec<u8>>`.
 ///
@@ -168,14 +168,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_uint8(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int64(ptr: *mut Cursor<Vec<u8>>, n: *mut i64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int64(ptr: *mut Cursor<Vec<u8>>, n: *mut i64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, i64, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `i32` from a `Cursor<Vec<u8>>`.
 ///
@@ -191,14 +191,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int64(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int32(ptr: *mut Cursor<Vec<u8>>, n: *mut i32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int32(ptr: *mut Cursor<Vec<u8>>, n: *mut i32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, i32, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `i16` from a `Cursor<Vec<u8>>`.
 ///
@@ -214,14 +214,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int32(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int16(ptr: *mut Cursor<Vec<u8>>, n: *mut i16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int16(ptr: *mut Cursor<Vec<u8>>, n: *mut i16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, i16, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `i8` from a `Cursor<Vec<u8>>`.
 ///
@@ -237,14 +237,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int16(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int8(ptr: *mut Cursor<Vec<u8>>, n: *mut i8) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int8(ptr: *mut Cursor<Vec<u8>>, n: *mut i8) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, i8, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `c_char` from a `Cursor<Vec<u8>>`.
 ///
@@ -260,14 +260,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_int8(ptr: *mut Cursor<Vec<u8>
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char(ptr: *mut Cursor<Vec<u8>>, n: *mut c_char) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char(ptr: *mut Cursor<Vec<u8>>, n: *mut c_char) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, c_char, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a 16-bit `c_char` from a `Cursor<Vec<u8>>`.
 ///
@@ -283,14 +283,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char(ptr: *mut Cursor<Vec<u8>
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char16(ptr: *mut Cursor<Vec<u8>>, n: *mut u16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char16(ptr: *mut Cursor<Vec<u8>>, n: *mut u16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, u16, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `float` from a `Cursor<Vec<u8>>`.
 ///
@@ -306,14 +306,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_char16(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_float(ptr: *mut Cursor<Vec<u8>>, n: *mut f32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_float(ptr: *mut Cursor<Vec<u8>>, n: *mut f32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, f32, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `double` from a `Cursor<Vec<u8>>`.
 ///
@@ -329,14 +329,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_float(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_double(ptr: *mut Cursor<Vec<u8>>, n: *mut f64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_double(ptr: *mut Cursor<Vec<u8>>, n: *mut f64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, f64, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Reads a `bool` from a `Cursor<Vec<u8>>`.
 ///
@@ -352,14 +352,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_double(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>>, n: *mut bool) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>>, n: *mut bool) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     *n = cdr::deserialize_from::<_, bool, _>(libp2p_cdr_buffer, cdr::Infinite).unwrap();
-}
+}}
 
 /// Deserializes a `CString` from a `Cursor<Vec<u8>>` and stores the raw pointer and length of the string.
 ///
@@ -376,12 +376,12 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_bool(ptr: *mut Cursor<Vec<u8>
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_string(
     ptr: *mut Cursor<Vec<u8>>,
     s: *mut *const c_char,
     size: *mut usize,
-) {
+) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -392,7 +392,7 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_string(
     if *size != 0 {
         *s = cs.into_raw();
     }
-}
+}}
 
 /// Frees a `CString` from memory.
 ///
@@ -407,13 +407,13 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_string(
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_string(s: *mut c_char) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_string(s: *mut c_char) { unsafe {
     if s.is_null() {
         return;
     }
     let _ = CString::from_raw(s);
-}
+}}
 
 /// Frees a `u16` string from memory.
 ///
@@ -429,13 +429,13 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_string(s: *mut c_char) {
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_u16string(s: *mut u16, size: usize) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_u16string(s: *mut u16, size: usize) { unsafe {
     if s.is_null() {
         return;
     }
     let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(s, size));
-}
+}}
 
 /// Reads a `u16` string from a `Cursor<Vec<u8>>`.
 ///
@@ -452,12 +452,12 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_free_u16string(s: *mut u16, size: 
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_u16string(
     ptr: *mut Cursor<Vec<u8>>,
     s: *mut *const u16,
     size: *mut usize,
-) {
+) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -469,7 +469,7 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_u16string(
         let boxed = cs.into_boxed_slice();
         *s = Box::into_raw(boxed) as *const u16;
     }
-}
+}}
 
 /// Creates a new `Cursor<Vec<u8>>` to write to.
 ///
@@ -480,7 +480,7 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_read_u16string(
 /// # Returns
 ///
 /// A raw pointer to a `Cursor<Vec<u8>>`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_new() -> *mut Cursor<Vec<u8>> {
     let libp2p_cdr_buffer = Cursor::new(Vec::<u8>::new());
     Box::into_raw(Box::new(libp2p_cdr_buffer))
@@ -503,14 +503,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_new() -> *mut Cursor<Vec<u8>
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint64(ptr: *mut Cursor<Vec<u8>>, n: u64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint64(ptr: *mut Cursor<Vec<u8>>, n: u64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `u32` to a `Cursor<Vec<u8>>`.
 ///
@@ -529,14 +529,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint64(ptr: *mut Cursor<Vec<
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint32(ptr: *mut Cursor<Vec<u8>>, n: u32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint32(ptr: *mut Cursor<Vec<u8>>, n: u32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `u16` to a `Cursor<Vec<u8>>`.
 ///
@@ -555,14 +555,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint32(ptr: *mut Cursor<Vec<
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint16(ptr: *mut Cursor<Vec<u8>>, n: u16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint16(ptr: *mut Cursor<Vec<u8>>, n: u16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `u8` to a `Cursor<Vec<u8>>`.
 ///
@@ -581,14 +581,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint16(ptr: *mut Cursor<Vec<
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint8(ptr: *mut Cursor<Vec<u8>>, n: u8) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint8(ptr: *mut Cursor<Vec<u8>>, n: u8) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `i64` to a `Cursor<Vec<u8>>`.
 ///
@@ -607,14 +607,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_uint8(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int64(ptr: *mut Cursor<Vec<u8>>, n: i64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int64(ptr: *mut Cursor<Vec<u8>>, n: i64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `i32` to a `Cursor<Vec<u8>>`.
 ///
@@ -633,14 +633,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int64(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int32(ptr: *mut Cursor<Vec<u8>>, n: i32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int32(ptr: *mut Cursor<Vec<u8>>, n: i32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `i16` to a `Cursor<Vec<u8>>`.
 ///
@@ -659,14 +659,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int32(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int16(ptr: *mut Cursor<Vec<u8>>, n: i16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int16(ptr: *mut Cursor<Vec<u8>>, n: i16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `i8` to a `Cursor<Vec<u8>>`.
 ///
@@ -685,14 +685,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int16(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int8(ptr: *mut Cursor<Vec<u8>>, n: i8) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int8(ptr: *mut Cursor<Vec<u8>>, n: i8) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `c_char` to a `Cursor<Vec<u8>>`.
 ///
@@ -711,14 +711,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_int8(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char(ptr: *mut Cursor<Vec<u8>>, n: c_char) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char(ptr: *mut Cursor<Vec<u8>>, n: c_char) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a 16-bit `char` to a `Cursor<Vec<u8>>`.
 ///
@@ -737,14 +737,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char16(ptr: *mut Cursor<Vec<u8>>, n: u16) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char16(ptr: *mut Cursor<Vec<u8>>, n: u16) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `float` to a `Cursor<Vec<u8>>`.
 ///
@@ -763,14 +763,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_char16(ptr: *mut Cursor<Vec<
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_float(ptr: *mut Cursor<Vec<u8>>, n: f32) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_float(ptr: *mut Cursor<Vec<u8>>, n: f32) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `double` to a `Cursor<Vec<u8>>`.
 ///
@@ -789,14 +789,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_float(ptr: *mut Cursor<Vec<u
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_double(ptr: *mut Cursor<Vec<u8>>, n: f64) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_double(ptr: *mut Cursor<Vec<u8>>, n: f64) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a `bool` to a `Cursor<Vec<u8>>`.
 ///
@@ -815,14 +815,14 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_double(ptr: *mut Cursor<Vec<
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8>>, n: bool) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8>>, n: bool) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
     };
     cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &n, cdr::Infinite).unwrap();
-}
+}}
 
 /// Writes a string to a `Cursor<Vec<u8>>`.
 ///
@@ -842,12 +842,12 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_bool(ptr: *mut Cursor<Vec<u8
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_string(
     ptr: *mut Cursor<Vec<u8>>,
     s: *const c_char,
     size: usize,
-) {
+) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -863,7 +863,7 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_string(
         cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &cstring, cdr::Infinite)
             .unwrap();
     }
-}
+}}
 
 /// Writes a u16 string to a `Cursor<Vec<u8>>`.
 ///
@@ -883,12 +883,12 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_string(
 /// # Panics
 ///
 /// This function will panic if the provided pointer is null.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_u16string(
     ptr: *mut Cursor<Vec<u8>>,
     s: *const u16,
     size: usize,
-) {
+) { unsafe {
     let libp2p_cdr_buffer = {
         assert!(!ptr.is_null());
         &mut *ptr
@@ -903,7 +903,7 @@ pub unsafe extern "C" fn rs_libp2p_cdr_buffer_write_u16string(
         let vec: Vec<u16> = slice.to_vec();
         cdr::serialize_into::<_, _, _, cdr::CdrBe>(libp2p_cdr_buffer, &vec, cdr::Infinite).unwrap();
     }
-}
+}}
 
 #[cfg(test)]
 mod tests {

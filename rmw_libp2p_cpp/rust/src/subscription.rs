@@ -134,13 +134,13 @@ impl Libp2pCustomSubscription {
 ///
 /// This function will panic if `topic_str_ptr` is null or if it does not point to a valid null-terminated string.
 #[allow(private_interfaces)]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
     ptr_node: *mut Libp2pCustomNode,
     topic_str_ptr: *const c_char,
     obj: CustomSubscriptionHandle,
     callback: unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
-) -> *mut Libp2pCustomSubscription {
+) -> *mut Libp2pCustomSubscription { unsafe {
     let topic_str = {
         assert!(!topic_str_ptr.is_null());
         CStr::from_ptr(topic_str_ptr)
@@ -149,7 +149,7 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
     let libp2p_custom_subscription =
         Libp2pCustomSubscription::new(ptr_node, topic_str.to_str().unwrap(), obj, callback);
     Box::into_raw(Box::new(libp2p_custom_subscription))
-}
+}}
 
 /// Frees a `Libp2pCustomSubscription` from memory.
 ///
@@ -167,15 +167,15 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_new(
 /// # Panics
 ///
 /// This function will panic if the provided pointer has been previously deallocated or was not returned by `rs_libp2p_custom_subscription_new`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
     ptr_subscription: *mut Libp2pCustomSubscription,
-) {
+) { unsafe {
     if ptr_subscription.is_null() {
         return;
     }
     let _ = Box::from_raw(ptr_subscription);
-}
+}}
 
 /// Gets the GID of a `Libp2pCustomSubscription`.
 ///
@@ -198,11 +198,11 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_free(
 /// # Panics
 ///
 /// This function will panic if `ptr_subscription` is null.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn rs_libp2p_custom_subscription_get_gid(
     ptr_subscription: *mut Libp2pCustomSubscription,
     buf: *mut std::os::raw::c_uchar,
-) -> usize {
+) -> usize { unsafe {
     let libp2p_custom_subscription = {
         assert!(!ptr_subscription.is_null());
         &mut *ptr_subscription
@@ -211,7 +211,7 @@ pub unsafe extern "C" fn rs_libp2p_custom_subscription_get_gid(
     let count = gid_bytes.len();
     std::ptr::copy_nonoverlapping(gid_bytes.as_ptr(), buf, count);
     count
-}
+}}
 
 #[cfg(test)]
 mod tests {

@@ -375,7 +375,7 @@ impl Drop for Libp2pCustomNode {
 /// # Returns
 ///
 /// A raw pointer to a `Libp2pCustomNode`.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
     Box::into_raw(Box::new(Libp2pCustomNode::new()))
 }
@@ -391,13 +391,13 @@ pub extern "C" fn rs_libp2p_custom_node_new() -> *mut Libp2pCustomNode {
 /// # Arguments
 ///
 /// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
-#[no_mangle]
-pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) { unsafe {
     if ptr.is_null() {
         return;
     }
     let _ = Box::from_raw(ptr);
-}
+}}
 
 #[cfg(test)]
 mod tests {

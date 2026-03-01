@@ -41,6 +41,9 @@ rs_libp2p_custom_node_new();
 extern void
 rs_libp2p_custom_node_free(rs_libp2p_custom_node_t *);
 
+extern void
+rs_libp2p_trigger_shutdown(rs_libp2p_custom_node_t *);
+
 extern rs_libp2p_custom_publisher_t *
 rs_libp2p_custom_publisher_new(rs_libp2p_custom_node_t *, const char *);
 

@@ -29,6 +29,7 @@
 #include "impl/identifier.hpp"
 #include "impl/custom_node_info.hpp"
 #include "impl/rmw_libp2p_rs.hpp"
+#include "impl/signal_handler.hpp"
 
 extern "C"
 {
@@ -108,6 +109,9 @@ rmw_create_node(
     goto fail;
   }
 
+  // Register node for SIGINT handling
+  rmw_libp2p_cpp::register_node_for_shutdown(node_impl->node_handle_);
+
   // Assign ROS context
   node_handle->context = context;
 
@@ -145,6 +149,8 @@ rmw_destroy_node(
   auto impl = static_cast<rmw_libp2p_cpp::CustomNodeInfo *>(node->data);
   if (impl) {
     if (impl->node_handle_) {
+      // Unregister from SIGINT handling before freeing
+      rmw_libp2p_cpp::unregister_node_for_shutdown(impl->node_handle_);
       rs_libp2p_custom_node_free(impl->node_handle_);
     }
     if (impl->graph_guard_condition_) {

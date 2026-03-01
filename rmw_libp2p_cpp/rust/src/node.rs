@@ -949,7 +949,7 @@ mod tests {
         let node = Libp2pCustomNode::new_test_only();
 
         // Shutdown flag should be false initially
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+        assert!(!node.shutdown_flag.load(Ordering::SeqCst));
     }
 
     #[test]
@@ -957,7 +957,7 @@ mod tests {
         let node = Libp2pCustomNode::new_test_only();
 
         // Verify initial state
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+        assert!(!node.shutdown_flag.load(Ordering::SeqCst));
 
         // Get raw pointer
         let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
@@ -966,7 +966,7 @@ mod tests {
         unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
 
         // Verify shutdown flag is set
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
     }
 
     #[test]
@@ -1001,7 +1001,7 @@ mod tests {
         }
 
         // Shutdown flag should be set
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
     }
 
     #[test]
@@ -1033,14 +1033,14 @@ mod tests {
         let node = Libp2pCustomNode::new();
 
         // Verify shutdown flag starts as false
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+        assert!(!node.shutdown_flag.load(Ordering::SeqCst));
 
         // Trigger shutdown programmatically (simulates SIGINT handler)
         let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
         unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
 
         // Verify flag was set
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
 
         // Allow time for graceful shutdown to begin
         std::thread::sleep(Duration::from_millis(100));
@@ -1120,7 +1120,7 @@ mod tests {
         }
 
         // Should still be true (idempotent)
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
 
         drop(node);
     }
@@ -1132,17 +1132,17 @@ mod tests {
 
         // Test all orderings work correctly
         node.shutdown_flag.store(true, Ordering::SeqCst);
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
 
         node.shutdown_flag.store(false, Ordering::SeqCst);
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+        assert!(!node.shutdown_flag.load(Ordering::SeqCst));
 
         // Test compare-exchange (used in some shutdown scenarios)
         let result =
             node.shutdown_flag
                 .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
         assert!(result.is_ok());
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
     }
 
     #[test]
@@ -1164,7 +1164,7 @@ mod tests {
         unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
 
         // Verify flag is set
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
 
         // Free node (should complete graceful shutdown)
         unsafe { rs_libp2p_custom_node_free(node_ptr) };
@@ -1186,7 +1186,7 @@ mod tests {
         unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
 
         // Verify flag is set
-        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+        assert!(node.shutdown_flag.load(Ordering::SeqCst));
 
         let start = Instant::now();
 

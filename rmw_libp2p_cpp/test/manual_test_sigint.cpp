@@ -107,7 +107,8 @@ int main(int argc, char ** argv)
     return 1;
   }
 
-  printf("Node created successfully: %s in namespace %s\n",
+  printf(
+    "Node created successfully: %s in namespace %s\n",
     node->name, node->namespace_);
   printf("Node running, press Ctrl+C to stop...\n\n");
   fflush(stdout);

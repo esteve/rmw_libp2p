@@ -131,6 +131,20 @@ if(BUILD_TESTING)
       "rmw"
     )
   endif()
+
+  # Manual integration test for SIGINT handling
+  # This is not a gtest - it's a standalone executable for manual testing
+  add_executable(manual_test_sigint test/manual_test_sigint.cpp)
+  target_link_libraries(manual_test_sigint rmw_libp2p_cpp)
+  ament_target_dependencies(manual_test_sigint
+    "rcpputils"
+    "rcutils"
+    "rmw"
+  )
+
+  install(TARGETS manual_test_sigint
+    DESTINATION lib/${PROJECT_NAME}
+  )
 endif()
 
 ament_export_include_directories(include)

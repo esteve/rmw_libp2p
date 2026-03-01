@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <csignal>
+#include <cstdlib>
+#include <mutex>
+#include <set>
+
 #include "rcutils/logging_macros.h"
 
 #include "rmw/impl/cpp/macros.hpp"
@@ -24,6 +29,66 @@
 #include "impl/identifier.hpp"
 
 #include "impl/rmw_libp2p_rs.hpp"
+
+namespace
+{
+// Global registry of active libp2p nodes for signal handling
+std::mutex g_nodes_mutex;
+std::set<rs_libp2p_custom_node_t *> g_active_nodes;
+bool g_signal_handler_installed = false;
+
+// Signal handler for graceful shutdown
+void sigint_handler(int signum)
+{
+  (void)signum;
+  std::lock_guard<std::mutex> lock(g_nodes_mutex);
+  RCUTILS_LOG_INFO_NAMED(
+    "rmw_libp2p_cpp",
+    "SIGINT received, triggering shutdown of %zu libp2p nodes",
+    g_active_nodes.size());
+
+  for (auto * node : g_active_nodes) {
+    if (node) {
+      rs_libp2p_trigger_shutdown(node);
+    }
+  }
+  exit(0);
+}
+}  // anonymous namespace
+
+namespace rmw_libp2p_cpp
+{
+
+void register_node_for_shutdown(rs_libp2p_custom_node_t * node)
+{
+  if (!node) {
+    return;
+  }
+
+  std::lock_guard<std::mutex> lock(g_nodes_mutex);
+  g_active_nodes.insert(node);
+
+  // Install signal handler on first node registration
+  if (!g_signal_handler_installed) {
+    std::signal(SIGINT, sigint_handler);
+    g_signal_handler_installed = true;
+    RCUTILS_LOG_DEBUG_NAMED(
+      "rmw_libp2p_cpp",
+      "Installed SIGINT handler for libp2p nodes");
+  }
+}
+
+void unregister_node_for_shutdown(rs_libp2p_custom_node_t * node)
+{
+  if (!node) {
+    return;
+  }
+
+  std::lock_guard<std::mutex> lock(g_nodes_mutex);
+  g_active_nodes.erase(node);
+}
+
+}  // namespace rmw_libp2p_cpp
 
 extern "C"
 {

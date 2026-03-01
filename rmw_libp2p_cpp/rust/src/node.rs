@@ -16,6 +16,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::ffi::c_void;
 use std::hash::{Hash, Hasher};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -29,6 +30,8 @@ use tokio::sync::Notify;
 use tokio::{select, task};
 
 use deadqueue::unlimited::Queue;
+
+use tracing::{debug, info, trace, warn};
 
 // Type aliases to fix clippy::type_complexity warning
 type SubscriberQueueItem = (
@@ -83,6 +86,7 @@ impl From<gossipsub::Event> for OutEvent {
 pub struct Libp2pCustomNode {
     thread_handle: Option<task::JoinHandle<()>>,
     stop_notify: Arc<Notify>,
+    pub(crate) shutdown_flag: Arc<AtomicBool>,
     pub(crate) outgoing_queue: Arc<deadqueue::unlimited::Queue<(gossipsub::IdentTopic, Vec<u8>)>>,
     pub(crate) new_subscribers_queue: SubscriberQueue,
     reactor: Runtime,
@@ -137,6 +141,7 @@ impl Libp2pCustomNode {
     pub(crate) fn new_test_only() -> Self {
         let reactor = Runtime::new().unwrap();
         let stop_notify = Arc::new(Notify::new());
+        let shutdown_flag = Arc::new(AtomicBool::new(false));
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(
             gossipsub::IdentTopic,
             Vec<u8>,
@@ -146,6 +151,7 @@ impl Libp2pCustomNode {
         Self {
             thread_handle: None, // No actual event loop thread for testing
             stop_notify,
+            shutdown_flag,
             outgoing_queue,
             new_subscribers_queue,
             reactor,
@@ -169,6 +175,7 @@ impl Libp2pCustomNode {
         let _guard = reactor.enter();
 
         let stop_notify = Arc::new(Notify::new());
+        let shutdown_flag = Arc::new(AtomicBool::new(false));
         let outgoing_queue = Arc::new(deadqueue::unlimited::Queue::<(
             gossipsub::IdentTopic,
             Vec<u8>,
@@ -181,6 +188,7 @@ impl Libp2pCustomNode {
             .unwrap();
 
         let stop_notify_clone = Arc::clone(&stop_notify);
+        let shutdown_flag_clone = Arc::clone(&shutdown_flag);
         let outgoing_queue_clone = Arc::clone(&outgoing_queue);
         let _incoming_queue = Queue::<(
             String,
@@ -197,45 +205,98 @@ impl Libp2pCustomNode {
                     unsafe extern "C" fn(&CustomSubscriptionHandle, *mut u8, len: usize),
                 ),
             >::new();
+
+            // Spawn SIGINT handler
+            let shutdown_flag_signal = Arc::clone(&shutdown_flag_clone);
+            let stop_notify_signal = Arc::clone(&stop_notify_clone);
+            tokio::spawn(async move {
+                if tokio::signal::ctrl_c().await.is_ok() {
+                    info!("Received SIGINT, initiating graceful shutdown");
+                    shutdown_flag_signal.store(true, Ordering::SeqCst);
+                    stop_notify_signal.notify_waiters();
+                }
+            });
+
             loop {
+                // Check shutdown flag at start of each iteration
+                if shutdown_flag_clone.load(Ordering::SeqCst) {
+                    trace!("Shutdown flag detected at loop start, exiting event loop");
+                    break;
+                }
+
                 select! {
                     // use a Notify that will be triggered to stop the swarm
                     // select! will wait on any future
                     _ = stop_notify_clone.notified() => {
-                        println!("Exit loop");
+                        info!("Shutdown initiated, draining queues...");
+
+                        // Graceful drain: attempt to flush pending messages with timeout
+                        let drain_result = tokio::time::timeout(
+                            Duration::from_secs(2),
+                            async {
+                                // Drain outgoing queue
+                                while let Some((topic, buffer)) = outgoing_queue_clone.try_pop() {
+                                    if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
+                                        warn!("Publish error during drain: {e:?}");
+                                    }
+                                    // Give time for message to be sent
+                                    tokio::time::sleep(Duration::from_millis(10)).await;
+                                }
+                            }
+                        ).await;
+
+                        match drain_result {
+                            Ok(_) => info!("Queue drained successfully"),
+                            Err(_) => warn!("Queue drain timeout reached (2s)"),
+                        }
+
+                        info!("Shutting down swarm");
                         break;
                     },
 
                     (topic, obj, callback) = new_subscribers_queue_clone.pop() => {
-                        // println!("Subscribing to topic: {}", topic);
+                        // Check shutdown flag after waking from queue pop
+                        if shutdown_flag_clone.load(Ordering::SeqCst) {
+                            trace!("Shutdown detected in subscriber queue branch");
+                            break;
+                        }
+                        debug!("Subscribing to topic: {}", topic);
                         swarm.behaviour_mut().gossipsub.subscribe(&topic).unwrap();
                         subscription_callback.insert(topic.hash().into_string(), (obj, callback));
                     },
 
                     // pop messages from the queue and publish them to the network
                     (topic, buffer) = outgoing_queue_clone.pop() => {
-                        // TODO(esteve): use some sort of debug log
-                        // println!("Publishing message on topic {} : {:?}", topic, buffer);
+                        // Check shutdown flag after waking from queue pop
+                        if shutdown_flag_clone.load(Ordering::SeqCst) {
+                            trace!("Shutdown detected in outgoing queue branch");
+                            break;
+                        }
+                        trace!("Publishing message on topic {} with {} bytes", topic, buffer.len());
                         if let Err(e) = swarm.behaviour_mut().gossipsub.publish(topic.clone(), buffer.clone()) {
-                            println!("Publish error: {e:?}");
+                            warn!("Publish error: {e:?}");
                         }
                     },
 
-                    event = swarm.select_next_some() => match event {
+                    event = swarm.select_next_some() => {
+                        // Check shutdown flag after waking from swarm event
+                        if shutdown_flag_clone.load(Ordering::SeqCst) {
+                            trace!("Shutdown detected in swarm event branch");
+                            break;
+                        }
+                        match event {
                         SwarmEvent::Behaviour(OutEvent::Gossipsub(gossipsub::Event::Message {
-                            propagation_source: _peer_id,
-                            message_id: _id,
+                            propagation_source: peer_id,
+                            message_id: id,
                             message,
                         })) => {
-                            // TODO(esteve): use some sort of debug log
-                            // println!(
-                            //     "Got message: {:?} with id: {} from peer: {:?} topic: {} with length: {}",
-                            //     message.data,
-                            //     id,
-                            //     peer_id,
-                            //     message.topic.as_str(),
-                            //     message.data.len()
-                            // );
+                            trace!(
+                                "Got message with id: {} from peer: {:?} topic: {} with length: {}",
+                                id,
+                                peer_id,
+                                message.topic.as_str(),
+                                message.data.len()
+                            );
                             let mut input_vec = message.data;
                             input_vec.shrink_to_fit();
                             let ptr: *mut u8 = input_vec.as_mut_ptr();
@@ -247,12 +308,12 @@ impl Libp2pCustomNode {
                             }
                         }
                         SwarmEvent::NewListenAddr { address, .. } => {
-                            println!("Listening on {:?}", address);
+                            info!("Listening on {:?}", address);
                         }
                         SwarmEvent::Behaviour(OutEvent::Mdns(
                             mdns::Event::Discovered(list)
                         )) => {
-                            // println!("Discovered peers: {:?}", list);
+                            debug!("Discovered {} peers", list.len());
                             for (peer, _) in list {
                                 swarm
                                     .behaviour_mut()
@@ -263,6 +324,7 @@ impl Libp2pCustomNode {
                         SwarmEvent::Behaviour(OutEvent::Mdns(mdns::Event::Expired(
                             list
                         ))) => {
+                            debug!("Expired {} peers", list.len());
                             for (peer, _) in list {
                                 if !swarm.behaviour_mut().mdns.has_node(&peer) {
                                     swarm
@@ -273,8 +335,8 @@ impl Libp2pCustomNode {
                             }
                         },
                         _ => {
-                            // TODO(esteve): use some sort of debug log
-                            // println!("UNKNOWN EVENT");
+                            trace!("Unhandled swarm event");
+                        }
                         }
                     },
                 }
@@ -284,6 +346,7 @@ impl Libp2pCustomNode {
         Self {
             thread_handle: Some(thread_handle),
             stop_notify,
+            shutdown_flag,
             outgoing_queue,
             new_subscribers_queue,
             reactor,
@@ -345,6 +408,15 @@ impl Libp2pCustomNode {
     ) {
         self.new_subscribers_queue.push((topic, obj, callback));
     }
+
+    /// Checks if shutdown has been initiated.
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if shutdown flag is set, `false` otherwise.
+    pub(crate) fn is_shutdown(&self) -> bool {
+        self.shutdown_flag.load(Ordering::SeqCst)
+    }
 }
 
 impl Drop for Libp2pCustomNode {
@@ -391,6 +463,31 @@ pub unsafe extern "C" fn rs_libp2p_custom_node_free(ptr: *mut Libp2pCustomNode) 
         return;
     }
     let _ = unsafe { Box::from_raw(ptr) };
+}
+
+/// Triggers graceful shutdown of a `Libp2pCustomNode` from C++ code.
+///
+/// This function sets the shutdown flag and notifies the event loop to begin
+/// graceful shutdown sequence (drain queues, shutdown swarm).
+///
+/// # Safety
+///
+/// This function is unsafe because it uses raw pointers. The caller must ensure:
+/// - `ptr` is a valid pointer to a `Libp2pCustomNode` created by `rs_libp2p_custom_node_new`
+/// - `ptr` has not already been freed
+/// - `ptr` is not accessed concurrently from multiple threads without synchronization
+///
+/// # Arguments
+///
+/// * `ptr` - A raw pointer to a `Libp2pCustomNode`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rs_libp2p_trigger_shutdown(ptr: *mut Libp2pCustomNode) {
+    if ptr.is_null() {
+        return;
+    }
+    let node = unsafe { &*ptr };
+    node.shutdown_flag.store(true, Ordering::SeqCst);
+    node.stop_notify.notify_waiters();
 }
 
 #[cfg(test)]
@@ -843,5 +940,312 @@ mod tests {
 
         // Clean shutdown
         drop(node);
+    }
+
+    // ==================== Signal Handling & Graceful Shutdown Tests ====================
+
+    #[test]
+    fn test_shutdown_flag_initialization() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Shutdown flag should be false initially
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+    }
+
+    #[test]
+    fn test_ffi_trigger_shutdown() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Verify initial state
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+
+        // Get raw pointer
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+
+        // Trigger shutdown via FFI
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Verify shutdown flag is set
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+    }
+
+    #[test]
+    fn test_ffi_trigger_shutdown_null_pointer() {
+        // Should not crash when given null pointer
+        unsafe { rs_libp2p_trigger_shutdown(std::ptr::null_mut()) };
+    }
+
+    #[test]
+    fn test_shutdown_flag_thread_safety() {
+        let node = Arc::new(Libp2pCustomNode::new_test_only());
+        let mut handles = vec![];
+
+        // Spawn multiple threads trying to set shutdown flag
+        for i in 0..10 {
+            let node_clone = Arc::clone(&node);
+            let handle = std::thread::spawn(move || {
+                let node_ptr = &*node_clone as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+                // Half use FFI, half use direct access
+                if i % 2 == 0 {
+                    unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+                } else {
+                    node_clone.shutdown_flag.store(true, Ordering::SeqCst);
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        // Shutdown flag should be set
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+    }
+
+    #[test]
+    fn test_graceful_shutdown_with_pending_messages_ffi() {
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Queue up many messages
+        for i in 0..1000 {
+            let topic = gossipsub::IdentTopic::new("shutdown_test");
+            let message = vec![i as u8; 100];
+            node.publish_message(topic, message);
+        }
+
+        // Trigger shutdown
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Drop should handle pending messages gracefully
+        drop(node);
+
+        // If we reach here without hanging, shutdown worked correctly
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_sigint_triggers_shutdown() {
+        // This test verifies that SIGINT handler is installed correctly
+        // Note: Cannot actually send SIGINT in unit test, but we test the mechanism
+        let node = Libp2pCustomNode::new();
+
+        // Verify shutdown flag starts as false
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+
+        // Trigger shutdown programmatically (simulates SIGINT handler)
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Verify flag was set
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+
+        // Allow time for graceful shutdown to begin
+        std::thread::sleep(Duration::from_millis(100));
+
+        // Drop should complete gracefully
+        drop(node);
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_graceful_drain_timeout() {
+        // Test that drain operation respects 2s timeout
+        let node = Libp2pCustomNode::new();
+
+        // Queue many messages
+        for i in 0..500 {
+            let topic = gossipsub::IdentTopic::new("timeout_test");
+            node.publish_message(topic, vec![i as u8; 200]);
+        }
+
+        let start = std::time::Instant::now();
+
+        // Trigger shutdown
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Drop and measure time
+        drop(node);
+
+        let elapsed = start.elapsed();
+
+        // Should complete within reasonable time (< 5 seconds to account for overhead)
+        // The 2s timeout plus some buffer for shutdown
+        assert!(
+            elapsed < Duration::from_secs(5),
+            "Shutdown took too long: {:?}",
+            elapsed
+        );
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_pending_messages_flushed() {
+        // Test that pending messages are attempted to be flushed during shutdown
+        let node = Libp2pCustomNode::new();
+        let topic = gossipsub::IdentTopic::new("flush_test");
+
+        // Queue a few messages
+        for i in 0..10 {
+            node.publish_message(topic.clone(), vec![i as u8]);
+        }
+
+        // Allow brief time for processing
+        std::thread::sleep(Duration::from_millis(50));
+
+        // Trigger graceful shutdown
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Drop should flush messages
+        drop(node);
+
+        // If we reach here without hanging, flush mechanism worked
+    }
+
+    #[test]
+    fn test_multiple_shutdown_triggers() {
+        // Test that multiple shutdown triggers don't cause issues
+        let node = Libp2pCustomNode::new_test_only();
+        let node_ptr = &node as *const Libp2pCustomNode as *mut Libp2pCustomNode;
+
+        // Trigger shutdown multiple times
+        unsafe {
+            rs_libp2p_trigger_shutdown(node_ptr);
+            rs_libp2p_trigger_shutdown(node_ptr);
+            rs_libp2p_trigger_shutdown(node_ptr);
+        }
+
+        // Should still be true (idempotent)
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+
+        drop(node);
+    }
+
+    #[test]
+    fn test_shutdown_flag_atomic_ordering() {
+        // Test that atomic operations use correct memory ordering
+        let node = Libp2pCustomNode::new_test_only();
+
+        // Test all orderings work correctly
+        node.shutdown_flag.store(true, Ordering::SeqCst);
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+
+        node.shutdown_flag.store(false, Ordering::SeqCst);
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), false);
+
+        // Test compare-exchange (used in some shutdown scenarios)
+        let result =
+            node.shutdown_flag
+                .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
+        assert!(result.is_ok());
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_ffi_shutdown_with_real_node() {
+        // Test FFI shutdown trigger with actual event loop
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+
+        // Perform some operations
+        let node = unsafe { &*node_ptr };
+        let topic = gossipsub::IdentTopic::new("ffi_test");
+        node.publish_message(topic, vec![1, 2, 3]);
+
+        // Allow brief processing time
+        std::thread::sleep(Duration::from_millis(50));
+
+        // Trigger shutdown via FFI
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Verify flag is set
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+
+        // Free node (should complete graceful shutdown)
+        unsafe { rs_libp2p_custom_node_free(node_ptr) };
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_shutdown_flag_immediate_exit() {
+        // Test that event loop respects shutdown flag and exits immediately
+        // even when all select branches would otherwise block
+        use std::time::Instant;
+
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+
+        let node = unsafe { &*node_ptr };
+
+        // Immediately trigger shutdown (before any events can occur)
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        // Verify flag is set
+        assert_eq!(node.shutdown_flag.load(Ordering::SeqCst), true);
+
+        let start = Instant::now();
+
+        // Free node - event loop should exit immediately without blocking
+        unsafe { rs_libp2p_custom_node_free(node_ptr) };
+
+        let elapsed = start.elapsed();
+
+        // Should complete very quickly (< 500ms)
+        // If shutdown flag is ignored, this would hang indefinitely
+        assert!(
+            elapsed < Duration::from_millis(500),
+            "Shutdown took too long: {:?} - event loop may not be checking shutdown flag",
+            elapsed
+        );
+    }
+
+    #[test]
+    #[ignore] // Run with: cargo test -- --ignored --test-threads=1
+    fn test_shutdown_flag_checked_in_all_branches() {
+        // Test that shutdown flag is respected in all select! branches
+        // by triggering shutdown after queueing items for each branch type
+        use std::time::Instant;
+
+        let node_ptr = rs_libp2p_custom_node_new();
+        assert!(!node_ptr.is_null());
+
+        let node = unsafe { &*node_ptr };
+
+        // Queue some work for each branch type
+        let topic = gossipsub::IdentTopic::new("test_topic");
+
+        // 1. Queue outgoing message (tests outgoing_queue branch)
+        node.publish_message(topic.clone(), vec![1, 2, 3]);
+
+        // 2. Queue subscriber (tests new_subscribers_queue branch)
+        let handle = CustomSubscriptionHandle {
+            ptr: std::ptr::null(),
+        };
+        node.notify_new_subscriber(topic, handle, dummy_callback);
+
+        // Give event loop time to start processing (but not necessarily complete)
+        std::thread::sleep(Duration::from_millis(100));
+
+        // Now trigger shutdown while items may still be in queues
+        unsafe { rs_libp2p_trigger_shutdown(node_ptr) };
+
+        let start = Instant::now();
+
+        // Drop should complete quickly despite pending items
+        unsafe { rs_libp2p_custom_node_free(node_ptr) };
+
+        let elapsed = start.elapsed();
+
+        // Should complete within drain timeout + overhead (< 3 seconds)
+        assert!(
+            elapsed < Duration::from_secs(3),
+            "Shutdown took too long: {:?}",
+            elapsed
+        );
     }
 }

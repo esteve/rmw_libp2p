@@ -58,11 +58,20 @@ impl Libp2pCustomPublisher {
     /// # Arguments
     ///
     /// * `buffer` - The buffer containing the message to be published.
-    fn publish(&mut self, buffer: Vec<u8>) {
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the message was queued for publishing, `false` if shutdown is in progress.
+    fn publish(&mut self, buffer: Vec<u8>) -> bool {
         let libp2p_custom_node = unsafe {
             assert!(!self.node.is_null());
             &mut *self.node
         };
+
+        // Check shutdown flag before publishing
+        if libp2p_custom_node.is_shutdown() {
+            return false;
+        }
 
         let mut out_buffer = Vec::<u8>::new();
 
@@ -81,6 +90,7 @@ impl Libp2pCustomPublisher {
         out_buffer.extend(buffer);
         libp2p_custom_node.publish_message(self.topic.clone(), out_buffer);
         self.sequence_number += 1;
+        true
     }
 }
 
@@ -619,6 +629,98 @@ mod tests {
         unsafe { rs_libp2p_custom_publisher_free(pub1) };
         unsafe { rs_libp2p_custom_publisher_free(pub2) };
         unsafe { rs_libp2p_custom_publisher_free(pub3) };
+        unsafe {
+            let _ = Box::from_raw(node);
+        }
+    }
+
+    #[test]
+    fn test_publisher_respects_shutdown_flag() {
+        use std::sync::atomic::Ordering;
+
+        let node_box = Box::new(Libp2pCustomNode::new_test_only());
+        let outgoing_queue = Arc::clone(&node_box.outgoing_queue);
+        let node = Box::into_raw(node_box);
+
+        let mut publisher = Libp2pCustomPublisher::new(node, "shutdown_test");
+
+        // Publisher should work normally before shutdown
+        let result = publisher.publish(vec![1, 2, 3]);
+        assert!(result, "Publish should succeed before shutdown");
+        assert_eq!(publisher.sequence_number, 1);
+        assert!(
+            outgoing_queue.try_pop().is_some(),
+            "Message should be queued before shutdown"
+        );
+
+        // Trigger shutdown
+        let node_ref = unsafe { &*node };
+        node_ref.shutdown_flag.store(true, Ordering::SeqCst);
+
+        // Publisher should reject messages after shutdown
+        let result = publisher.publish(vec![4, 5, 6]);
+        assert!(!result, "Publish should fail after shutdown flag is set");
+        assert_eq!(
+            publisher.sequence_number, 1,
+            "Sequence number should not increment on failed publish"
+        );
+        assert!(
+            outgoing_queue.try_pop().is_none(),
+            "No message should be queued after shutdown"
+        );
+
+        // Multiple publish attempts should all fail
+        for _ in 0..5 {
+            let result = publisher.publish(vec![7, 8, 9]);
+            assert!(!result, "All publishes should fail when shutdown");
+        }
+        assert_eq!(
+            publisher.sequence_number, 1,
+            "Sequence number should remain unchanged"
+        );
+
+        // Cleanup
+        unsafe {
+            let _ = Box::from_raw(node);
+        }
+    }
+
+    #[test]
+    fn test_ffi_publisher_respects_shutdown() {
+        use std::sync::atomic::Ordering;
+
+        let node_box = Box::new(Libp2pCustomNode::new_test_only());
+        let outgoing_queue = Arc::clone(&node_box.outgoing_queue);
+        let shutdown_flag = Arc::clone(&node_box.shutdown_flag);
+        let node = Box::into_raw(node_box);
+
+        let topic = std::ffi::CString::new("shutdown_ffi_test").unwrap();
+        let pub_ptr = unsafe { rs_libp2p_custom_publisher_new(node, topic.as_ptr()) };
+
+        // Publish should work before shutdown
+        let buffer1 = Cursor::new(vec![0xAAu8, 0xBBu8]);
+        unsafe { rs_libp2p_custom_publisher_publish(pub_ptr, &buffer1 as *const _) };
+        assert!(outgoing_queue.try_pop().is_some());
+
+        // Trigger shutdown
+        shutdown_flag.store(true, Ordering::SeqCst);
+
+        // Publish should be rejected after shutdown
+        let buffer2 = Cursor::new(vec![0xCCu8, 0xDDu8]);
+        unsafe { rs_libp2p_custom_publisher_publish(pub_ptr, &buffer2 as *const _) };
+
+        // Queue should be empty (message was not queued)
+        assert!(
+            outgoing_queue.try_pop().is_none(),
+            "Message should not be queued after shutdown"
+        );
+
+        // Sequence number should only have incremented once
+        let seq = unsafe { rs_libp2p_custom_publisher_get_sequence_number(pub_ptr) };
+        assert_eq!(seq, 1, "Only one message should have been published");
+
+        // Cleanup
+        unsafe { rs_libp2p_custom_publisher_free(pub_ptr) };
         unsafe {
             let _ = Box::from_raw(node);
         }
